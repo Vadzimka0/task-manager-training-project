@@ -1,29 +1,74 @@
-# README #
+## Description
 
-This README would normally document whatever steps are necessary to get your application up and running.
+The application is a simple to use task manager
 
-### What is this repository for? ###
+### Tech stack:
 
-* Quick summary
-* Version
-* [Learn Markdown](https://bitbucket.org/tutorials/markdowndemo)
+Nestjs, Postgres, TypeORM
 
-### How do I get set up? ###
+### Requirements:
 
-* Summary of set up
-* Configuration
-* Dependencies
-* Database configuration
-* How to run tests
-* Deployment instructions
+- Node version 16
+- NPM
+- PostgreSQL
 
-### Contribution guidelines ###
+### Installation:
 
-* Writing tests
-* Code review
-* Other guidelines
+```bash
+# https:
+git clone https://github.com/Vadzimka0/task-manager.git
+# or ssh
+git clone git@github.com:Vadzimka0/task-manager.git
+```
 
-### Who do I talk to? ###
+### Running the app:
 
-* Repo owner or admin
-* Other community or team contact
+1. cd into `task-manager`
+
+2. run `npm install`
+
+3. set up your postgres database
+
+```bash
+# create db
+CREATE DATABASE intern1;
+# create user name;
+CREATE USER intern1 WITH PASSWORD '1234';
+GRANT ALL PRIVILEGES ON DATABASE intern1 TO intern1;
+```
+
+4. rename `.env.sample` to `.env` and populate the required parameters
+
+```bash
+POSTGRES_HOST=localhost
+POSTGRES_PORT=5432
+POSTGRES_USER=intern1
+POSTGRES_PASSWORD=1234
+POSTGRES_DB=intern1
+
+JWT_ACCESS_TOKEN_SECRET=accesstoken
+JWT_ACCESS_TOKEN_EXPIRATION_TIME=172800
+JWT_REFRESH_TOKEN_SECRET=refreshtoken
+JWT_REFRESH_TOKEN_EXPIRATION_TIME=604800
+```
+
+5. run migrations `npm run db:migrate`
+
+6. run seeds `npm run db:seed`
+
+7. run app on dev or watch mode:
+
+```bash
+# watch mode
+$ npm run start:dev
+
+# development
+$ npm run start
+
+# production mode
+$ npm run start:prod
+```
+
+### Stay in touch
+
+- Author - Vadzim Dzianisik
