@@ -16,14 +16,14 @@ Nestjs, Postgres, TypeORM
 
 ```bash
 # https:
-git clone https://github.com/Vadzimka0/task-manager.git
+git clone https://vadzimdzianisik@bitbucket.org/cogniteq-web/vadzimdzianisik.git
 # or ssh
-git clone git@github.com:Vadzimka0/task-manager.git
+git clone git@bitbucket.org:cogniteq-web/vadzimdzianisik.git
 ```
 
 ### Running the app:
 
-1. cd into `task-manager`
+1. cd into `vadzimdzianisik`
 
 2. run `npm install`
 
