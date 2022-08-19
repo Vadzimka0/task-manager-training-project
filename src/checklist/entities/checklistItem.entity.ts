@@ -15,7 +15,6 @@ export class ChecklistItemEntity {
   @Column({ default: StatusEnum.PENDING })
   status: StatusEnum;
 
-  // added
   @Exclude()
   @ManyToOne(() => ChecklistEntity, (checklist) => checklist.items, {
     onDelete: 'CASCADE',

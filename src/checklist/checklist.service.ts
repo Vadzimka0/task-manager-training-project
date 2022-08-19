@@ -44,14 +44,17 @@ export class ChecklistService {
     currentUser: UserEntity,
   ): Promise<ChecklistEntity> {
     const newChecklist = new ChecklistEntity();
-
     if (createChecklistDto.itemsTitles) {
       const { itemsTitles, ...dtoWithoutItems } = createChecklistDto;
       Object.assign(newChecklist, dtoWithoutItems);
-      newChecklist.author = currentUser;
-
       const listItems = [];
       for (const text of itemsTitles) {
+        if (text.length > 512) {
+          throw new HttpException(
+            'itemTitle must be shorter than or equal to 512 characters',
+            HttpStatus.BAD_REQUEST,
+          );
+        }
         const newItem = new ChecklistItemEntity();
         Object.assign(newItem, { itemTitle: text });
         await this.checklistItemRepository.save(newItem);
@@ -60,10 +63,9 @@ export class ChecklistService {
       newChecklist.items = listItems;
     } else {
       Object.assign(newChecklist, createChecklistDto);
-      newChecklist.author = currentUser;
       newChecklist.items = [];
     }
-
+    newChecklist.author = currentUser;
     return await this.checklistRepository.save(newChecklist);
   }
 
@@ -90,11 +92,11 @@ export class ChecklistService {
       .andWhere('items.checklistId = :id', { id: listId });
 
     const [checklistItems, checklistItemsCount] = await queryBuilder.getManyAndCount();
-    checklistItems.map((item: ListItemType) => {
+    const checklistItemsWithChecklistId = checklistItems.map((item: ListItemType) => {
       item.checklistId = item.checklist.id;
       return item;
     });
-    return { checklistItems, checklistItemsCount } as ListItemsResponseInterface;
+    return { checklistItems: checklistItemsWithChecklistId, checklistItemsCount };
   }
 
   async createChecklistItem(
