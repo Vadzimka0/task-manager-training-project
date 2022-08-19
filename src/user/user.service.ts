@@ -35,6 +35,17 @@ export class UserService {
     throw new HttpException('User with this id does not exist', HttpStatus.NOT_FOUND);
   }
 
+  async getByName(performer: string | null, currentUser: UserEntity): Promise<UserEntity> {
+    if (performer) {
+      const user = await this.userRepository.findOneBy({ username: performer });
+      if (user) {
+        return user;
+      }
+      throw new HttpException('User with this username does not exist', HttpStatus.NOT_FOUND);
+    }
+    return currentUser;
+  }
+
   async getAllUsers(): Promise<UserEntity[]> {
     return await this.userRepository.find();
   }

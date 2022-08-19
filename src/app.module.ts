@@ -7,6 +7,7 @@ import { DatabaseModule } from './database/database.module';
 import { NoteModule } from './note/note.module';
 import { UserModule } from './user/user.module';
 import { ProjectModule } from './project/project.module';
+import { TaskModule } from './task/task.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { ProjectModule } from './project/project.module';
     NoteModule,
     ChecklistModule,
     ProjectModule,
+    TaskModule,
   ],
   controllers: [],
   providers: [],

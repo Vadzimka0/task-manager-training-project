@@ -4,6 +4,7 @@ import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { ChecklistEntity } from '../../checklist/entities/checklist.entity';
 import { NoteEntity } from '../../note/entities/note.entity';
 import { ProjectEntity } from '../../project/entities/project.entity';
+import { TaskEntity } from '../../task/entities/task.entity';
 
 @Entity({ name: 'users' })
 export class UserEntity {
@@ -29,6 +30,12 @@ export class UserEntity {
 
   @OneToMany(() => ProjectEntity, (project: ProjectEntity) => project.author)
   projects?: ProjectEntity[];
+
+  @OneToMany(() => TaskEntity, (task: TaskEntity) => task.author)
+  createdTasks?: TaskEntity[];
+
+  @OneToMany(() => TaskEntity, (task: TaskEntity) => task.performer)
+  assignedTasks?: TaskEntity[];
 
   @OneToMany(() => NoteEntity, (note: NoteEntity) => note.author)
   notes?: NoteEntity[];

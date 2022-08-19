@@ -23,8 +23,8 @@ export class ProjectService {
       .leftJoinAndSelect('projects.author', 'author')
       .andWhere('projects.authorId = :id', { id: userId })
       .orderBy('projects.createdAt', 'DESC');
-    const projectsCount = await queryBuilder.getCount();
-    const projects = await queryBuilder.getMany();
+
+    const [projects, projectsCount] = await queryBuilder.getManyAndCount();
     return { projects, projectsCount };
   }
 
@@ -69,5 +69,18 @@ export class ProjectService {
 
   buildProjectResponse(project: ProjectEntity): ProjectResponseInterface {
     return { project };
+  }
+
+  async getByTag(tag: string | null, currentUser: UserEntity): Promise<ProjectEntity> {
+    let nameProject: string;
+    tag ? (nameProject = tag) : (nameProject = SPECIAL_ONE_PROJECT_NAME);
+    const currentProject = await this.projectRepository.findOneBy({ title: nameProject });
+    if (!currentProject) {
+      throw new HttpException('Tag (project) does not exist', HttpStatus.NOT_FOUND);
+    }
+    if (currentProject.author.id !== currentUser.id) {
+      throw new HttpException('Such a Tag (project) does not belong to you', HttpStatus.FORBIDDEN);
+    }
+    return currentProject;
   }
 }
