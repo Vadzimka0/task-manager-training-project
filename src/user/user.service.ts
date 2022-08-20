@@ -35,17 +35,6 @@ export class UserService {
     throw new HttpException('User with this id does not exist', HttpStatus.NOT_FOUND);
   }
 
-  async getByName(performer: string | null, currentUser: UserEntity): Promise<UserEntity> {
-    if (performer) {
-      const user = await this.userRepository.findOneBy({ username: performer });
-      if (user) {
-        return user;
-      }
-      throw new HttpException('User with this username does not exist', HttpStatus.NOT_FOUND);
-    }
-    return currentUser;
-  }
-
   async getAllUsers(): Promise<UserEntity[]> {
     return await this.userRepository.find();
   }
@@ -54,7 +43,6 @@ export class UserService {
     const newUser = new UserEntity();
     Object.assign(newUser, registerDto);
     const user = await this.userRepository.save(newUser);
-
     const createProjectDto = {
       title: SPECIAL_ONE_PROJECT_NAME,
       color: SPECIAL_ONE_PROJECT_COLOR,
@@ -88,5 +76,25 @@ export class UserService {
     return await this.userRepository.update(userId, {
       currentHashedRefreshToken: null,
     });
+  }
+
+  async getByName(performer: string): Promise<UserEntity> {
+    const user = await this.userRepository.findOneBy({ username: performer });
+    if (user) {
+      return user;
+    }
+    throw new HttpException('User with this username does not exist', HttpStatus.NOT_FOUND);
+  }
+
+  async getMembers(members: string[]): Promise<UserEntity[]> {
+    const currentMembers = [];
+    for (const member of members) {
+      const user = await this.userRepository.findOneBy({ username: member });
+      if (!user) {
+        throw new HttpException('User with this username does not exist', HttpStatus.NOT_FOUND);
+      }
+      currentMembers.push(user);
+    }
+    return currentMembers;
   }
 }

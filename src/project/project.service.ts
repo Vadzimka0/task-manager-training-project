@@ -71,14 +71,12 @@ export class ProjectService {
     return { project };
   }
 
-  async getByTag(tag: string | null, currentUser: UserEntity): Promise<ProjectEntity> {
-    let nameProject: string;
-    tag ? (nameProject = tag) : (nameProject = SPECIAL_ONE_PROJECT_NAME);
-    const currentProject = await this.projectRepository.findOneBy({ title: nameProject });
+  async getByTagTitle(title: string, currentUserId: number): Promise<ProjectEntity> {
+    const currentProject = await this.projectRepository.findOneBy({ title });
     if (!currentProject) {
       throw new HttpException('Tag (project) does not exist', HttpStatus.NOT_FOUND);
     }
-    if (currentProject.author.id !== currentUser.id) {
+    if (currentProject.author.id !== currentUserId) {
       throw new HttpException('Such a Tag (project) does not belong to you', HttpStatus.FORBIDDEN);
     }
     return currentProject;

@@ -2,7 +2,7 @@ import { IsArray, IsEnum, IsNotEmpty, IsOptional, MaxLength } from 'class-valida
 
 import { StatusEnum } from '../../common/enums';
 
-export class CreateTaskDto {
+export class UpdateTaskDto {
   @IsNotEmpty()
   @MaxLength(256)
   readonly title: string;
@@ -13,7 +13,6 @@ export class CreateTaskDto {
   @IsNotEmpty()
   readonly dueDate: Date;
 
-  @IsOptional()
   @IsEnum(StatusEnum)
   readonly status: StatusEnum;
 
