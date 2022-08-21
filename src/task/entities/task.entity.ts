@@ -22,13 +22,13 @@ export class TaskEntity extends AbstractEntity {
   @ManyToOne(() => ProjectEntity, (project) => project.tasks, { eager: true })
   tag: ProjectEntity;
 
-  @ManyToOne(() => UserEntity, (author) => author.createdTasks, { eager: true })
-  author: UserEntity;
-
-  @ManyToOne(() => UserEntity, (user) => user.assignedTasks, { eager: true, nullable: true })
+  @ManyToOne(() => UserEntity, (user) => user.assignedTasks, { eager: true })
   performer: UserEntity;
 
-  @ManyToMany(() => UserEntity)
+  @ManyToMany(() => UserEntity, { eager: true })
   @JoinTable()
   members: UserEntity[];
+
+  // @ManyToOne(() => UserEntity, (author) => author.createdTasks, { eager: true })
+  // author: UserEntity;
 }

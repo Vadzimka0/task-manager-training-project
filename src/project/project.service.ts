@@ -33,6 +33,9 @@ export class ProjectService {
     currentUser: UserEntity,
   ): Promise<ProjectEntity> {
     const newProject = new ProjectEntity();
+
+    // check duplicate owner's projects
+
     Object.assign(newProject, createProjectDto);
     newProject.author = currentUser;
     return await this.projectRepository.save(newProject);
@@ -44,6 +47,9 @@ export class ProjectService {
     projectId: number,
   ): Promise<ProjectEntity> {
     const currentProject = await this.findAndValidateProject(userId, projectId);
+
+    // check duplicate owner's projects
+
     Object.assign(currentProject, updateProjectDto);
     return await this.projectRepository.save(currentProject);
   }
@@ -71,13 +77,15 @@ export class ProjectService {
     return { project };
   }
 
-  async getByTagTitle(title: string, currentUserId: number): Promise<ProjectEntity> {
-    const currentProject = await this.projectRepository.findOneBy({ title });
+  async getTagByTitleAndUserId(title: string, currentUserId: number): Promise<ProjectEntity> {
+    const currentProject = await this.projectRepository
+      .createQueryBuilder('projects')
+      .where('projects.title = :title', { title: title })
+      .andWhere('projects.authorId = :id', { id: currentUserId })
+      .getOne();
+
     if (!currentProject) {
       throw new HttpException('Tag (project) does not exist', HttpStatus.NOT_FOUND);
-    }
-    if (currentProject.author.id !== currentUserId) {
-      throw new HttpException('Such a Tag (project) does not belong to you', HttpStatus.FORBIDDEN);
     }
     return currentProject;
   }

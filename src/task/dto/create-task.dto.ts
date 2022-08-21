@@ -22,8 +22,7 @@ export class CreateTaskDto {
   // readonly tag: string;
 
   @IsOptional()
-  readonly performer: { username: string };
-  // readonly performer: string;
+  readonly assignedTo: string;
 
   @IsOptional()
   @IsArray()

@@ -86,7 +86,7 @@ export class UserService {
     throw new HttpException('User with this username does not exist', HttpStatus.NOT_FOUND);
   }
 
-  async getMembers(members: string[]): Promise<UserEntity[]> {
+  async getMembersInstances(members: string[]): Promise<UserEntity[]> {
     const currentMembers = [];
     for (const member of members) {
       const user = await this.userRepository.findOneBy({ username: member });

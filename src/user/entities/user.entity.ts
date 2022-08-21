@@ -31,9 +31,6 @@ export class UserEntity {
   @OneToMany(() => ProjectEntity, (project: ProjectEntity) => project.author)
   projects?: ProjectEntity[];
 
-  @OneToMany(() => TaskEntity, (task: TaskEntity) => task.author)
-  createdTasks?: TaskEntity[];
-
   @OneToMany(() => TaskEntity, (task: TaskEntity) => task.performer)
   assignedTasks?: TaskEntity[];
 
@@ -42,4 +39,7 @@ export class UserEntity {
 
   @OneToMany(() => ChecklistEntity, (checklist: ChecklistEntity) => checklist.author)
   checklists?: ChecklistEntity[];
+
+  // @OneToMany(() => TaskEntity, (task: TaskEntity) => task.author)
+  // createdTasks?: TaskEntity[];
 }
