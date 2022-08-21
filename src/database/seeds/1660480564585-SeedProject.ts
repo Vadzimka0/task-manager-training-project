@@ -41,7 +41,10 @@ export class SeedProject1660480564585 implements MigrationInterface {
       `INSERT INTO projects (title, color, "authorId") VALUES ('Sport', 'yellow', 2)`,
     );
     await queryRunner.query(
-      `INSERT INTO projects (title, color, "authorId") VALUES ('Education', 'black', 3)`,
+      `INSERT INTO projects (title, color, "authorId") VALUES ('Family', 'green', 2)`,
+    );
+    await queryRunner.query(
+      `INSERT INTO projects (title, color, "authorId") VALUES ('Shopping', 'black', 3)`,
     );
     await queryRunner.query(
       `INSERT INTO projects (title, color, "authorId") VALUES ('Shopping', 'green', 8)`,
