@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcrypt';
 import { Repository, UpdateResult } from 'typeorm';
@@ -19,6 +19,14 @@ export class UserService {
     private readonly projectService: ProjectService,
   ) {}
 
+  async getById(id: number): Promise<UserEntity> {
+    const user = await this.userRepository.findOne({ where: { id } });
+    if (user) {
+      return user;
+    }
+    throw new HttpException('User with this id does not exist', HttpStatus.NOT_FOUND);
+  }
+
   async getByEmail(email: string): Promise<UserEntity> {
     const user = await this.userRepository.findOne({ where: { email } });
     if (user) {
@@ -27,12 +35,12 @@ export class UserService {
     throw new HttpException('User with this email does not exist', HttpStatus.NOT_FOUND);
   }
 
-  async getById(id: number): Promise<UserEntity> {
-    const user = await this.userRepository.findOne({ where: { id } });
+  async getByName(performer: string): Promise<UserEntity> {
+    const user = await this.userRepository.findOneBy({ username: performer });
     if (user) {
       return user;
     }
-    throw new HttpException('User with this id does not exist', HttpStatus.NOT_FOUND);
+    throw new HttpException('User with this username does not exist', HttpStatus.NOT_FOUND);
   }
 
   async getAllUsers(): Promise<UserEntity[]> {
@@ -52,38 +60,29 @@ export class UserService {
     return user;
   }
 
-  async setCurrentRefreshToken(refreshToken: string, userId: number): Promise<void> {
-    const currentHashedRefreshToken = await bcrypt.hash(refreshToken, 10);
+  async setCurrentRefreshToken(refresh_token: string, userId: number): Promise<void> {
+    const currentHashedRefreshToken = await bcrypt.hash(refresh_token, 10);
     await this.userRepository.update(userId, {
       currentHashedRefreshToken,
     });
   }
 
-  async getUserIfRefreshTokenMatches(refreshToken: string, userId: number): Promise<UserEntity> {
-    const user = await this.getById(userId);
-
+  async getUserIfRefreshTokenMatches(refreshToken: string, email: string): Promise<UserEntity> {
+    const user = await this.getByEmail(email);
     const isRefreshTokenMatching = await bcrypt.compare(
       refreshToken,
       user.currentHashedRefreshToken,
     );
-
     if (isRefreshTokenMatching) {
       return user;
     }
   }
 
-  async removeRefreshToken(userId: number): Promise<UpdateResult> {
-    return await this.userRepository.update(userId, {
+  async removeRefreshToken(email: string): Promise<any> {
+    const user = await this.getByEmail(email);
+    await this.userRepository.update(user.id, {
       currentHashedRefreshToken: null,
     });
-  }
-
-  async getByName(performer: string): Promise<UserEntity> {
-    const user = await this.userRepository.findOneBy({ username: performer });
-    if (user) {
-      return user;
-    }
-    throw new HttpException('User with this username does not exist', HttpStatus.NOT_FOUND);
   }
 
   async getMembersInstances(members: string[]): Promise<UserEntity[]> {

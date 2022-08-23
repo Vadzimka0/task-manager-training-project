@@ -1,5 +1,3 @@
-interface TokenPayload {
-  userId: number;
+export interface TokenPayload {
+  email: string;
 }
-
-export default TokenPayload;

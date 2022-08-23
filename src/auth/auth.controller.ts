@@ -6,18 +6,19 @@ import {
   HttpCode,
   Post,
   Req,
-  Request,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
 
-import { UserEntity } from '../user/entities/user.entity';
+import { Data } from '../common/types/data';
 import { UserService } from '../user/user.service';
 import { AuthService } from './auth.service';
-import { User } from './decorators/user.decorator';
 import { RegisterDto } from './dto/register.dto';
-import { JwtAuthGuard, JwtRefreshGuard, LocalAuthGuard } from './guards';
-import RequestWithUser from './interfaces/requestWithUser.interface';
+import { JwtRefreshGuard, LocalAuthGuard } from './guards';
+import { Register } from './interfaces/register.type';
+import { RequestWithUser } from './interfaces/requestWithUser.interface';
+import { SuccessResponse } from './interfaces/successResponse.interface';
+import { UserSession } from './interfaces/userSession.interface';
 
 @Controller('auth')
 @UseInterceptors(ClassSerializerInterceptor)
@@ -27,43 +28,31 @@ export class AuthController {
     private readonly userService: UserService,
   ) {}
 
-  @Post('signup')
-  async register(@Body() registerDto: RegisterDto): Promise<UserEntity> {
-    return this.authService.register(registerDto);
+  @Post('sign-up')
+  async register(@Body() registerDto: RegisterDto): Promise<Data<Register>> {
+    const data = await this.authService.register(registerDto);
+    return { data };
   }
 
   @HttpCode(200)
   @UseGuards(LocalAuthGuard)
-  @Post('signin')
-  async logIn(@Req() request: RequestWithUser): Promise<UserEntity> {
-    const { user } = request;
-    const accessTokenCookie = this.authService.getCookieWithJwtAccessToken(user.id);
-    const { cookie: refreshTokenCookie, token: refreshToken } =
-      this.authService.getCookieWithJwtRefreshToken(user.id);
-    await this.userService.setCurrentRefreshToken(refreshToken, user.id);
-    request.res.setHeader('Set-Cookie', [accessTokenCookie, refreshTokenCookie]);
-    return user;
-  }
-
-  @UseGuards(JwtAuthGuard)
-  @Get('me')
-  authenticate(@User() user: UserEntity): UserEntity {
-    return user;
+  @Post('sign-in')
+  async logIn(@Req() request: RequestWithUser): Promise<Data<UserSession>> {
+    const data = await this.authService.login(request.user);
+    return { data };
   }
 
   @UseGuards(JwtRefreshGuard)
-  @Get('refresh')
-  refresh(@Req() request: RequestWithUser): UserEntity {
-    const accessTokenCookie = this.authService.getCookieWithJwtAccessToken(request.user.id);
-    request.res.setHeader('Set-Cookie', accessTokenCookie);
-    return request.user;
+  @Get('refresh-token')
+  async refresh(@Req() request: RequestWithUser): Promise<Data<UserSession>> {
+    const data = await this.authService.refresh(request.user);
+    return { data };
   }
 
   @HttpCode(200)
-  @UseGuards(JwtAuthGuard)
-  @Post('signout')
-  async logOut(@Request() request: RequestWithUser): Promise<void> {
-    await this.userService.removeRefreshToken(request.user.id);
-    request.res.setHeader('Set-Cookie', this.authService.getCookiesForLogOut());
+  @Post('sign-out')
+  async logOut(@Body() body: { email: string }): Promise<Data<SuccessResponse>> {
+    const data = await this.authService.logout(body.email);
+    return { data };
   }
 }

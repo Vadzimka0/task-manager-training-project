@@ -1,4 +1,9 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import {
+  Injectable,
+  InternalServerErrorException,
+  UnauthorizedException,
+  UnprocessableEntityException,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
@@ -7,86 +12,97 @@ import PostgresErrorCode from '../database/postgresErrorCode.enum';
 import { UserEntity } from '../user/entities/user.entity';
 import { UserService } from '../user/user.service';
 import { RegisterDto } from './dto/register.dto';
-import TokenPayload from './interfaces/tokenPayload.interface';
+import { Register } from './interfaces/register.type';
+import { SuccessResponse } from './interfaces/successResponse.interface';
+import { TokenPayload } from './interfaces/tokenPayload.interface';
+import { UserSession } from './interfaces/userSession.interface';
 
 @Injectable()
 export class AuthService {
+  private token_type: string;
   constructor(
     private readonly userService: UserService,
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
-  ) {}
+  ) {
+    this.token_type = 'Bearer';
+  }
 
-  // private decodeFromBase64(stringBase64: string): string {
-  //   const buffer = Buffer.from(stringBase64, 'base64');
-  //   return buffer.toString('utf8');
-  // }
-
-  async register(registerDto: RegisterDto): Promise<UserEntity> {
-    // const decodedPassword = this.decodeFromBase64(registerDto.password);
+  async register(registerDto: RegisterDto): Promise<Register> {
     const hashedPassword = await bcrypt.hash(registerDto.password, 10);
     try {
       const createdUser = await this.userService.createUser({
         ...registerDto,
         password: hashedPassword,
       });
-      return createdUser;
+      delete createdUser.currentHashedRefreshToken;
+      delete createdUser.password;
+
+      const user_session = await this.getUserSessionInfo(createdUser);
+      return { ...createdUser, user_session };
     } catch (error) {
       if (error?.code === PostgresErrorCode.UniqueViolation) {
-        throw new HttpException('User with that email already exists', HttpStatus.BAD_REQUEST);
+        throw new UnprocessableEntityException('User is already registered.');
       }
-      throw new HttpException('Something went wrong', HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new InternalServerErrorException('Something went wrong');
     }
   }
 
-  getCookieWithJwtAccessToken(userId: number) {
-    const payload: TokenPayload = { userId };
+  async login(user: UserEntity): Promise<UserSession> {
+    return this.getUserSessionInfo(user);
+  }
+
+  async refresh(user: UserEntity): Promise<UserSession> {
+    return this.getUserSessionInfo(user);
+  }
+
+  async logout(email: string): Promise<SuccessResponse> {
+    await this.userService.removeRefreshToken(email);
+    return { success: true };
+  }
+
+  async getUserSessionInfo(user: UserEntity): Promise<UserSession> {
+    const access_token = this.getJwtAccessToken(user.email);
+    const refresh_token = this.getJwtRefreshToken(user.email);
+    await this.userService.setCurrentRefreshToken(refresh_token, user.id);
+
+    const expiresInMS = this.configService.get('JWT_ACCESS_TOKEN_EXPIRATION_TIME') * 1000;
+    const expires_in = new Date(new Date().getTime() + expiresInMS).getTime();
+    return { access_token, refresh_token, token_type: this.token_type, expires_in };
+  }
+
+  getJwtAccessToken(email: string) {
+    const payload: TokenPayload = { email };
     const token = this.jwtService.sign(payload, {
       secret: this.configService.get('JWT_ACCESS_TOKEN_SECRET'),
       expiresIn: `${this.configService.get('JWT_ACCESS_TOKEN_EXPIRATION_TIME')}s`,
     });
-    return `Authentication=${token}; HttpOnly; Path=/; Max-Age=${this.configService.get(
-      'JWT_ACCESS_TOKEN_EXPIRATION_TIME',
-    )}`;
+    return token;
   }
 
-  getCookieWithJwtRefreshToken(userId: number) {
-    const payload: TokenPayload = { userId };
-    const token = this.jwtService.sign(payload, {
+  getJwtRefreshToken(email: string) {
+    const payload: TokenPayload = { email };
+    const refreshToken = this.jwtService.sign(payload, {
       secret: this.configService.get('JWT_REFRESH_TOKEN_SECRET'),
       expiresIn: `${this.configService.get('JWT_REFRESH_TOKEN_EXPIRATION_TIME')}s`,
     });
-    const cookie = `Refresh=${token}; HttpOnly; Path=/; Max-Age=${this.configService.get(
-      'JWT_REFRESH_TOKEN_EXPIRATION_TIME',
-    )}`;
-    return {
-      cookie,
-      token,
-    };
-  }
-
-  getCookiesForLogOut() {
-    return [
-      'Authentication=; HttpOnly; Path=/; Max-Age=0',
-      'Refresh=; HttpOnly; Path=/; Max-Age=0',
-    ];
+    return refreshToken;
   }
 
   async getAuthenticatedUser(email: string, base64Password: string) {
-    // const decodedPassword = this.decodeFromBase64(base64Password);
     try {
       const user = await this.userService.getByEmail(email);
       await this.verifyPassword(base64Password, user.password);
       return user;
     } catch (error) {
-      throw new HttpException('Wrong credentials provided', HttpStatus.BAD_REQUEST);
+      throw new UnauthorizedException('Invalid credentials.');
     }
   }
 
   private async verifyPassword(base64Password: string, hashedPassword: string) {
     const isPasswordMatching = await bcrypt.compare(base64Password, hashedPassword);
     if (!isPasswordMatching) {
-      throw new HttpException('Wrong credentials provided', HttpStatus.BAD_REQUEST);
+      throw new UnauthorizedException('Invalid credentials.');
     }
   }
 }
