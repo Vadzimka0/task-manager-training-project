@@ -28,7 +28,7 @@ export class ProjectController {
   constructor(private readonly projectService: ProjectService) {}
 
   @Get()
-  async findAllAuthorsProjects(@User('id') userId: number): Promise<ProjectsResponseInterface> {
+  async findAllAuthorsProjects(@User('id') userId: string): Promise<ProjectsResponseInterface> {
     return this.projectService.findAllAuthorsProjects(userId);
   }
 
@@ -44,8 +44,8 @@ export class ProjectController {
   @Patch(':id')
   async updateProject(
     @Body() updateProjectDto: UpdateProjectDto,
-    @User('id') userId: number,
-    @Param('id') projectId: number,
+    @User('id') userId: string,
+    @Param('id') projectId: string,
   ): Promise<ProjectResponseInterface> {
     const project = await this.projectService.updateProject(updateProjectDto, userId, projectId);
     return this.projectService.buildProjectResponse(project);
@@ -53,8 +53,8 @@ export class ProjectController {
 
   @Delete(':id')
   async deleteProject(
-    @User('id') userId: number,
-    @Param('id') projectId: number,
+    @User('id') userId: string,
+    @Param('id') projectId: string,
   ): Promise<DeleteResult> {
     return await this.projectService.deleteProject(userId, projectId);
   }

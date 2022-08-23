@@ -8,8 +8,8 @@ import { TaskEntity } from '../../task/entities/task.entity';
 
 @Entity({ name: 'users' })
 export class UserEntity {
-  @PrimaryGeneratedColumn()
-  id: number;
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
   @Column({ unique: true })
   email: string;
@@ -28,18 +28,18 @@ export class UserEntity {
   @Exclude()
   currentHashedRefreshToken?: string;
 
-  @OneToMany(() => ProjectEntity, (project: ProjectEntity) => project.author)
+  @OneToMany(() => ProjectEntity, (project: ProjectEntity) => project.owner)
   projects?: ProjectEntity[];
 
   @OneToMany(() => TaskEntity, (task: TaskEntity) => task.performer)
   assignedTasks?: TaskEntity[];
 
-  @OneToMany(() => NoteEntity, (note: NoteEntity) => note.author)
+  @OneToMany(() => NoteEntity, (note: NoteEntity) => note.owner)
   notes?: NoteEntity[];
 
-  @OneToMany(() => ChecklistEntity, (checklist: ChecklistEntity) => checklist.author)
+  @OneToMany(() => ChecklistEntity, (checklist: ChecklistEntity) => checklist.owner)
   checklists?: ChecklistEntity[];
 
-  // @OneToMany(() => TaskEntity, (task: TaskEntity) => task.author)
+  // @OneToMany(() => TaskEntity, (task: TaskEntity) => task.owner)
   // createdTasks?: TaskEntity[];
 }

@@ -19,7 +19,7 @@ export class UserService {
     private readonly projectService: ProjectService,
   ) {}
 
-  async getById(id: number): Promise<UserEntity> {
+  async getById(id: string): Promise<UserEntity> {
     const user = await this.userRepository.findOne({ where: { id } });
     if (user) {
       return user;
@@ -56,11 +56,11 @@ export class UserService {
       color: SPECIAL_ONE_PROJECT_COLOR,
     };
     const project = await this.projectService.createProject(createProjectDto, user);
-    project.author = user;
+    project.owner = user;
     return user;
   }
 
-  async setCurrentRefreshToken(refresh_token: string, userId: number): Promise<void> {
+  async setCurrentRefreshToken(refresh_token: string, userId: string): Promise<void> {
     const currentHashedRefreshToken = await bcrypt.hash(refresh_token, 10);
     await this.userRepository.update(userId, {
       currentHashedRefreshToken,

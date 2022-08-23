@@ -7,7 +7,7 @@ import { ChecklistEntity } from './checklist.entity';
 @Entity({ name: 'checklist_items' })
 export class ChecklistItemEntity {
   @PrimaryGeneratedColumn()
-  itemId: number;
+  itemId: string;
 
   @Column({ length: 512 })
   itemTitle: string;

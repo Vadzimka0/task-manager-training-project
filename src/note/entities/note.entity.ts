@@ -1,7 +1,7 @@
+import { Exclude } from 'class-transformer';
 import { Column, Entity, ManyToOne } from 'typeorm';
 
 import { AbstractEntity } from '../../common/abstract-entity-class';
-import { ColorEnum, StatusEnum } from '../../common/enums';
 import { UserEntity } from '../../user/entities/user.entity';
 
 @Entity({ name: 'notes' })
@@ -9,12 +9,13 @@ export class NoteEntity extends AbstractEntity {
   @Column({ length: 512 })
   description: string;
 
-  @Column()
-  color: ColorEnum;
+  @Column({ length: 8 })
+  color: string;
 
-  @Column({ default: StatusEnum.PENDING })
-  status: StatusEnum;
+  @Column({ default: false })
+  is_completed: boolean;
 
-  @ManyToOne(() => UserEntity, (author) => author.notes, { eager: true })
-  author: UserEntity;
+  @Exclude()
+  @ManyToOne(() => UserEntity, (owner) => owner.notes, { eager: true })
+  owner: UserEntity;
 }

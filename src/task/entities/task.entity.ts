@@ -29,6 +29,6 @@ export class TaskEntity extends AbstractEntity {
   @JoinTable()
   members: UserEntity[];
 
-  // @ManyToOne(() => UserEntity, (author) => author.createdTasks, { eager: true })
-  // author: UserEntity;
+  // @ManyToOne(() => UserEntity, (owner) => owner.createdTasks, { eager: true })
+  // owner: UserEntity;
 }

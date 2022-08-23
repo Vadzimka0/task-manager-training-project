@@ -1,18 +1,18 @@
-import { IsEnum, IsNotEmpty, IsOptional, MaxLength } from 'class-validator';
-
-import { ColorEnum, StatusEnum } from '../../common/enums';
+import { IsBoolean, IsNotEmpty, IsUUID, MaxLength } from 'class-validator';
 
 export class UpdateNoteDto {
-  @IsOptional()
   @IsNotEmpty()
   @MaxLength(512)
   readonly description: string;
 
-  @IsOptional()
-  @IsEnum(ColorEnum)
-  readonly color: ColorEnum;
+  @IsNotEmpty()
+  readonly color: string;
 
-  @IsOptional()
-  @IsEnum(StatusEnum)
-  readonly status: StatusEnum;
+  @IsNotEmpty()
+  @IsBoolean()
+  readonly is_completed: string;
+
+  @IsNotEmpty()
+  @IsUUID()
+  readonly owner_id: string;
 }

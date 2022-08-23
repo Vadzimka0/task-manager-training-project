@@ -20,6 +20,6 @@ export class ChecklistEntity extends AbstractEntity {
   items?: ChecklistItemEntity[];
 
   @Exclude()
-  @ManyToOne(() => UserEntity, (author) => author.checklists, { eager: true })
-  author: UserEntity;
+  @ManyToOne(() => UserEntity, (owner) => owner.checklists, { eager: true })
+  owner: UserEntity;
 }

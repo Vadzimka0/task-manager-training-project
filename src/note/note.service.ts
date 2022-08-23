@@ -1,11 +1,16 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Injectable,
+  InternalServerErrorException,
+  UnprocessableEntityException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { DeleteResult, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 
 import { UserEntity } from '../user/entities/user.entity';
 import { CreateNoteDto, UpdateNoteDto } from './dto';
 import { NoteEntity } from './entities/note.entity';
-import { NoteResponseInterface, NotesResponseInterface } from './types';
+import { NoteType } from './types';
 
 @Injectable()
 export class NoteService {
@@ -14,56 +19,95 @@ export class NoteService {
     private noteRepository: Repository<NoteEntity>,
   ) {}
 
-  async findAllAuthorsNotes(userId: number): Promise<NotesResponseInterface> {
+  async fetchAllOwnersNotes(userId: string): Promise<NoteEntity[]> {
     const queryBuilder = this.noteRepository
       .createQueryBuilder('notes')
-      .leftJoinAndSelect('notes.author', 'author')
-      .andWhere('notes.authorId = :id', { id: userId })
-      .orderBy('notes.createdAt', 'DESC');
-    const notesCount = await queryBuilder.getCount();
+      .leftJoinAndSelect('notes.owner', 'owner')
+      .andWhere('notes.owner_id = :id', { id: userId })
+      .orderBy('notes.created_at', 'ASC');
+
     const notes = await queryBuilder.getMany();
-    const notesWithoutAuthor = notes.map((note) => {
-      delete note.author;
-      return note;
-    });
-    return { notes: notesWithoutAuthor, notesCount };
+    const notesWithOwnerId = notes.map((note: NoteType) => this.buildNoteWithOwnerId(note));
+    return notesWithOwnerId;
   }
 
   async createNote(createNoteDto: CreateNoteDto, currentUser: UserEntity): Promise<NoteEntity> {
+    this.validateHexColor(createNoteDto.color);
+    const { owner_id, ...dtoWithoutOwner } = createNoteDto;
+    this.idsMatching(owner_id, currentUser.id);
+
     const newNote = new NoteEntity();
-    Object.assign(newNote, createNoteDto);
-    newNote.author = currentUser;
+    Object.assign(newNote, dtoWithoutOwner);
+    newNote.owner = currentUser;
     return await this.noteRepository.save(newNote);
+  }
+
+  async fetchOneNote(userId: string, noteId: string): Promise<NoteEntity> {
+    try {
+      const note = await this.noteRepository.findOneBy({ id: noteId });
+      if (note.owner.id !== userId) {
+        // 'You are not an owner'
+        throw new UnprocessableEntityException(`The note id is not valid.`);
+      }
+      return await this.noteRepository.save(note);
+    } catch (_) {
+      throw new UnprocessableEntityException(`The note id is not valid.`);
+    }
   }
 
   async updateNote(
     updateNoteDto: UpdateNoteDto,
-    userId: number,
-    noteId: number,
+    userId: string,
+    noteId: string,
   ): Promise<NoteEntity> {
+    this.validateHexColor(updateNoteDto.color);
+    const { owner_id, ...dtoWithoutOwner } = updateNoteDto;
+    this.idsMatching(owner_id, userId);
+
     const currentNote = await this.findAndValidateNote(userId, noteId);
-    Object.assign(currentNote, updateNoteDto);
+    Object.assign(currentNote, dtoWithoutOwner);
     return await this.noteRepository.save(currentNote);
   }
 
-  async deleteNote(userId: number, noteId: number): Promise<DeleteResult> {
+  async deleteNote(userId: string, noteId: string): Promise<{ id: string }> {
     await this.findAndValidateNote(userId, noteId);
-    return await this.noteRepository.delete({ id: noteId });
+    await this.noteRepository.delete({ id: noteId });
+    return { id: noteId };
   }
 
-  async findAndValidateNote(userId: number, noteId: number): Promise<NoteEntity> {
-    const note = await this.noteRepository.findOneBy({ id: noteId });
-    if (!note) {
-      throw new HttpException('Note does not exist', HttpStatus.NOT_FOUND);
+  async findAndValidateNote(userId: string, noteId: string): Promise<NoteEntity> {
+    try {
+      const note = await this.noteRepository.findOneBy({ id: noteId });
+      if (note.owner.id !== userId) {
+        // 'You are not an owner'
+        throw new InternalServerErrorException(
+          `Entity NoteModel, id=${noteId} not found in the database`,
+        );
+      }
+      return note;
+    } catch (_) {
+      throw new InternalServerErrorException(
+        `Entity NoteModel, id=${noteId} not found in the database`,
+      );
     }
-    if (note.author.id !== userId) {
-      throw new HttpException('You are not an author', HttpStatus.FORBIDDEN);
+  }
+
+  validateHexColor(color: string): void {
+    if (!/^#(?:[0-9a-fA-F]{3}){1,2}$/i.test(color)) {
+      throw new UnprocessableEntityException(
+        'Color is not valid. The length has to be 7 symbols and first one has to be #.',
+      );
     }
+  }
+
+  idsMatching(owner_id: string, user_id: string): void {
+    if (owner_id !== user_id) {
+      throw new ForbiddenException('Invalid ID. You are not an owner');
+    }
+  }
+
+  buildNoteWithOwnerId(note: NoteType): NoteType {
+    note.owner_id = note.owner.id;
     return note;
-  }
-
-  buildNoteResponse(note: NoteEntity): NoteResponseInterface {
-    delete note.author;
-    return { note };
   }
 }

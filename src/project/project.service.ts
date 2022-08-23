@@ -17,12 +17,12 @@ export class ProjectService {
     private projectRepository: Repository<ProjectEntity>,
   ) {}
 
-  async findAllAuthorsProjects(userId: number): Promise<ProjectsResponseInterface> {
+  async findAllAuthorsProjects(userId: string): Promise<ProjectsResponseInterface> {
     const queryBuilder = this.projectRepository
       .createQueryBuilder('projects')
-      .leftJoinAndSelect('projects.author', 'author')
-      .andWhere('projects.authorId = :id', { id: userId })
-      .orderBy('projects.createdAt', 'DESC');
+      .leftJoinAndSelect('projects.owner', 'owner')
+      .andWhere('projects.ownerId = :id', { id: userId })
+      .orderBy('projects.created_at', 'DESC');
 
     const [projects, projectsCount] = await queryBuilder.getManyAndCount();
     return { projects, projectsCount };
@@ -37,14 +37,14 @@ export class ProjectService {
     // check duplicate owner's projects
 
     Object.assign(newProject, createProjectDto);
-    newProject.author = currentUser;
+    newProject.owner = currentUser;
     return await this.projectRepository.save(newProject);
   }
 
   async updateProject(
     updateProjectDto: UpdateProjectDto,
-    userId: number,
-    projectId: number,
+    userId: string,
+    projectId: string,
   ): Promise<ProjectEntity> {
     const currentProject = await this.findAndValidateProject(userId, projectId);
 
@@ -54,17 +54,17 @@ export class ProjectService {
     return await this.projectRepository.save(currentProject);
   }
 
-  async deleteProject(userId: number, projectId: number): Promise<DeleteResult> {
+  async deleteProject(userId: string, projectId: string): Promise<DeleteResult> {
     await this.findAndValidateProject(userId, projectId);
     return await this.projectRepository.delete({ id: projectId });
   }
 
-  async findAndValidateProject(userId: number, projectId: number): Promise<ProjectEntity> {
+  async findAndValidateProject(userId: string, projectId: string): Promise<ProjectEntity> {
     const project = await this.projectRepository.findOneBy({ id: projectId });
     if (!project) {
       throw new HttpException('Project does not exist', HttpStatus.NOT_FOUND);
     }
-    if (project.author.id !== userId) {
+    if (project.owner.id !== userId) {
       throw new HttpException('You are not an author', HttpStatus.FORBIDDEN);
     }
     if (project.title === SPECIAL_ONE_PROJECT_NAME) {
@@ -77,11 +77,11 @@ export class ProjectService {
     return { project };
   }
 
-  async getTagByTitleAndUserId(title: string, currentUserId: number): Promise<ProjectEntity> {
+  async getTagByTitleAndUserId(title: string, currentUserId: string): Promise<ProjectEntity> {
     const currentProject = await this.projectRepository
       .createQueryBuilder('projects')
       .where('projects.title = :title', { title: title })
-      .andWhere('projects.authorId = :id', { id: currentUserId })
+      .andWhere('projects.ownerId = :id', { id: currentUserId })
       .getOne();
 
     if (!currentProject) {

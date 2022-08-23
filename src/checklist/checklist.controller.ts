@@ -37,14 +37,14 @@ export class ChecklistController {
   constructor(private readonly checklistService: ChecklistService) {}
 
   @Get()
-  async findAllAuthorsChecklists(@User('id') userId: number): Promise<ListsResponseInterface> {
+  async findAllAuthorsChecklists(@User('id') userId: string): Promise<ListsResponseInterface> {
     return this.checklistService.findAllAuthorsChecklists(userId);
   }
 
   @Get(':listId/items')
   async findChecklistItems(
-    @User('id') userId: number,
-    @Param('listId') listId: number,
+    @User('id') userId: string,
+    @Param('listId') listId: string,
   ): Promise<ListItemsResponseInterface> {
     return this.checklistService.findChecklistItems(userId, listId);
   }
@@ -61,8 +61,8 @@ export class ChecklistController {
   @Patch(':listId')
   async updateChecklist(
     @Body() updateChecklistDto: UpdateChecklistDto,
-    @User('id') userId: number,
-    @Param('listId') listId: number,
+    @User('id') userId: string,
+    @Param('listId') listId: string,
   ): Promise<ListResponseInterface> {
     const checklist = await this.checklistService.updateChecklist(
       updateChecklistDto,
@@ -74,8 +74,8 @@ export class ChecklistController {
 
   @Delete(':listId')
   async deleteChecklist(
-    @User('id') userId: number,
-    @Param('listId') listId: number,
+    @User('id') userId: string,
+    @Param('listId') listId: string,
   ): Promise<DeleteResult> {
     return this.checklistService.deleteChecklist(userId, listId);
   }
@@ -83,8 +83,8 @@ export class ChecklistController {
   @Post(':listId/items')
   async createChecklistItem(
     @Body() createChecklistItemDto: CreateChecklistItemDto,
-    @User('id') userId: number,
-    @Param('listId') listId: number,
+    @User('id') userId: string,
+    @Param('listId') listId: string,
   ): Promise<ListItemResponseInterface> {
     const checklistItem = await this.checklistService.createChecklistItem(
       createChecklistItemDto,
@@ -97,9 +97,9 @@ export class ChecklistController {
   @Patch(':listId/items/:itemId')
   async updateChecklistItem(
     @Body() updateChecklistItemDto: UpdateChecklistItemDto,
-    @User('id') userId: number,
-    @Param('listId') listId: number,
-    @Param('itemId') itemId: number,
+    @User('id') userId: string,
+    @Param('listId') listId: string,
+    @Param('itemId') itemId: string,
   ): Promise<ListItemResponseInterface> {
     const checklistItem = await this.checklistService.updateChecklistItem(
       updateChecklistItemDto,
@@ -112,9 +112,9 @@ export class ChecklistController {
 
   @Delete(':listId/items/:itemId')
   async deleteChecklistItem(
-    @User('id') userId: number,
-    @Param('listId') listId: number,
-    @Param('itemId') itemId: number,
+    @User('id') userId: string,
+    @Param('listId') listId: string,
+    @Param('itemId') itemId: string,
   ): Promise<DeleteResult> {
     return this.checklistService.deleteChecklistItem(userId, listId, itemId);
   }

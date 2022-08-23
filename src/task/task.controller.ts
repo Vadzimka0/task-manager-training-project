@@ -24,7 +24,7 @@ export class TaskController {
   constructor(private readonly taskService: TaskService) {}
 
   // @Get()
-  // async findAllAuthorsTasks(@User('id') userId: number): Promise<any> {
+  // async findAllAuthorsTasks(@User('id') userId: string): Promise<any> {
   //   return this.taskService.findAllAuthorsTasks(userId);
   // }
 
@@ -41,14 +41,14 @@ export class TaskController {
   async updateTask(
     @Body() updateTaskDto: UpdateTaskDto,
     @User() currentUser: UserEntity,
-    @Param('id') taskId: number,
+    @Param('id') taskId: string,
   ): Promise<any> {
     const task = await this.taskService.updateTask(updateTaskDto, currentUser, taskId);
     return task;
   }
 
   @Delete(':id')
-  async deleteTask(@User('id') userId: number, @Param('id') taskId: number): Promise<any> {
+  async deleteTask(@User('id') userId: string, @Param('id') taskId: string): Promise<any> {
     const task = await this.taskService.deleteTask(userId, taskId);
     return task;
   }

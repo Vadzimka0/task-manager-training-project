@@ -5,19 +5,20 @@ import {
   Delete,
   Get,
   Param,
-  Patch,
   Post,
+  Put,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
-import { DeleteResult } from 'typeorm';
 
 import { User } from '../auth/decorators/user.decorator';
 import { JwtAuthGuard } from '../auth/guards';
+import { Data } from '../common/types/data';
 import { UserEntity } from '../user/entities/user.entity';
 import { CreateNoteDto, UpdateNoteDto } from './dto';
+import { NoteEntity } from './entities/note.entity';
 import { NoteService } from './note.service';
-import { NoteResponseInterface, NotesResponseInterface } from './types';
+import { NoteType } from './types/note.type';
 
 @Controller('notes')
 @UseGuards(JwtAuthGuard)
@@ -25,35 +26,49 @@ import { NoteResponseInterface, NotesResponseInterface } from './types';
 export class NoteController {
   constructor(private readonly noteService: NoteService) {}
 
+  @Get(':id')
+  async fetchOneNote(
+    @User('id') userId: string,
+    @Param('id') noteId: string,
+  ): Promise<Data<NoteEntity>> {
+    const note = await this.noteService.fetchOneNote(userId, noteId);
+    const data = this.noteService.buildNoteWithOwnerId(note as NoteType);
+    return { data };
+  }
+
   @Get()
-  async findAllAuthorsNotes(@User('id') userId: number): Promise<NotesResponseInterface> {
-    return this.noteService.findAllAuthorsNotes(userId);
+  async fetchAllOwnersNotes(@User('id') userId: string): Promise<Data<NoteEntity[]>> {
+    const data = await this.noteService.fetchAllOwnersNotes(userId);
+    return { data };
   }
 
   @Post()
   async createNote(
     @Body() createNoteDto: CreateNoteDto,
     @User() currentUser: UserEntity,
-  ): Promise<NoteResponseInterface> {
+  ): Promise<Data<NoteEntity>> {
     const note = await this.noteService.createNote(createNoteDto, currentUser);
-    return this.noteService.buildNoteResponse(note);
+    const data = this.noteService.buildNoteWithOwnerId(note as NoteType);
+    return { data };
   }
 
-  @Patch(':id')
+  @Put(':id')
   async updateNote(
     @Body() updateNoteDto: UpdateNoteDto,
-    @User('id') currentUserId: number,
-    @Param('id') noteId: number,
-  ): Promise<NoteResponseInterface> {
-    const note = await this.noteService.updateNote(updateNoteDto, currentUserId, noteId);
-    return this.noteService.buildNoteResponse(note);
+    @User('id') userId: string,
+    @Param('id') noteId: string,
+  ): Promise<Data<NoteEntity>> {
+    const note = await this.noteService.updateNote(updateNoteDto, userId, noteId);
+    const data = this.noteService.buildNoteWithOwnerId(note as NoteType);
+    return { data };
   }
 
   @Delete(':id')
   async deleteNote(
-    @User('id') currentUserId: number,
-    @Param('id') noteId: number,
-  ): Promise<DeleteResult> {
-    return await this.noteService.deleteNote(currentUserId, noteId);
+    @User('id') userId: string,
+    @Param('id') noteId: string,
+  ): Promise<Data<{ id: string }>> {
+    const data = await this.noteService.deleteNote(userId, noteId);
+    return { data };
   }
 }

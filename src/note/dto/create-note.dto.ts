@@ -1,12 +1,14 @@
-import { IsEnum, IsNotEmpty, MaxLength } from 'class-validator';
-
-import { ColorEnum } from '../../common/enums';
+import { IsNotEmpty, IsUUID, MaxLength } from 'class-validator';
 
 export class CreateNoteDto {
   @IsNotEmpty()
   @MaxLength(512)
   readonly description: string;
 
-  @IsEnum(ColorEnum)
-  readonly color: ColorEnum;
+  @IsNotEmpty()
+  readonly color: string;
+
+  @IsNotEmpty()
+  @IsUUID()
+  readonly owner_id: string;
 }

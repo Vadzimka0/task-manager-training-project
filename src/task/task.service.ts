@@ -19,11 +19,11 @@ export class TaskService {
     private readonly projectService: ProjectService,
     private readonly userService: UserService,
   ) {}
-  // async findAllAuthorsTasks(userId: number): Promise<any> {
+  // async findAllAuthorsTasks(userId: string): Promise<any> {
   //   const queryBuilder = this.taskRepository
   //     .createQueryBuilder('tasks')
-  //     .andWhere('tasks.authorId = :id', { id: userId })
-  //     .orderBy('tasks.createdAt', 'DESC');
+  //     .andWhere('tasks.ownerId = :id', { id: userId })
+  //     .orderBy('tasks.created_at', 'DESC');
   //   const [tasks, tasksCount] = await queryBuilder.getManyAndCount();
   //   return { tasks, tasksCount };
   // }
@@ -49,7 +49,7 @@ export class TaskService {
   async updateTask(
     updateTaskDto: UpdateTaskDto,
     currentUser: UserEntity,
-    taskId: number,
+    taskId: string,
   ): Promise<TaskEntity> {
     const currentTask = await this.findAndValidateTask(currentUser.id, taskId);
 
@@ -75,12 +75,12 @@ export class TaskService {
     return await this.taskRepository.save(currentTask);
   }
 
-  async deleteTask(userId: number, taskId: number): Promise<DeleteResult> {
+  async deleteTask(userId: string, taskId: string): Promise<DeleteResult> {
     await this.findAndValidateTask(userId, taskId);
     return await this.taskRepository.delete({ id: taskId });
   }
 
-  async getTag(userId: number, title: string, assignedTo: string): Promise<ProjectEntity> {
+  async getTag(userId: string, title: string, assignedTo: string): Promise<ProjectEntity> {
     if (!assignedTo) {
       const specialOneTag = await this.projectService.getTagByTitleAndUserId(
         SPECIAL_ONE_PROJECT_NAME,
@@ -111,14 +111,14 @@ export class TaskService {
     return [];
   }
 
-  async findAndValidateTask(userId: number, taskId: number): Promise<TaskEntity> {
+  async findAndValidateTask(userId: string, taskId: string): Promise<TaskEntity> {
     const task = await this.taskRepository.findOne({
       where: { id: taskId },
     });
     if (!task) {
       throw new HttpException('Task does not exist', HttpStatus.NOT_FOUND);
     }
-    if (task.tag.author.id !== userId) {
+    if (task.tag.owner.id !== userId) {
       throw new HttpException('You are not an author', HttpStatus.FORBIDDEN);
     }
     return task;

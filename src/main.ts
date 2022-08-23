@@ -8,7 +8,13 @@ import { HttpExceptionFilter } from './common/exception-filter/http-exception.fi
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.useGlobalPipes(
-    new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true, transform: true }),
+    new ValidationPipe({
+      whitelist: true,
+      forbidNonWhitelisted: true,
+      transform: true,
+      // disableErrorMessages: true,
+      // dismissDefaultMessages: true,
+    }),
   );
   app.useGlobalFilters(new HttpExceptionFilter());
   app.use(cookieParser());

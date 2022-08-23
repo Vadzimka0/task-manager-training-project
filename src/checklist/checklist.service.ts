@@ -27,13 +27,13 @@ export class ChecklistService {
     private checklistItemRepository: Repository<ChecklistItemEntity>,
   ) {}
 
-  async findAllAuthorsChecklists(userId: number): Promise<ListsResponseInterface> {
+  async findAllAuthorsChecklists(userId: string): Promise<ListsResponseInterface> {
     const queryBuilder = this.checklistRepository
       .createQueryBuilder('checklists')
       .leftJoinAndSelect('checklists.items', 'items')
-      .leftJoinAndSelect('checklists.author', 'author')
-      .andWhere('checklists.authorId = :id', { id: userId })
-      .orderBy('checklists.createdAt', 'DESC');
+      .leftJoinAndSelect('checklists.owner', 'author')
+      .andWhere('checklists.ownerId = :id', { id: userId })
+      .orderBy('checklists.created_at', 'DESC');
 
     const [checklists, checklistsCount] = await queryBuilder.getManyAndCount();
     return { checklists, checklistsCount };
@@ -65,26 +65,26 @@ export class ChecklistService {
       Object.assign(newChecklist, createChecklistDto);
       newChecklist.items = [];
     }
-    newChecklist.author = currentUser;
+    newChecklist.owner = currentUser;
     return await this.checklistRepository.save(newChecklist);
   }
 
   async updateChecklist(
     updateChecklistDto: UpdateChecklistDto,
-    userId: number,
-    listId: number,
+    userId: string,
+    listId: string,
   ): Promise<ChecklistEntity> {
     const currentChecklist = await this.findAndValidateChecklist(listId, userId);
     Object.assign(currentChecklist, updateChecklistDto);
     return await this.checklistRepository.save(currentChecklist);
   }
 
-  async deleteChecklist(userId: number, listId: number): Promise<DeleteResult> {
+  async deleteChecklist(userId: string, listId: string): Promise<DeleteResult> {
     await this.findAndValidateChecklist(listId, userId);
     return this.checklistRepository.delete({ id: listId });
   }
 
-  async findChecklistItems(userId: number, listId: number): Promise<ListItemsResponseInterface> {
+  async findChecklistItems(userId: string, listId: string): Promise<ListItemsResponseInterface> {
     await this.findAndValidateChecklist(listId, userId);
     const queryBuilder = this.checklistItemRepository
       .createQueryBuilder('items')
@@ -101,8 +101,8 @@ export class ChecklistService {
 
   async createChecklistItem(
     createChecklistItemDto: CreateChecklistItemDto,
-    userId: number,
-    listId: number,
+    userId: string,
+    listId: string,
   ): Promise<ChecklistItemEntity> {
     const currentChecklist = await this.findAndValidateChecklist(listId, userId);
     const newChecklistItem = new ChecklistItemEntity();
@@ -113,9 +113,9 @@ export class ChecklistService {
 
   async updateChecklistItem(
     updateChecklistItemDto: UpdateChecklistItemDto,
-    userId: number,
-    listId: number,
-    itemId: number,
+    userId: string,
+    listId: string,
+    itemId: string,
   ): Promise<ChecklistItemEntity> {
     await this.findAndValidateChecklist(listId, userId);
     const currentChecklistItem = await this.findAndValidateChecklistItem(listId, itemId);
@@ -123,24 +123,24 @@ export class ChecklistService {
     return await this.checklistItemRepository.save(currentChecklistItem);
   }
 
-  async deleteChecklistItem(userId: number, listId: number, itemId: number): Promise<DeleteResult> {
+  async deleteChecklistItem(userId: string, listId: string, itemId: string): Promise<DeleteResult> {
     await this.findAndValidateChecklist(listId, userId);
     await this.findAndValidateChecklistItem(listId, itemId);
     return this.checklistItemRepository.delete({ itemId });
   }
 
-  async findAndValidateChecklist(listId: number, userId: number): Promise<ChecklistEntity> {
+  async findAndValidateChecklist(listId: string, userId: string): Promise<ChecklistEntity> {
     const checklist = await this.checklistRepository.findOneBy({ id: listId });
     if (!checklist) {
       throw new HttpException('Checklist does not exist', HttpStatus.NOT_FOUND);
     }
-    if (checklist.author.id !== userId) {
+    if (checklist.owner.id !== userId) {
       throw new HttpException('You are not an author of this checklist', HttpStatus.FORBIDDEN);
     }
     return checklist;
   }
 
-  async findAndValidateChecklistItem(listId: number, itemId: number): Promise<ChecklistItemEntity> {
+  async findAndValidateChecklistItem(listId: string, itemId: string): Promise<ChecklistItemEntity> {
     const checklistItem = await this.checklistItemRepository.findOne({
       where: { itemId },
       relations: ['checklist'],
