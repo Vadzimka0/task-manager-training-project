@@ -19,6 +19,19 @@ export class NoteService {
     private noteRepository: Repository<NoteEntity>,
   ) {}
 
+  async fetchOneNote(userId: string, noteId: string): Promise<NoteEntity> {
+    try {
+      const note = await this.noteRepository.findOneBy({ id: noteId });
+      if (note.owner.id !== userId) {
+        // 'You are not an owner'
+        throw new UnprocessableEntityException(`The note id is not valid.`);
+      }
+      return await this.noteRepository.save(note);
+    } catch (_) {
+      throw new UnprocessableEntityException(`The note id is not valid.`);
+    }
+  }
+
   async fetchAllOwnersNotes(userId: string): Promise<NoteEntity[]> {
     const queryBuilder = this.noteRepository
       .createQueryBuilder('notes')
@@ -40,19 +53,6 @@ export class NoteService {
     Object.assign(newNote, dtoWithoutOwner);
     newNote.owner = currentUser;
     return await this.noteRepository.save(newNote);
-  }
-
-  async fetchOneNote(userId: string, noteId: string): Promise<NoteEntity> {
-    try {
-      const note = await this.noteRepository.findOneBy({ id: noteId });
-      if (note.owner.id !== userId) {
-        // 'You are not an owner'
-        throw new UnprocessableEntityException(`The note id is not valid.`);
-      }
-      return await this.noteRepository.save(note);
-    } catch (_) {
-      throw new UnprocessableEntityException(`The note id is not valid.`);
-    }
   }
 
   async updateNote(

@@ -1,3 +1,4 @@
+import { ChecklistType } from './checklist.type';
 import { ListItemType } from './listItem.type';
 import { ListItemResponseInterface } from './listItemResponse.interface';
 import { ListItemsResponseInterface } from './listItemsResponse.interface';
@@ -10,4 +11,5 @@ export {
   ListItemsResponseInterface,
   ListItemResponseInterface,
   ListItemType,
+  ChecklistType,
 };

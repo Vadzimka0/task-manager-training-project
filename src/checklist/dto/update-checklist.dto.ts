@@ -1,14 +1,22 @@
-import { IsEnum, IsNotEmpty, IsOptional, MaxLength } from 'class-validator';
+import { Type } from 'class-transformer';
+import { IsNotEmpty, IsOptional, IsUUID, MaxLength, ValidateNested } from 'class-validator';
 
-import { ColorEnum } from '../../common/enums';
+import { UpdateChecklistItemDto } from './update-checklist-item.dto';
 
 export class UpdateChecklistDto {
-  @IsOptional()
   @IsNotEmpty()
   @MaxLength(512)
   readonly title: string;
 
+  @IsNotEmpty()
+  readonly color: string;
+
+  @IsNotEmpty()
+  @IsUUID()
+  readonly owner_id: string;
+
   @IsOptional()
-  @IsEnum(ColorEnum)
-  readonly color: ColorEnum;
+  @ValidateNested({ each: true })
+  @Type(() => UpdateChecklistItemDto)
+  readonly items: UpdateChecklistItemDto[] | null;
 }

@@ -1,5 +1,5 @@
 import { ChecklistItemEntity } from '../entities/checklistItem.entity';
 
 export type ListItemType = ChecklistItemEntity & {
-  checklistId: string;
+  checklist_id: string;
 };

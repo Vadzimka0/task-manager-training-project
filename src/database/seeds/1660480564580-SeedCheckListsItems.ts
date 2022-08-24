@@ -5,49 +5,49 @@ export class SeedCheckListsItems1660480564580 implements MigrationInterface {
 
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(
-      `INSERT INTO checklist_items ("itemTitle", status, "checklistId") VALUES ('buy potatoes', 'done', 1)`,
+      `INSERT INTO checklist_items ("content", status, "checklistId") VALUES ('buy potatoes', 'done', 1)`,
     );
     await queryRunner.query(
-      `INSERT INTO checklist_items ("itemTitle", status, "checklistId") VALUES ('peel potatoes', 'done', 1)`,
+      `INSERT INTO checklist_items ("content", status, "checklistId") VALUES ('peel potatoes', 'done', 1)`,
     );
     await queryRunner.query(
-      `INSERT INTO checklist_items ("itemTitle", status, "checklistId") VALUES ('boil potatoes', 'done', 1)`,
+      `INSERT INTO checklist_items ("content", status, "checklistId") VALUES ('boil potatoes', 'done', 1)`,
     );
     await queryRunner.query(
-      `INSERT INTO checklist_items ("itemTitle", status, "checklistId") VALUES ('eat potatoes', 'pending', 1)`,
+      `INSERT INTO checklist_items ("content", status, "checklistId") VALUES ('eat potatoes', 'pending', 1)`,
     );
     await queryRunner.query(
-      `INSERT INTO checklist_items ("itemTitle", status, "checklistId") VALUES ('buy apples', 'done', 2)`,
+      `INSERT INTO checklist_items ("content", status, "checklistId") VALUES ('buy apples', 'done', 2)`,
     );
     await queryRunner.query(
-      `INSERT INTO checklist_items ("itemTitle", status, "checklistId") VALUES ('eat apples', 'pending', 2)`,
+      `INSERT INTO checklist_items ("content", status, "checklistId") VALUES ('eat apples', 'pending', 2)`,
     );
     await queryRunner.query(
-      `INSERT INTO checklist_items ("itemTitle", status, "checklistId") VALUES ('buy lemons', 'pending', 4)`,
+      `INSERT INTO checklist_items ("content", status, "checklistId") VALUES ('buy lemons', 'pending', 4)`,
     );
     await queryRunner.query(
-      `INSERT INTO checklist_items ("itemTitle", status, "checklistId") VALUES ('buy grapes', 'done', 6)`,
+      `INSERT INTO checklist_items ("content", status, "checklistId") VALUES ('buy grapes', 'done', 6)`,
     );
     await queryRunner.query(
-      `INSERT INTO checklist_items ("itemTitle", status, "checklistId") VALUES ('wash grapes', 'pending', 6)`,
+      `INSERT INTO checklist_items ("content", status, "checklistId") VALUES ('wash grapes', 'pending', 6)`,
     );
     await queryRunner.query(
-      `INSERT INTO checklist_items ("itemTitle", status, "checklistId") VALUES ('eat grapes', 'pending', 6)`,
+      `INSERT INTO checklist_items ("content", status, "checklistId") VALUES ('eat grapes', 'pending', 6)`,
     );
     await queryRunner.query(
-      `INSERT INTO checklist_items ("itemTitle", status, "checklistId") VALUES ('eat oranges', 'done', 7)`,
+      `INSERT INTO checklist_items ("content", status, "checklistId") VALUES ('eat oranges', 'done', 7)`,
     );
     await queryRunner.query(
-      `INSERT INTO checklist_items ("itemTitle", status, "checklistId") VALUES ('buy peaches', 'pending', 8)`,
+      `INSERT INTO checklist_items ("content", status, "checklistId") VALUES ('buy peaches', 'pending', 8)`,
     );
     await queryRunner.query(
-      `INSERT INTO checklist_items ("itemTitle", status, "checklistId") VALUES ('eat peaches', 'pending', 8)`,
+      `INSERT INTO checklist_items ("content", status, "checklistId") VALUES ('eat peaches', 'pending', 8)`,
     );
     await queryRunner.query(
-      `INSERT INTO checklist_items ("itemTitle", status, "checklistId") VALUES ('buy plums', 'done', 9)`,
+      `INSERT INTO checklist_items ("content", status, "checklistId") VALUES ('buy plums', 'done', 9)`,
     );
     await queryRunner.query(
-      `INSERT INTO checklist_items ("itemTitle", status, "checklistId") VALUES ('eat plums', 'done', 9)`,
+      `INSERT INTO checklist_items ("content", status, "checklistId") VALUES ('eat plums', 'done', 9)`,
     );
   }
 

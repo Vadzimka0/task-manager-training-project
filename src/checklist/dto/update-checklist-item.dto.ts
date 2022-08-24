@@ -1,13 +1,15 @@
-import { IsEnum, IsNotEmpty, IsOptional, MaxLength } from 'class-validator';
-
-import { StatusEnum } from '../../common/enums';
+import { IsBoolean, IsNotEmpty, IsUUID, MaxLength } from 'class-validator';
 
 export class UpdateChecklistItemDto {
-  @IsOptional()
+  @IsNotEmpty()
+  @IsUUID()
+  readonly id: string;
+
   @IsNotEmpty()
   @MaxLength(512)
-  readonly itemTitle: string;
+  readonly content: string;
 
-  @IsEnum(StatusEnum)
-  readonly status: StatusEnum;
+  @IsNotEmpty()
+  @IsBoolean()
+  readonly is_completed: boolean;
 }

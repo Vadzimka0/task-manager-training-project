@@ -1,7 +1,11 @@
-import { IsNotEmpty, MaxLength } from 'class-validator';
+import { IsBoolean, IsNotEmpty, MaxLength } from 'class-validator';
 
 export class CreateChecklistItemDto {
   @IsNotEmpty()
   @MaxLength(512)
-  readonly itemTitle: string;
+  readonly content: string;
+
+  @IsNotEmpty()
+  @IsBoolean()
+  readonly is_completed: boolean;
 }

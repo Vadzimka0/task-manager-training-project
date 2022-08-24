@@ -1,19 +1,16 @@
 import { Exclude } from 'class-transformer';
-import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, ManyToOne } from 'typeorm';
 
-import { StatusEnum } from '../../common/enums';
+import { AbstractEntity } from '../../common/abstract-entity-class';
 import { ChecklistEntity } from './checklist.entity';
 
 @Entity({ name: 'checklist_items' })
-export class ChecklistItemEntity {
-  @PrimaryGeneratedColumn()
-  itemId: string;
-
+export class ChecklistItemEntity extends AbstractEntity {
   @Column({ length: 512 })
-  itemTitle: string;
+  content: string;
 
-  @Column({ default: StatusEnum.PENDING })
-  status: StatusEnum;
+  @Column()
+  is_completed: boolean;
 
   @Exclude()
   @ManyToOne(() => ChecklistEntity, (checklist) => checklist.items, {

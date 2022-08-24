@@ -5,7 +5,7 @@ export class CreateChecklistWithItems1660855222462 implements MigrationInterface
 
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(
-      `CREATE TABLE "checklist_items" ("itemId" SERIAL NOT NULL, "itemTitle" character varying(512) NOT NULL, "status" character varying NOT NULL DEFAULT 'pending', "checklistId" integer, CONSTRAINT "PK_8740c63fb47a78c390acc79506f" PRIMARY KEY ("itemId"))`,
+      `CREATE TABLE "checklist_items" ("itemId" SERIAL NOT NULL, "content" character varying(512) NOT NULL, "status" character varying NOT NULL DEFAULT 'pending', "checklistId" integer, CONSTRAINT "PK_8740c63fb47a78c390acc79506f" PRIMARY KEY ("itemId"))`,
     );
     await queryRunner.query(
       `CREATE TABLE "checklists" ("id" SERIAL NOT NULL, "created_at" TIMESTAMP NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP NOT NULL DEFAULT now(), "title" character varying(512) NOT NULL, "color" character varying NOT NULL, "authorId" integer, CONSTRAINT "PK_336ade2047f3d713e1afa20d2c6" PRIMARY KEY ("id"))`,
