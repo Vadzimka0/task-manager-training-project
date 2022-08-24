@@ -5,54 +5,45 @@ import {
   Delete,
   Get,
   Param,
-  Patch,
   Post,
   Put,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
-import { DeleteResult } from 'typeorm';
 
 import { User } from '../auth/decorators/user.decorator';
 import { JwtAuthGuard } from '../auth/guards';
 import { Data } from '../common/types/data';
 import { UserEntity } from '../user/entities/user.entity';
 import { ChecklistService } from './checklist.service';
-import {
-  CreateChecklistDto,
-  CreateChecklistItemDto,
-  UpdateChecklistDto,
-  UpdateChecklistItemDto,
-} from './dto';
-import {
-  ChecklistType,
-  ListItemResponseInterface,
-  ListItemsResponseInterface,
-  ListResponseInterface,
-  ListsResponseInterface,
-} from './types';
-import { ListItemType } from './types/listItem.type';
+import { CreateChecklistDto, DeleteChecklistItemsDto, UpdateChecklistDto } from './dto';
+import { ChecklistType } from './types';
 
-@Controller('checklists')
+@Controller()
 @UseGuards(JwtAuthGuard)
 @UseInterceptors(ClassSerializerInterceptor)
 export class ChecklistController {
   constructor(private readonly checklistService: ChecklistService) {}
 
-  // @Get()
-  // async findAllAuthorsChecklists(@User('id') userId: string): Promise<ListsResponseInterface> {
-  //   return this.checklistService.findAllAuthorsChecklists(userId);
-  // }
+  @Get('user-checklists/:ownerId')
+  async fetchAllUserChecklists(
+    @User('id') userId: string,
+    @Param('ownerId') ownerId: string,
+  ): Promise<Data<ChecklistType[]>> {
+    const data = await this.checklistService.fetchAllUserChecklists(userId, ownerId);
+    return { data };
+  }
 
-  // @Get(':listId/items')
-  // async findChecklistItems(
-  //   @User('id') userId: string,
-  //   @Param('listId') listId: string,
-  // ): Promise<ListItemsResponseInterface> {
-  //   return this.checklistService.findChecklistItems(userId, listId);
-  // }
+  @Get('checklists/:listId')
+  async fetchOneChecklist(
+    @User('id') userId: string,
+    @Param('listId') listId: string,
+  ): Promise<Data<ChecklistType>> {
+    const data = await this.checklistService.fetchOneChecklist(userId, listId);
+    return { data };
+  }
 
-  @Post()
+  @Post('checklists')
   async createChecklist(
     @Body() createChecklistDto: CreateChecklistDto,
     @User() currentUser: UserEntity,
@@ -61,7 +52,7 @@ export class ChecklistController {
     return { data };
   }
 
-  @Put(':listId')
+  @Put('checklists/:listId')
   async updateChecklist(
     @Body() updateChecklistDto: UpdateChecklistDto,
     @User('id') userId: string,
@@ -71,64 +62,33 @@ export class ChecklistController {
     return { data };
   }
 
-  // @Patch(':listId')
-  // async updateChecklist(
-  //   @Body() updateChecklistDto: UpdateChecklistDto,
-  //   @User('id') userId: string,
-  //   @Param('listId') listId: string,
-  // ): Promise<ListResponseInterface> {
-  //   const checklist = await this.checklistService.updateChecklist(
-  //     updateChecklistDto,
-  //     userId,
-  //     listId,
-  //   );
-  //   return this.checklistService.buildChecklistResponse(checklist);
-  // }
+  @Delete('checklists/:listId')
+  async deleteChecklist(
+    @User('id') userId: string,
+    @Param('listId') listId: string,
+  ): Promise<Data<{ id: string }>> {
+    const data = await this.checklistService.deleteChecklist(userId, listId);
+    return { data };
+  }
 
-  // @Delete(':listId')
-  // async deleteChecklist(
-  //   @User('id') userId: string,
-  //   @Param('listId') listId: string,
-  // ): Promise<DeleteResult> {
-  //   return this.checklistService.deleteChecklist(userId, listId);
-  // }
+  @Delete('checklists-items')
+  async deleteChecklistItems(
+    @User('id') userId: string,
+    @Body() deleteChecklistItemsDto: DeleteChecklistItemsDto,
+  ): Promise<Data<DeleteChecklistItemsDto>> {
+    const data = await this.checklistService.deleteChecklistItems(
+      userId,
+      deleteChecklistItemsDto.items,
+    );
+    return { data };
+  }
 
-  // @Post(':listId/items')
-  // async createChecklistItem(
-  //   @Body() createChecklistItemDto: CreateChecklistItemDto,
-  //   @User('id') userId: string,
-  //   @Param('listId') listId: string,
-  // ): Promise<ListItemResponseInterface> {
-  //   const checklistItem = await this.checklistService.createChecklistItem(
-  //     createChecklistItemDto,
-  //     userId,
-  //     listId,
-  //   );
-  //   return await this.checklistService.buildChecklistItemResponse(checklistItem as ListItemType);
-  // }
-
-  // @Patch(':listId/items/:itemId')
-  // async updateChecklistItem(
-  //   @Body() updateChecklistItemDto: UpdateChecklistItemDto,
-  //   @User('id') userId: string,
-  //   @Param('listId') listId: string,
-  //   @Param('itemId') itemId: string,
-  // ): Promise<ListItemResponseInterface> {
-  //   const checklistItem = await this.checklistService.updateChecklistItem(
-  //     updateChecklistItemDto,
-  //     userId,
-  //     listId,
-  //     itemId,
-  //   );
-  //   return await this.checklistService.buildChecklistItemResponse(checklistItem as ListItemType);
-  // }
-
-  // @Delete(':listId/items/:itemId')
-  // async deleteChecklistItem(
-  //   @User('id') userId: string,
-  //   @Param('listId') listId: string,
-  //   @Param('itemId') itemId: string,
-  // ): Promise<DeleteResult> {
-  //   return this.checklistService.deleteChecklistItem(userId, listId, itemId);
-  // }
+  @Delete('checklists-items/:itemId')
+  async deleteChecklistItem(
+    @User('id') userId: string,
+    @Param('itemId') itemId: string,
+  ): Promise<Data<{ id: string }>> {
+    const data = await this.checklistService.deleteChecklistItem(userId, itemId);
+    return { data };
+  }
 }

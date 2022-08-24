@@ -15,12 +15,7 @@ import {
   UpdateChecklistItemDto,
 } from './dto';
 import { ChecklistEntity, ChecklistItemEntity } from './entities';
-import {
-  ListItemResponseInterface,
-  ListItemType,
-  ListResponseInterface,
-  ChecklistType,
-} from './types';
+import { ChecklistType, ListItemType } from './types';
 
 @Injectable()
 export class ChecklistService {
@@ -31,17 +26,30 @@ export class ChecklistService {
     private checklistItemRepository: Repository<ChecklistItemEntity>,
   ) {}
 
-  // async findAllAuthorsChecklists(userId: string): Promise<ListsResponseInterface> {
-  //   const queryBuilder = this.checklistRepository
-  //     .createQueryBuilder('checklists')
-  //     .leftJoinAndSelect('checklists.items', 'items')
-  //     .leftJoinAndSelect('checklists.owner', 'author')
-  //     .andWhere('checklists.ownerId = :id', { id: userId })
-  //     .orderBy('checklists.created_at', 'DESC');
+  async fetchAllUserChecklists(userId: string, ownerId: string): Promise<ChecklistType[]> {
+    this.idsMatching(ownerId, userId);
 
-  //   const [checklists, checklistsCount] = await queryBuilder.getManyAndCount();
-  //   return { checklists, checklistsCount };
-  // }
+    const queryBuilder = this.checklistRepository
+      .createQueryBuilder('checklists')
+      .leftJoinAndSelect('checklists.items', 'items')
+      .leftJoinAndSelect('checklists.owner', 'owner')
+      .andWhere('checklists.owner_id = :id', { id: userId })
+      .orderBy('checklists.created_at', 'DESC');
+
+    const checklists = await queryBuilder.getMany();
+    const checklistsWithOwnerId = checklists.map((checklist: ChecklistType) => {
+      checklist.owner_id = userId;
+      checklist.items = this.getItemsWithChecklistId(checklist);
+      return checklist;
+    });
+    return checklistsWithOwnerId;
+  }
+
+  async fetchOneChecklist(userId: string, listId: string): Promise<ChecklistType> {
+    const checklist = await this.findAndValidateChecklist(listId, userId);
+    checklist.items = this.getItemsWithChecklistId(checklist);
+    return this.getChecklistWithOwnerId(checklist as ChecklistType, userId);
+  }
 
   async createChecklist(
     createChecklistDto: CreateChecklistDto,
@@ -57,11 +65,7 @@ export class ChecklistService {
     newChecklist.owner = currentUser;
 
     const savedChecklist = await this.checklistRepository.save(newChecklist);
-
-    savedChecklist.items = savedChecklist.items.map((item: ListItemType) => {
-      item.checklist_id = savedChecklist.id;
-      return item;
-    });
+    savedChecklist.items = this.getItemsWithChecklistId(savedChecklist);
     return this.getChecklistWithOwnerId(savedChecklist as ChecklistType, currentUser.id);
   }
 
@@ -87,17 +91,30 @@ export class ChecklistService {
     currentChecklist.items = await this.getUpdatedItems(items, listId);
 
     const savedChecklist = await this.checklistRepository.save(currentChecklist);
-
-    savedChecklist.items = savedChecklist.items.map((item: ListItemType) => {
-      item.checklist_id = savedChecklist.id;
-      return item;
-    });
+    savedChecklist.items = this.getItemsWithChecklistId(savedChecklist);
     return this.getChecklistWithOwnerId(savedChecklist as ChecklistType, userId);
   }
 
-  getChecklistWithOwnerId(checklist: ChecklistType, userId: string): ChecklistType {
-    checklist.owner_id = userId;
-    return checklist;
+  async deleteChecklist(userId: string, listId: string): Promise<{ id: string }> {
+    await this.findAndValidateChecklist(listId, userId);
+    await this.checklistRepository.delete({ id: listId });
+    return { id: listId };
+  }
+
+  async deleteChecklistItem(userId: string, itemId: string): Promise<{ id: string }> {
+    await this.findAndValidateOwnersItem(userId, itemId);
+    await this.checklistItemRepository.delete({ id: itemId });
+    return { id: itemId };
+  }
+
+  async deleteChecklistItems(userId: string, itemsIds: string[]): Promise<{ items: string[] }> {
+    const items = [];
+    for (const itemId of itemsIds) {
+      const currentItem = await this.findAndValidateOwnersItem(userId, itemId);
+      await this.checklistItemRepository.delete({ id: itemId });
+      items.push(currentItem.id);
+    }
+    return { items };
   }
 
   async getItemsInstances(items: CreateChecklistItemDto[] | null): Promise<ChecklistItemEntity[]> {
@@ -131,56 +148,6 @@ export class ChecklistService {
     return currentItems;
   }
 
-  // async deleteChecklist(userId: string, listId: string): Promise<DeleteResult> {
-  //   await this.findAndValidateChecklist(listId, userId);
-  //   return this.checklistRepository.delete({ id: listId });
-  // }
-
-  // async findChecklistItems(userId: string, listId: string): Promise<ListItemsResponseInterface> {
-  //   await this.findAndValidateChecklist(listId, userId);
-  //   const queryBuilder = this.checklistItemRepository
-  //     .createQueryBuilder('items')
-  //     .leftJoinAndSelect('items.checklist', 'checklist')
-  //     .andWhere('items.checklistId = :id', { id: listId });
-
-  //   const [checklistItems, checklistItemsCount] = await queryBuilder.getManyAndCount();
-  //   const checklistItemsWithChecklistId = checklistItems.map((item: ListItemType) => {
-  //     item.checklistId = item.checklist.id;
-  //     return item;
-  //   });
-  //   return { checklistItems: checklistItemsWithChecklistId, checklistItemsCount };
-  // }
-
-  // async createChecklistItem(
-  //   createChecklistItemDto: CreateChecklistItemDto,
-  //   userId: string,
-  //   listId: string,
-  // ): Promise<ChecklistItemEntity> {
-  //   const currentChecklist = await this.findAndValidateChecklist(listId, userId);
-  //   const newChecklistItem = new ChecklistItemEntity();
-  //   Object.assign(newChecklistItem, createChecklistItemDto);
-  //   newChecklistItem.checklist = currentChecklist;
-  //   return await this.checklistItemRepository.save(newChecklistItem);
-  // }
-
-  // async updateChecklistItem(
-  //   updateChecklistItemDto: UpdateChecklistItemDto,
-  //   userId: string,
-  //   listId: string,
-  //   itemId: string,
-  // ): Promise<ChecklistItemEntity> {
-  //   await this.findAndValidateChecklist(listId, userId);
-  //   const currentChecklistItem = await this.findAndValidateChecklistItem(listId, itemId);
-  //   Object.assign(currentChecklistItem, updateChecklistItemDto);
-  //   return await this.checklistItemRepository.save(currentChecklistItem);
-  // }
-
-  // async deleteChecklistItem(userId: string, listId: string, itemId: string): Promise<DeleteResult> {
-  //   await this.findAndValidateChecklist(listId, userId);
-  //   await this.findAndValidateChecklistItem(listId, itemId);
-  //   return this.checklistItemRepository.delete({ itemId });
-  // }
-
   async findAndValidateChecklist(listId: string, userId: string): Promise<ChecklistEntity> {
     try {
       const checklist = await this.checklistRepository.findOneBy({ id: listId });
@@ -212,6 +179,23 @@ export class ChecklistService {
     }
   }
 
+  async findAndValidateOwnersItem(userId: string, itemId: string): Promise<ChecklistItemEntity> {
+    try {
+      const checklistItem = await this.checklistItemRepository.findOne({
+        where: { id: itemId },
+        relations: ['checklist'],
+      });
+      if (checklistItem.checklist.owner.id !== userId) {
+        throw new Error();
+      }
+      return checklistItem;
+    } catch (_) {
+      throw new InternalServerErrorException(
+        `Entity ChecklisItemtModel, id=${itemId} not found in the database`,
+      );
+    }
+  }
+
   validateHexColor(color: string): void {
     if (!/^#(?:[0-9a-fA-F]{3}){1,2}$/i.test(color)) {
       throw new UnprocessableEntityException(
@@ -226,12 +210,15 @@ export class ChecklistService {
     }
   }
 
-  buildChecklistResponse(checklist: ChecklistEntity): ListResponseInterface {
-    return { checklist };
+  getChecklistWithOwnerId(checklist: ChecklistType, userId: string): ChecklistType {
+    checklist.owner_id = userId;
+    return checklist;
   }
 
-  // buildChecklistItemResponse(checklistItem: ListItemType): ListItemResponseInterface {
-  //   checklistItem.checklistId = checklistItem.checklist.id;
-  //   return { checklistItem };
-  // }
+  getItemsWithChecklistId(checklist: ChecklistEntity): ListItemType[] {
+    return checklist.items.map((item: ListItemType) => {
+      item.checklist_id = checklist.id;
+      return item;
+    });
+  }
 }
