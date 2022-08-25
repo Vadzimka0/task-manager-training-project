@@ -12,6 +12,6 @@ export class RegisterDto {
   @IsOptional()
   readonly username: string;
 
-  @IsOptional()
-  readonly photo: string;
+  // @IsOptional()
+  // readonly photo: string;
 }

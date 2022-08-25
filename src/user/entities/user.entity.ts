@@ -1,5 +1,5 @@
 import { Exclude } from 'class-transformer';
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, CreateDateColumn, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 
 import { ChecklistEntity } from '../../checklist/entities/checklist.entity';
 import { NoteEntity } from '../../note/entities/note.entity';
@@ -11,11 +11,14 @@ export class UserEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
+  @CreateDateColumn()
+  created_at: Date;
+
   @Column({ unique: true })
   email: string;
 
   @Column({ nullable: true })
-  photo: string;
+  avatar_url: string;
 
   @Column({ nullable: true })
   username: string;

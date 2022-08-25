@@ -1,7 +1,7 @@
+import { Exclude } from 'class-transformer';
 import { Column, Entity, JoinTable, ManyToMany, ManyToOne } from 'typeorm';
 
 import { AbstractEntity } from '../../common/abstract-entity-class';
-import { StatusEnum } from '../../common/enums';
 import { ProjectEntity } from '../../project/entities/project.entity';
 import { UserEntity } from '../../user/entities/user.entity';
 
@@ -14,16 +14,18 @@ export class TaskEntity extends AbstractEntity {
   description: string;
 
   @Column()
-  dueDate: Date;
+  due_date: Date;
 
-  @Column({ default: StatusEnum.PENDING })
-  status: StatusEnum;
+  @Column()
+  is_completed: boolean;
 
-  @ManyToOne(() => ProjectEntity, (project) => project.tasks, { eager: true })
-  tag: ProjectEntity;
-
+  @Exclude()
   @ManyToOne(() => UserEntity, (user) => user.assignedTasks, { eager: true })
   performer: UserEntity;
+
+  @Exclude()
+  @ManyToOne(() => ProjectEntity, (project) => project.tasks, { eager: true })
+  project: ProjectEntity;
 
   @ManyToMany(() => UserEntity, { eager: true })
   @JoinTable()

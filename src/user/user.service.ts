@@ -1,4 +1,10 @@
-import { HttpException, HttpStatus, Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  HttpException,
+  HttpStatus,
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcrypt';
 import { Repository, UpdateResult } from 'typeorm';
@@ -24,7 +30,7 @@ export class UserService {
     if (user) {
       return user;
     }
-    throw new HttpException('User with this id does not exist', HttpStatus.NOT_FOUND);
+    throw new NotFoundException('User does not exist');
   }
 
   async getByEmail(email: string): Promise<UserEntity> {
@@ -35,13 +41,13 @@ export class UserService {
     throw new HttpException('User with this email does not exist', HttpStatus.NOT_FOUND);
   }
 
-  async getByName(performer: string): Promise<UserEntity> {
-    const user = await this.userRepository.findOneBy({ username: performer });
-    if (user) {
-      return user;
-    }
-    throw new HttpException('User with this username does not exist', HttpStatus.NOT_FOUND);
-  }
+  // async getByName(performer: string): Promise<UserEntity> {
+  //   const user = await this.userRepository.findOneBy({ username: performer });
+  //   if (user) {
+  //     return user;
+  //   }
+  //   throw new HttpException('User with this username does not exist', HttpStatus.NOT_FOUND);
+  // }
 
   async getAllUsers(): Promise<UserEntity[]> {
     return await this.userRepository.find();
@@ -86,10 +92,10 @@ export class UserService {
     });
   }
 
-  async getMembersInstances(members: string[]): Promise<UserEntity[]> {
+  async getMembersInstances(membersIds: string[]): Promise<UserEntity[]> {
     const currentMembers = [];
-    for (const member of members) {
-      const user = await this.userRepository.findOneBy({ username: member });
+    for (const id of membersIds) {
+      const user = await this.userRepository.findOneBy({ id });
       if (!user) {
         throw new HttpException('User with this username does not exist', HttpStatus.NOT_FOUND);
       }

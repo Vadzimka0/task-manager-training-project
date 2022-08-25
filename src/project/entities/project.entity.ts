@@ -17,6 +17,6 @@ export class ProjectEntity extends AbstractEntity {
   @ManyToOne(() => UserEntity, (owner) => owner.projects, { eager: true })
   owner: UserEntity;
 
-  @OneToMany(() => TaskEntity, (task) => task.tag)
+  @OneToMany(() => TaskEntity, (task) => task.project)
   tasks?: TaskEntity[];
 }

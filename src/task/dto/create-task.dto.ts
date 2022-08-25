@@ -1,6 +1,12 @@
-import { IsArray, IsEnum, IsNotEmpty, IsOptional, MaxLength } from 'class-validator';
-
-import { StatusEnum } from '../../common/enums';
+import {
+  IsArray,
+  IsBoolean,
+  IsDateString,
+  IsNotEmpty,
+  IsOptional,
+  IsUUID,
+  MaxLength,
+} from 'class-validator';
 
 export class CreateTaskDto {
   @IsNotEmpty()
@@ -11,24 +17,33 @@ export class CreateTaskDto {
   readonly description: string;
 
   @IsNotEmpty()
-  readonly dueDate: Date;
-
-  @IsOptional()
-  @IsEnum(StatusEnum)
-  readonly status: StatusEnum;
+  @IsDateString()
+  readonly due_date: Date;
 
   @IsNotEmpty()
-  readonly tag: { title: string };
-  // readonly tag: string;
+  @IsBoolean()
+  readonly is_completed: boolean;
 
   @IsOptional()
-  readonly assignedTo: string;
+  @IsNotEmpty()
+  @IsUUID()
+  readonly assigned_to: string | null;
+
+  @IsNotEmpty()
+  @IsUUID()
+  readonly project_id: string;
+
+  @IsNotEmpty()
+  @IsUUID()
+  readonly owner_id: string;
 
   @IsOptional()
+  @IsNotEmpty()
   @IsArray()
-  readonly members?: string[];
+  readonly members: string[] | null;
 
   @IsOptional()
+  @IsNotEmpty()
   @IsArray()
-  readonly attachments?: string[];
+  readonly attachments: string[] | null;
 }

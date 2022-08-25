@@ -150,16 +150,27 @@ export class ProjectService {
     return project;
   }
 
-  async getTagByTitleAndUserId(title: string, currentUserId: string): Promise<ProjectEntity> {
-    const currentProject = await this.projectRepository
+  async getProjectByTitle(title: string, currentUserId: string): Promise<ProjectEntity> {
+    const project = await this.projectRepository
       .createQueryBuilder('projects')
       .where('projects.title = :title', { title: title })
-      .andWhere('projects.ownerId = :id', { id: currentUserId })
+      .andWhere('projects.owner_id = :id', { id: currentUserId })
       .getOne();
-
-    if (!currentProject) {
-      throw new HttpException('Tag (project) does not exist', HttpStatus.NOT_FOUND);
+    if (!project) {
+      throw new NotFoundException('Project does not exist');
     }
-    return currentProject;
+    return project;
+  }
+
+  async getProjectByProjectId(projectId: string, currentUserId: string): Promise<ProjectEntity> {
+    const project = await this.projectRepository
+      .createQueryBuilder('projects')
+      .where('projects.id = :id', { id: projectId })
+      .andWhere('projects.owner_id = :owner_id', { owner_id: currentUserId })
+      .getOne();
+    if (!project) {
+      throw new NotFoundException('Project does not exist');
+    }
+    return project;
   }
 }
