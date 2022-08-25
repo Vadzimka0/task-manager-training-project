@@ -54,6 +54,7 @@ export class UserService {
     const createProjectDto = {
       title: SPECIAL_ONE_PROJECT_NAME,
       color: SPECIAL_ONE_PROJECT_COLOR,
+      owner_id: user.id,
     };
     const project = await this.projectService.createProject(createProjectDto, user);
     project.owner = user;

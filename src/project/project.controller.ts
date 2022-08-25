@@ -5,57 +5,79 @@ import {
   Delete,
   Get,
   Param,
-  Patch,
   Post,
+  Put,
+  Query,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
-import { DeleteResult } from 'typeorm';
 
 import { User } from '../auth/decorators/user.decorator';
 import { JwtAuthGuard } from '../auth/guards';
+import { Data } from '../common/types/data';
 import { UserEntity } from '../user/entities/user.entity';
 import { CreateProjectDto } from './dto/create-project.dto';
-import { UpdateProjectDto } from './dto/update-project.dto';
 import { ProjectService } from './project.service';
-import { ProjectResponseInterface } from './types/projectResponse.interface';
-import { ProjectsResponseInterface } from './types/projectsResponse.interface';
+import { ProjectType } from './types/project.type';
 
-@Controller('projects')
+@Controller()
 @UseGuards(JwtAuthGuard)
 @UseInterceptors(ClassSerializerInterceptor)
 export class ProjectController {
   constructor(private readonly projectService: ProjectService) {}
 
-  @Get()
-  async findAllAuthorsProjects(@User('id') userId: string): Promise<ProjectsResponseInterface> {
-    return this.projectService.findAllAuthorsProjects(userId);
+  @Get('user-projects/:ownerId')
+  async fetchAllUserProjects(
+    @User('id') userId: string,
+    @Param('ownerId') ownerId: string,
+  ): Promise<Data<ProjectType[]>> {
+    const data = await this.projectService.fetchUserProjects(userId, ownerId);
+    return { data };
   }
 
-  @Post()
+  @Get('projects-search')
+  async fetchProjectsBySearch(
+    @User('id') userId: string,
+    @Query() querySearch: { query: string },
+  ): Promise<Data<ProjectType[]>> {
+    const data = await this.projectService.fetchUserProjects(userId, undefined, querySearch);
+    return { data };
+  }
+
+  @Get('projects/:projectId')
+  async fetchOneProject(
+    @User('id') userId: string,
+    @Param('projectId') projectId: string,
+  ): Promise<Data<ProjectType>> {
+    const data = await this.projectService.fetchOneProject(userId, projectId);
+    return { data };
+  }
+
+  @Post('projects')
   async createProject(
-    @Body() createProjectDto: CreateProjectDto,
+    @Body() projectDto: CreateProjectDto,
     @User() currentUser: UserEntity,
-  ): Promise<ProjectResponseInterface> {
-    const project = await this.projectService.createProject(createProjectDto, currentUser);
-    return this.projectService.buildProjectResponse(project);
+  ): Promise<Data<ProjectType>> {
+    const data = await this.projectService.createProject(projectDto, currentUser);
+    return { data };
   }
 
-  @Patch(':id')
+  @Put('projects/:id')
   async updateProject(
-    @Body() updateProjectDto: UpdateProjectDto,
+    @Body() projectDto: CreateProjectDto,
     @User('id') userId: string,
     @Param('id') projectId: string,
-  ): Promise<ProjectResponseInterface> {
-    const project = await this.projectService.updateProject(updateProjectDto, userId, projectId);
-    return this.projectService.buildProjectResponse(project);
+  ): Promise<Data<ProjectType>> {
+    const data = await this.projectService.updateProject(projectDto, userId, projectId);
+    return { data };
   }
 
-  @Delete(':id')
+  @Delete('projects/:id')
   async deleteProject(
     @User('id') userId: string,
     @Param('id') projectId: string,
-  ): Promise<DeleteResult> {
-    return await this.projectService.deleteProject(userId, projectId);
+  ): Promise<Data<{ id: string }>> {
+    const data = await this.projectService.deleteProject(userId, projectId);
+    return { data };
   }
 }

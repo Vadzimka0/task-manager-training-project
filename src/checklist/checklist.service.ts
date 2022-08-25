@@ -79,8 +79,6 @@ export class ChecklistService {
     this.idsMatching(owner_id, userId);
 
     const currentChecklist = await this.findAndValidateChecklist(listId, userId);
-    Object.assign(currentChecklist, dtoWithoutItemsAndOwner);
-
     if (
       (items === null && currentChecklist.items.length) ||
       (items && items.length && !currentChecklist.items.length)
@@ -88,6 +86,7 @@ export class ChecklistService {
       throw new ForbiddenException('The count of items cannot be different from the original');
     }
 
+    Object.assign(currentChecklist, dtoWithoutItemsAndOwner);
     currentChecklist.items = await this.getUpdatedItems(items, listId);
 
     const savedChecklist = await this.checklistRepository.save(currentChecklist);
@@ -174,7 +173,7 @@ export class ChecklistService {
       return checklistItem;
     } catch (_) {
       throw new InternalServerErrorException(
-        `Entity ChecklisItemtModel, id=${itemId} not found in the database`,
+        `Entity ChecklisItemModel, id=${itemId} not found in the database`,
       );
     }
   }
@@ -191,7 +190,7 @@ export class ChecklistService {
       return checklistItem;
     } catch (_) {
       throw new InternalServerErrorException(
-        `Entity ChecklisItemtModel, id=${itemId} not found in the database`,
+        `Entity ChecklisItemModel, id=${itemId} not found in the database`,
       );
     }
   }
