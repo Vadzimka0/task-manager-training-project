@@ -2,10 +2,14 @@ import {
   IsArray,
   IsBoolean,
   IsDateString,
+  IsEmpty,
   IsNotEmpty,
+  IsNotEmptyObject,
+  IsObject,
   IsOptional,
   IsUUID,
   MaxLength,
+  ValidateIf,
 } from 'class-validator';
 
 export class CreateTaskDto {
@@ -42,8 +46,6 @@ export class CreateTaskDto {
   @IsArray()
   readonly members: string[] | null;
 
-  @IsOptional()
-  @IsNotEmpty()
-  @IsArray()
-  readonly attachments: string[] | null;
+  @IsEmpty()
+  readonly attachments: null;
 }

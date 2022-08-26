@@ -4,6 +4,7 @@ import {
   Controller,
   Delete,
   Get,
+  HttpCode,
   Param,
   Post,
   Put,
@@ -16,7 +17,6 @@ import { JwtAuthGuard } from '../auth/guards';
 import { Data } from '../common/types/data';
 import { UserEntity } from '../user/entities/user.entity';
 import { CreateNoteDto, UpdateNoteDto } from './dto';
-import { NoteEntity } from './entities/note.entity';
 import { NoteService } from './note.service';
 import { NoteType } from './types/note.type';
 
@@ -26,29 +26,28 @@ import { NoteType } from './types/note.type';
 export class NoteController {
   constructor(private readonly noteService: NoteService) {}
 
-  @Get(':id')
-  async fetchOneNote(
-    @User('id') userId: string,
-    @Param('id') noteId: string,
-  ): Promise<Data<NoteEntity>> {
-    const note = await this.noteService.fetchOneNote(userId, noteId);
-    const data = this.noteService.buildNoteWithOwnerId(note as NoteType);
-    return { data };
-  }
-
   @Get()
-  async fetchAllOwnersNotes(@User('id') userId: string): Promise<Data<NoteEntity[]>> {
+  async fetchAllOwnersNotes(@User('id') userId: string): Promise<Data<NoteType[]>> {
     const data = await this.noteService.fetchAllOwnersNotes(userId);
     return { data };
   }
 
+  @Get(':id')
+  async fetchOneNote(
+    @User('id') userId: string,
+    @Param('id') noteId: string,
+  ): Promise<Data<NoteType>> {
+    const data = await this.noteService.fetchOneNote(userId, noteId);
+    return { data };
+  }
+
   @Post()
+  @HttpCode(200)
   async createNote(
     @Body() createNoteDto: CreateNoteDto,
     @User() currentUser: UserEntity,
-  ): Promise<Data<NoteEntity>> {
-    const note = await this.noteService.createNote(createNoteDto, currentUser);
-    const data = this.noteService.buildNoteWithOwnerId(note as NoteType);
+  ): Promise<Data<NoteType>> {
+    const data = await this.noteService.createNote(createNoteDto, currentUser);
     return { data };
   }
 
@@ -57,9 +56,8 @@ export class NoteController {
     @Body() updateNoteDto: UpdateNoteDto,
     @User('id') userId: string,
     @Param('id') noteId: string,
-  ): Promise<Data<NoteEntity>> {
-    const note = await this.noteService.updateNote(updateNoteDto, userId, noteId);
-    const data = this.noteService.buildNoteWithOwnerId(note as NoteType);
+  ): Promise<Data<NoteType>> {
+    const data = await this.noteService.updateNote(updateNoteDto, userId, noteId);
     return { data };
   }
 

@@ -42,14 +42,14 @@ export class ProjectService {
     }
     const projects = await queryBuilder.getMany();
     const projectsWithOwnerId = projects.map((project: ProjectType) =>
-      this.getProjectWithOwnerId(project, userId),
+      this.getProjectWithOwnerId(project),
     );
     return projectsWithOwnerId;
   }
 
   async fetchOneProject(userId: string, projectId: string): Promise<ProjectType> {
     const project = await this.findProjectForRead(projectId, userId);
-    return this.getProjectWithOwnerId(project as ProjectType, userId);
+    return this.getProjectWithOwnerId(project as ProjectType);
   }
 
   async createProject(projectDto: CreateProjectDto, currentUser: UserEntity): Promise<ProjectType> {
@@ -63,7 +63,7 @@ export class ProjectService {
     newProject.owner = currentUser;
 
     const savedProject = await this.projectRepository.save(newProject);
-    return this.getProjectWithOwnerId(savedProject as ProjectType, currentUser.id);
+    return this.getProjectWithOwnerId(savedProject as ProjectType);
   }
 
   async updateProject(
@@ -82,7 +82,7 @@ export class ProjectService {
     Object.assign(currentProject, dtoWithoutOwner);
 
     const savedProject = await this.projectRepository.save(currentProject);
-    return this.getProjectWithOwnerId(savedProject as ProjectType, userId);
+    return this.getProjectWithOwnerId(savedProject as ProjectType);
   }
 
   async deleteProject(userId: string, projectId: string): Promise<{ id: string }> {
@@ -145,8 +145,8 @@ export class ProjectService {
     }
   }
 
-  getProjectWithOwnerId(project: ProjectType, userId: string): ProjectType {
-    project.owner_id = userId;
+  getProjectWithOwnerId(project: ProjectType): ProjectType {
+    project.owner_id = project.owner.id;
     return project;
   }
 

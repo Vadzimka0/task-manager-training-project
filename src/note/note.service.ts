@@ -1,5 +1,7 @@
 import {
   ForbiddenException,
+  HttpException,
+  HttpStatus,
   Injectable,
   InternalServerErrorException,
   UnprocessableEntityException,
@@ -19,20 +21,7 @@ export class NoteService {
     private noteRepository: Repository<NoteEntity>,
   ) {}
 
-  async fetchOneNote(userId: string, noteId: string): Promise<NoteEntity> {
-    try {
-      const note = await this.noteRepository.findOneBy({ id: noteId });
-      if (note.owner.id !== userId) {
-        // 'You are not an owner'
-        throw new UnprocessableEntityException(`The note id is not valid.`);
-      }
-      return await this.noteRepository.save(note);
-    } catch (_) {
-      throw new UnprocessableEntityException(`The note id is not valid.`);
-    }
-  }
-
-  async fetchAllOwnersNotes(userId: string): Promise<NoteEntity[]> {
+  async fetchAllOwnersNotes(userId: string): Promise<NoteType[]> {
     const queryBuilder = this.noteRepository
       .createQueryBuilder('notes')
       .leftJoinAndSelect('notes.owner', 'owner')
@@ -40,11 +29,16 @@ export class NoteService {
       .orderBy('notes.created_at', 'ASC');
 
     const notes = await queryBuilder.getMany();
-    const notesWithOwnerId = notes.map((note: NoteType) => this.buildNoteWithOwnerId(note));
+    const notesWithOwnerId = notes.map((note: NoteType) => this.getNoteWithOwnerId(note));
     return notesWithOwnerId;
   }
 
-  async createNote(createNoteDto: CreateNoteDto, currentUser: UserEntity): Promise<NoteEntity> {
+  async fetchOneNote(userId: string, noteId: string): Promise<NoteType> {
+    const note = await this.findAndValidateNote(userId, noteId);
+    return this.getNoteWithOwnerId(note as NoteType);
+  }
+
+  async createNote(createNoteDto: CreateNoteDto, currentUser: UserEntity): Promise<NoteType> {
     this.validateHexColor(createNoteDto.color);
     const { owner_id, ...dtoWithoutOwner } = createNoteDto;
     this.idsMatching(owner_id, currentUser.id);
@@ -52,21 +46,25 @@ export class NoteService {
     const newNote = new NoteEntity();
     Object.assign(newNote, dtoWithoutOwner);
     newNote.owner = currentUser;
-    return await this.noteRepository.save(newNote);
+
+    const savedNote = await this.noteRepository.save(newNote);
+    return this.getNoteWithOwnerId(savedNote as NoteType);
   }
 
   async updateNote(
     updateNoteDto: UpdateNoteDto,
     userId: string,
     noteId: string,
-  ): Promise<NoteEntity> {
+  ): Promise<NoteType> {
     this.validateHexColor(updateNoteDto.color);
     const { owner_id, ...dtoWithoutOwner } = updateNoteDto;
     this.idsMatching(owner_id, userId);
 
     const currentNote = await this.findAndValidateNote(userId, noteId);
     Object.assign(currentNote, dtoWithoutOwner);
-    return await this.noteRepository.save(currentNote);
+
+    const savedNote = await this.noteRepository.save(currentNote);
+    return this.getNoteWithOwnerId(savedNote as NoteType);
   }
 
   async deleteNote(userId: string, noteId: string): Promise<{ id: string }> {
@@ -78,16 +76,19 @@ export class NoteService {
   async findAndValidateNote(userId: string, noteId: string): Promise<NoteEntity> {
     try {
       const note = await this.noteRepository.findOneBy({ id: noteId });
-      if (note.owner.id !== userId) {
-        // 'You are not an owner'
+      if (!note) {
         throw new InternalServerErrorException(
           `Entity NoteModel, id=${noteId} not found in the database`,
         );
       }
+      if (note.owner.id !== userId) {
+        throw new UnprocessableEntityException('The note id is not valid. You are not the owner'); //Invalid ID. You are not an owner
+      }
       return note;
-    } catch (_) {
-      throw new InternalServerErrorException(
-        `Entity NoteModel, id=${noteId} not found in the database`,
+    } catch (err) {
+      throw new HttpException(
+        err.message,
+        err.status ? err.status : HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
   }
@@ -102,11 +103,11 @@ export class NoteService {
 
   idsMatching(owner_id: string, user_id: string): void {
     if (owner_id !== user_id) {
-      throw new ForbiddenException('Invalid ID. You are not an owner');
+      throw new ForbiddenException('Invalid owner_id');
     }
   }
 
-  buildNoteWithOwnerId(note: NoteType): NoteType {
+  getNoteWithOwnerId(note: NoteType): NoteType {
     note.owner_id = note.owner.id;
     return note;
   }

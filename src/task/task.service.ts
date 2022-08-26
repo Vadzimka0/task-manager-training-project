@@ -71,6 +71,7 @@ export class TaskService {
   async createTask(taskDto: CreateTaskDto, currentUser: UserEntity): Promise<TaskType> {
     const { owner_id, project_id, assigned_to, members, attachments, ...dtoWithoutRelationItems } =
       taskDto;
+    // if (attachments === undefined) throw new ForbiddenException('attachments must be null');
     this.idsMatching(owner_id, currentUser.id);
 
     const newTask = new TaskEntity();
@@ -84,8 +85,8 @@ export class TaskService {
 
     const currentMembers = await this.getMembersById(members);
     newTask.members = currentMembers;
+    // newTask.attachments = null;
 
-    // attachments
     const savedTask = await this.taskRepository.save(newTask);
     return this.getTaskWithRelationIds(savedTask as TaskType, currentUser.id);
   }
