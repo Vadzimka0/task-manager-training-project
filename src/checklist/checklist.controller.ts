@@ -4,6 +4,7 @@ import {
   Controller,
   Delete,
   Get,
+  HttpCode,
   Param,
   Post,
   Put,
@@ -44,6 +45,7 @@ export class ChecklistController {
   }
 
   @Post('checklists')
+  @HttpCode(200)
   async createChecklist(
     @Body() createChecklistDto: CreateChecklistDto,
     @User() currentUser: UserEntity,

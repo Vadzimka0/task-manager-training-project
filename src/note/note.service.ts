@@ -82,7 +82,7 @@ export class NoteService {
         );
       }
       if (note.owner.id !== userId) {
-        throw new UnprocessableEntityException('The note id is not valid. You are not the owner'); //Invalid ID. You are not an owner
+        throw new UnprocessableEntityException('The note id is not valid. You are not the owner');
       }
       return note;
     } catch (err) {
