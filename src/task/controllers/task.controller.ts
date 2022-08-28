@@ -11,13 +11,13 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 
-import { User } from '../auth/decorators/user.decorator';
-import { JwtAuthGuard } from '../auth/guards';
-import { Data } from '../common/types/data';
-import { UserEntity } from '../user/entities/user.entity';
-import { CreateTaskDto } from './dto/create-task.dto';
-import { TaskService } from './task.service';
-import { TaskApiType } from './types/task-api.type';
+import { User } from '../../auth/decorators/user.decorator';
+import { JwtAuthGuard } from '../../auth/guards';
+import { Data } from '../../common/types/data';
+import { UserEntity } from '../../user/entities/user.entity';
+import { CreateTaskDto } from '../dto/create-task.dto';
+import { TaskService } from '../services/task.service';
+import { TaskApiType } from '../types/task-api.type';
 
 @Controller()
 @UseGuards(JwtAuthGuard)

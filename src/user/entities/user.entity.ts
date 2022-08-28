@@ -4,6 +4,7 @@ import { Column, CreateDateColumn, Entity, OneToMany, PrimaryGeneratedColumn } f
 import { ChecklistEntity } from '../../checklist/entities/checklist.entity';
 import { NoteEntity } from '../../note/entities/note.entity';
 import { ProjectEntity } from '../../project/entities/project.entity';
+import { CommentEntity } from '../../task/entities/comment.entity';
 import { TaskEntity } from '../../task/entities/task.entity';
 
 @Entity({ name: 'users' })
@@ -42,6 +43,9 @@ export class UserEntity {
 
   @OneToMany(() => ChecklistEntity, (checklist: ChecklistEntity) => checklist.owner)
   checklists?: ChecklistEntity[];
+
+  @OneToMany(() => CommentEntity, (comment: CommentEntity) => comment.owner)
+  comments?: CommentEntity[];
 
   // @OneToMany(() => TaskEntity, (task: TaskEntity) => task.owner)
   // createdTasks?: TaskEntity[];

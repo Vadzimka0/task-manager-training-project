@@ -8,14 +8,14 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
-import { SPECIAL_ONE_PROJECT_NAME } from '../common/constants/default-constants';
-import { ProjectEntity } from '../project/entities/project.entity';
-import { ProjectService } from '../project/project.service';
-import { UserEntity } from '../user/entities/user.entity';
-import { UserService } from '../user/user.service';
-import { CreateTaskDto } from './dto/create-task.dto';
-import { TaskEntity } from './entities/task.entity';
-import { TaskApiType } from './types/task-api.type';
+import { SPECIAL_ONE_PROJECT_NAME } from '../../common/constants/default-constants';
+import { ProjectEntity } from '../../project/entities/project.entity';
+import { ProjectService } from '../../project/project.service';
+import { UserEntity } from '../../user/entities/user.entity';
+import { UserService } from '../../user/user.service';
+import { CreateTaskDto } from '../dto/create-task.dto';
+import { TaskEntity } from '../entities/task.entity';
+import { TaskApiType } from '../types/task-api.type';
 
 @Injectable()
 export class TaskService {
@@ -27,7 +27,7 @@ export class TaskService {
   ) {}
 
   async fetchOneTask(userId: string, taskId: string): Promise<TaskApiType> {
-    const task = await this.findAndValidateTask(userId, taskId);
+    const task = await this.getValidTask(userId, taskId);
     return this.getTaskWithRelationIds(task as TaskApiType, userId);
   }
 
@@ -100,7 +100,7 @@ export class TaskService {
       taskDto;
     this.idsMatching(owner_id, currentUser.id);
 
-    const currentTask = await this.findAndValidateTask(currentUser.id, taskId);
+    const currentTask = await this.getValidTask(currentUser.id, taskId);
     Object.assign(currentTask, dtoWithoutRelationItems);
 
     if (currentTask.project.id !== project_id) {
@@ -125,7 +125,7 @@ export class TaskService {
   }
 
   async deleteTask(userId: string, taskId: string): Promise<{ id: string }> {
-    await this.findAndValidateTask(userId, taskId);
+    await this.getValidTask(userId, taskId);
     await this.taskRepository.delete({ id: taskId });
     return { id: taskId };
   }
@@ -158,7 +158,7 @@ export class TaskService {
     return [];
   }
 
-  async findAndValidateTask(userId: string, taskId: string): Promise<TaskEntity> {
+  async getValidTask(userId: string, taskId: string): Promise<TaskEntity> {
     try {
       const task = await this.taskRepository.findOneBy({ id: taskId });
       if (!task) {
@@ -166,6 +166,25 @@ export class TaskService {
       }
       if (task.project.owner.id !== userId) {
         throw new ForbiddenException('Invalid ID. You are not an owner');
+      }
+      return task;
+    } catch (err) {
+      throw new HttpException(
+        err.message,
+        err.status ? err.status : HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  async getValidTaskForComment(userId: string, taskId: string): Promise<TaskEntity> {
+    try {
+      const task = await this.taskRepository.findOneBy({ id: taskId });
+      if (!task) {
+        throw new NotFoundException(`Entity TaskModel, id=${taskId} not found in the database`);
+      }
+      const ids = task.members.map((member) => member.id);
+      if (!ids.includes(userId) && task.project.owner.id !== userId) {
+        throw new ForbiddenException('Invalid ID. You are not an owner or member');
       }
       return task;
     } catch (err) {

@@ -4,12 +4,9 @@ import {
   IsDateString,
   IsEmpty,
   IsNotEmpty,
-  IsNotEmptyObject,
-  IsObject,
   IsOptional,
   IsUUID,
   MaxLength,
-  ValidateIf,
 } from 'class-validator';
 
 export class CreateTaskDto {
