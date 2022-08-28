@@ -17,7 +17,7 @@ import { Data } from '../common/types/data';
 import { UserEntity } from '../user/entities/user.entity';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { TaskService } from './task.service';
-import { TaskType } from './types/task.type';
+import { TaskApiType } from './types/task-api.type';
 
 @Controller()
 @UseGuards(JwtAuthGuard)
@@ -29,7 +29,7 @@ export class TaskController {
   async fetchOneTask(
     @User('id') userId: string,
     @Param('taskId') taskId: string,
-  ): Promise<Data<TaskType>> {
+  ): Promise<Data<TaskApiType>> {
     const data = await this.taskService.fetchOneTask(userId, taskId);
     return { data };
   }
@@ -38,7 +38,7 @@ export class TaskController {
   async fetchUserTasks(
     @User('id') userId: string,
     @Param('ownerId') ownerId: string,
-  ): Promise<Data<TaskType[]>> {
+  ): Promise<Data<TaskApiType[]>> {
     const data = await this.taskService.fetchUserTasks(userId, ownerId);
     return { data };
   }
@@ -47,7 +47,7 @@ export class TaskController {
   async fetchProjectTasks(
     @User('id') userId: string,
     @Param('projectId') projectId: string,
-  ): Promise<Data<TaskType[]>> {
+  ): Promise<Data<TaskApiType[]>> {
     const data = await this.taskService.fetchProjectTasks(userId, projectId);
     return { data };
   }
@@ -56,7 +56,7 @@ export class TaskController {
   async createTask(
     @Body() taskDto: CreateTaskDto,
     @User() currentUser: UserEntity,
-  ): Promise<Data<TaskType>> {
+  ): Promise<Data<TaskApiType>> {
     const data = await this.taskService.createTask(taskDto, currentUser);
     return { data };
   }
@@ -66,7 +66,7 @@ export class TaskController {
     @Body() taskDto: CreateTaskDto,
     @User() currentUser: UserEntity,
     @Param('id') taskId: string,
-  ): Promise<Data<TaskType>> {
+  ): Promise<Data<TaskApiType>> {
     const data = await this.taskService.updateTask(taskDto, currentUser, taskId);
     return { data };
   }

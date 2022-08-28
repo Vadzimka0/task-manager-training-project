@@ -15,7 +15,7 @@ import { UserEntity } from '../user/entities/user.entity';
 import { UserService } from '../user/user.service';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { TaskEntity } from './entities/task.entity';
-import { TaskType } from './types/task.type';
+import { TaskApiType } from './types/task-api.type';
 
 @Injectable()
 export class TaskService {
@@ -26,12 +26,12 @@ export class TaskService {
     private readonly userService: UserService,
   ) {}
 
-  async fetchOneTask(userId: string, taskId: string): Promise<TaskType> {
+  async fetchOneTask(userId: string, taskId: string): Promise<TaskApiType> {
     const task = await this.findAndValidateTask(userId, taskId);
-    return this.getTaskWithRelationIds(task as TaskType, userId);
+    return this.getTaskWithRelationIds(task as TaskApiType, userId);
   }
 
-  async fetchUserTasks(userId: string, ownerId: string): Promise<TaskType[]> {
+  async fetchUserTasks(userId: string, ownerId: string): Promise<TaskApiType[]> {
     if (ownerId) this.idsMatching(ownerId, userId);
 
     const queryBuilder = this.taskRepository
@@ -44,13 +44,13 @@ export class TaskService {
       .orderBy('tasks.created_at', 'DESC');
 
     const tasks = await queryBuilder.getMany();
-    const tasksWithRelationIds = tasks.map((task: TaskType) =>
+    const tasksWithRelationIds = tasks.map((task: TaskApiType) =>
       this.getTaskWithRelationIds(task, userId),
     );
     return tasksWithRelationIds;
   }
 
-  async fetchProjectTasks(userId: string, projectId: string): Promise<TaskType[]> {
+  async fetchProjectTasks(userId: string, projectId: string): Promise<TaskApiType[]> {
     // TODO: matching projectid and owner
     const queryBuilder = this.taskRepository
       .createQueryBuilder('tasks')
@@ -62,13 +62,13 @@ export class TaskService {
       .orderBy('tasks.created_at', 'DESC');
 
     const tasks = await queryBuilder.getMany();
-    const tasksWithRelationIds = tasks.map((task: TaskType) =>
+    const tasksWithRelationIds = tasks.map((task: TaskApiType) =>
       this.getTaskWithRelationIds(task, userId),
     );
     return tasksWithRelationIds;
   }
 
-  async createTask(taskDto: CreateTaskDto, currentUser: UserEntity): Promise<TaskType> {
+  async createTask(taskDto: CreateTaskDto, currentUser: UserEntity): Promise<TaskApiType> {
     const { owner_id, project_id, assigned_to, members, attachments, ...dtoWithoutRelationItems } =
       taskDto;
     // if (attachments === undefined) throw new ForbiddenException('attachments must be null');
@@ -88,14 +88,14 @@ export class TaskService {
     // newTask.attachments = null;
 
     const savedTask = await this.taskRepository.save(newTask);
-    return this.getTaskWithRelationIds(savedTask as TaskType, currentUser.id);
+    return this.getTaskWithRelationIds(savedTask as TaskApiType, currentUser.id);
   }
 
   async updateTask(
     taskDto: CreateTaskDto,
     currentUser: UserEntity,
     taskId: string,
-  ): Promise<TaskType> {
+  ): Promise<TaskApiType> {
     const { owner_id, project_id, assigned_to, members, attachments, ...dtoWithoutRelationItems } =
       taskDto;
     this.idsMatching(owner_id, currentUser.id);
@@ -121,7 +121,7 @@ export class TaskService {
 
     // attachments
     const savedTask = await this.taskRepository.save(currentTask);
-    return this.getTaskWithRelationIds(savedTask as TaskType, currentUser.id);
+    return this.getTaskWithRelationIds(savedTask as TaskApiType, currentUser.id);
   }
 
   async deleteTask(userId: string, taskId: string): Promise<{ id: string }> {
@@ -194,7 +194,7 @@ export class TaskService {
     }
   }
 
-  getTaskWithRelationIds(task: TaskType, userId: string): TaskType {
+  getTaskWithRelationIds(task: TaskApiType, userId: string): TaskApiType {
     task.owner_id = userId;
     task.project_id = task.project.id;
     task.assigned_to = task.performer.id;
