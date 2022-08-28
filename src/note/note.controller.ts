@@ -18,7 +18,7 @@ import { Data } from '../common/types/data';
 import { UserEntity } from '../user/entities/user.entity';
 import { CreateNoteDto, UpdateNoteDto } from './dto';
 import { NoteService } from './note.service';
-import { NoteType } from './types/note.type';
+import { NoteApiType } from './types/note-api.type';
 
 @Controller('notes')
 @UseGuards(JwtAuthGuard)
@@ -27,7 +27,7 @@ export class NoteController {
   constructor(private readonly noteService: NoteService) {}
 
   @Get()
-  async fetchAllOwnersNotes(@User('id') userId: string): Promise<Data<NoteType[]>> {
+  async fetchAllOwnersNotes(@User('id') userId: string): Promise<Data<NoteApiType[]>> {
     const data = await this.noteService.fetchAllOwnersNotes(userId);
     return { data };
   }
@@ -36,7 +36,7 @@ export class NoteController {
   async fetchOneNote(
     @User('id') userId: string,
     @Param('id') noteId: string,
-  ): Promise<Data<NoteType>> {
+  ): Promise<Data<NoteApiType>> {
     const data = await this.noteService.fetchOneNote(userId, noteId);
     return { data };
   }
@@ -46,7 +46,7 @@ export class NoteController {
   async createNote(
     @Body() createNoteDto: CreateNoteDto,
     @User() currentUser: UserEntity,
-  ): Promise<Data<NoteType>> {
+  ): Promise<Data<NoteApiType>> {
     const data = await this.noteService.createNote(createNoteDto, currentUser);
     return { data };
   }
@@ -56,7 +56,7 @@ export class NoteController {
     @Body() updateNoteDto: UpdateNoteDto,
     @User('id') userId: string,
     @Param('id') noteId: string,
-  ): Promise<Data<NoteType>> {
+  ): Promise<Data<NoteApiType>> {
     const data = await this.noteService.updateNote(updateNoteDto, userId, noteId);
     return { data };
   }
