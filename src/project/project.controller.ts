@@ -18,7 +18,7 @@ import { Data } from '../common/types/data';
 import { UserEntity } from '../user/entities/user.entity';
 import { CreateProjectDto } from './dto/create-project.dto';
 import { ProjectService } from './project.service';
-import { ProjectType } from './types/project.type';
+import { ProjectApiType } from './types/project-api.type';
 
 @Controller()
 @UseGuards(JwtAuthGuard)
@@ -30,7 +30,7 @@ export class ProjectController {
   async fetchAllUserProjects(
     @User('id') userId: string,
     @Param('ownerId') ownerId: string,
-  ): Promise<Data<ProjectType[]>> {
+  ): Promise<Data<ProjectApiType[]>> {
     const data = await this.projectService.fetchUserProjects(userId, ownerId);
     return { data };
   }
@@ -39,7 +39,7 @@ export class ProjectController {
   async fetchProjectsBySearch(
     @User('id') userId: string,
     @Query() querySearch: { query: string },
-  ): Promise<Data<ProjectType[]>> {
+  ): Promise<Data<ProjectApiType[]>> {
     const data = await this.projectService.fetchUserProjects(userId, undefined, querySearch);
     return { data };
   }
@@ -48,7 +48,7 @@ export class ProjectController {
   async fetchOneProject(
     @User('id') userId: string,
     @Param('projectId') projectId: string,
-  ): Promise<Data<ProjectType>> {
+  ): Promise<Data<ProjectApiType>> {
     const data = await this.projectService.fetchOneProject(userId, projectId);
     return { data };
   }
@@ -57,7 +57,7 @@ export class ProjectController {
   async createProject(
     @Body() projectDto: CreateProjectDto,
     @User() currentUser: UserEntity,
-  ): Promise<Data<ProjectType>> {
+  ): Promise<Data<ProjectApiType>> {
     const data = await this.projectService.createProject(projectDto, currentUser);
     return { data };
   }
@@ -67,7 +67,7 @@ export class ProjectController {
     @Body() projectDto: CreateProjectDto,
     @User('id') userId: string,
     @Param('id') projectId: string,
-  ): Promise<Data<ProjectType>> {
+  ): Promise<Data<ProjectApiType>> {
     const data = await this.projectService.updateProject(projectDto, userId, projectId);
     return { data };
   }

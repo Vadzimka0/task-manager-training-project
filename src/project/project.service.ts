@@ -13,7 +13,7 @@ import { SPECIAL_ONE_PROJECT_NAME } from '../common/constants/default-constants'
 import { UserEntity } from '../user/entities/user.entity';
 import { CreateProjectDto } from './dto/create-project.dto';
 import { ProjectEntity } from './entities/project.entity';
-import { ProjectType } from './types/project.type';
+import { ProjectApiType } from './types/project-api.type';
 
 @Injectable()
 export class ProjectService {
@@ -26,7 +26,7 @@ export class ProjectService {
     userId: string,
     ownerId?: string,
     search?: { query: string },
-  ): Promise<ProjectType[]> {
+  ): Promise<ProjectApiType[]> {
     if (ownerId) this.idsMatching(ownerId, userId);
 
     const queryBuilder = this.projectRepository
@@ -41,18 +41,21 @@ export class ProjectService {
       });
     }
     const projects = await queryBuilder.getMany();
-    const projectsWithOwnerId = projects.map((project: ProjectType) =>
+    const projectsWithOwnerId = projects.map((project: ProjectApiType) =>
       this.getProjectWithOwnerId(project),
     );
     return projectsWithOwnerId;
   }
 
-  async fetchOneProject(userId: string, projectId: string): Promise<ProjectType> {
+  async fetchOneProject(userId: string, projectId: string): Promise<ProjectApiType> {
     const project = await this.findProjectForRead(projectId, userId);
-    return this.getProjectWithOwnerId(project as ProjectType);
+    return this.getProjectWithOwnerId(project as ProjectApiType);
   }
 
-  async createProject(projectDto: CreateProjectDto, currentUser: UserEntity): Promise<ProjectType> {
+  async createProject(
+    projectDto: CreateProjectDto,
+    currentUser: UserEntity,
+  ): Promise<ProjectApiType> {
     this.validateHexColor(projectDto.color);
     const { owner_id, ...dtoWithoutOwner } = projectDto;
     this.idsMatching(owner_id, currentUser.id);
@@ -63,14 +66,14 @@ export class ProjectService {
     newProject.owner = currentUser;
 
     const savedProject = await this.projectRepository.save(newProject);
-    return this.getProjectWithOwnerId(savedProject as ProjectType);
+    return this.getProjectWithOwnerId(savedProject as ProjectApiType);
   }
 
   async updateProject(
     projectDto: CreateProjectDto,
     userId: string,
     projectId: string,
-  ): Promise<ProjectType> {
+  ): Promise<ProjectApiType> {
     this.validateHexColor(projectDto.color);
     const { owner_id, ...dtoWithoutOwner } = projectDto;
     this.idsMatching(owner_id, userId);
@@ -82,7 +85,7 @@ export class ProjectService {
     Object.assign(currentProject, dtoWithoutOwner);
 
     const savedProject = await this.projectRepository.save(currentProject);
-    return this.getProjectWithOwnerId(savedProject as ProjectType);
+    return this.getProjectWithOwnerId(savedProject as ProjectApiType);
   }
 
   async deleteProject(userId: string, projectId: string): Promise<{ id: string }> {
@@ -145,7 +148,7 @@ export class ProjectService {
     }
   }
 
-  getProjectWithOwnerId(project: ProjectType): ProjectType {
+  getProjectWithOwnerId(project: ProjectApiType): ProjectApiType {
     project.owner_id = project.owner.id;
     return project;
   }
