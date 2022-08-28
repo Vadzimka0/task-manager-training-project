@@ -17,7 +17,7 @@ import {
   UpdateChecklistItemDto,
 } from './dto';
 import { ChecklistEntity, ChecklistItemEntity } from './entities';
-import { ChecklistType, ListItemType } from './types';
+import { ChecklistApiType, ListItemApiType } from './types';
 
 @Injectable()
 export class ChecklistService {
@@ -28,7 +28,7 @@ export class ChecklistService {
     private checklistItemRepository: Repository<ChecklistItemEntity>,
   ) {}
 
-  async fetchAllUserChecklists(userId: string, ownerId: string): Promise<ChecklistType[]> {
+  async fetchAllUserChecklists(userId: string, ownerId: string): Promise<ChecklistApiType[]> {
     this.idsMatching(ownerId, userId);
 
     const queryBuilder = this.checklistRepository
@@ -39,7 +39,7 @@ export class ChecklistService {
       .orderBy('checklists.created_at', 'DESC');
 
     const checklists = await queryBuilder.getMany();
-    const checklistsWithOwnerId = checklists.map((checklist: ChecklistType) => {
+    const checklistsWithOwnerId = checklists.map((checklist: ChecklistApiType) => {
       checklist.owner_id = userId;
       checklist.items = this.getItemsWithChecklistId(checklist);
       return checklist;
@@ -47,16 +47,16 @@ export class ChecklistService {
     return checklistsWithOwnerId;
   }
 
-  async fetchOneChecklist(userId: string, listId: string): Promise<ChecklistType> {
+  async fetchOneChecklist(userId: string, listId: string): Promise<ChecklistApiType> {
     const checklist = await this.findAndValidateChecklist(listId, userId);
     checklist.items = this.getItemsWithChecklistId(checklist);
-    return this.getChecklistWithOwnerId(checklist as ChecklistType);
+    return this.getChecklistWithOwnerId(checklist as ChecklistApiType);
   }
 
   async createChecklist(
     createChecklistDto: CreateChecklistDto,
     currentUser: UserEntity,
-  ): Promise<ChecklistType> {
+  ): Promise<ChecklistApiType> {
     this.validateHexColor(createChecklistDto.color);
     const { items, owner_id, ...dtoWithoutItemsAndOwner } = createChecklistDto;
     this.idsMatching(owner_id, currentUser.id);
@@ -68,14 +68,14 @@ export class ChecklistService {
 
     const savedChecklist = await this.checklistRepository.save(newChecklist);
     savedChecklist.items = this.getItemsWithChecklistId(savedChecklist);
-    return this.getChecklistWithOwnerId(savedChecklist as ChecklistType);
+    return this.getChecklistWithOwnerId(savedChecklist as ChecklistApiType);
   }
 
   async updateChecklist(
     updateChecklistDto: UpdateChecklistDto,
     userId: string,
     listId: string,
-  ): Promise<ChecklistType> {
+  ): Promise<ChecklistApiType> {
     this.validateHexColor(updateChecklistDto.color);
     const { items, owner_id, ...dtoWithoutItemsAndOwner } = updateChecklistDto;
     this.idsMatching(owner_id, userId);
@@ -94,7 +94,7 @@ export class ChecklistService {
 
     const savedChecklist = await this.checklistRepository.save(currentChecklist);
     savedChecklist.items = this.getItemsWithChecklistId(savedChecklist);
-    return this.getChecklistWithOwnerId(savedChecklist as ChecklistType);
+    return this.getChecklistWithOwnerId(savedChecklist as ChecklistApiType);
   }
 
   async deleteChecklist(userId: string, listId: string): Promise<{ id: string }> {
@@ -184,7 +184,7 @@ export class ChecklistService {
       });
       if (!checklistItem) {
         throw new InternalServerErrorException(
-          `Entity ChecklisItemModel, id=${itemId} not found in the database`,
+          `Entity ChecklistItemModel, id=${itemId} not found in the database`,
         );
       }
       if (userId && checklistItem.checklist.owner.id !== userId) {
@@ -216,13 +216,13 @@ export class ChecklistService {
     }
   }
 
-  getChecklistWithOwnerId(checklist: ChecklistType): ChecklistType {
+  getChecklistWithOwnerId(checklist: ChecklistApiType): ChecklistApiType {
     checklist.owner_id = checklist.owner.id;
     return checklist;
   }
 
-  getItemsWithChecklistId(checklist: ChecklistEntity): ListItemType[] {
-    return checklist.items.map((item: ListItemType) => {
+  getItemsWithChecklistId(checklist: ChecklistEntity): ListItemApiType[] {
+    return checklist.items.map((item: ListItemApiType) => {
       item.checklist_id = checklist.id;
       return item;
     });

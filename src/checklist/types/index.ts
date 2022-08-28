@@ -1,4 +1,4 @@
-import { ChecklistType } from './checklist.type';
-import { ListItemType } from './listItem.type';
+import { ChecklistApiType } from './checklist-api.type';
+import { ListItemApiType } from './listItem-api.type';
 
-export { ListItemType, ChecklistType };
+export { ListItemApiType, ChecklistApiType };

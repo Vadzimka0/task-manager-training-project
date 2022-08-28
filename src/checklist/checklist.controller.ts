@@ -18,7 +18,7 @@ import { Data } from '../common/types/data';
 import { UserEntity } from '../user/entities/user.entity';
 import { ChecklistService } from './checklist.service';
 import { CreateChecklistDto, DeleteChecklistItemsDto, UpdateChecklistDto } from './dto';
-import { ChecklistType } from './types';
+import { ChecklistApiType } from './types';
 
 @Controller()
 @UseGuards(JwtAuthGuard)
@@ -30,7 +30,7 @@ export class ChecklistController {
   async fetchAllUserChecklists(
     @User('id') userId: string,
     @Param('ownerId') ownerId: string,
-  ): Promise<Data<ChecklistType[]>> {
+  ): Promise<Data<ChecklistApiType[]>> {
     const data = await this.checklistService.fetchAllUserChecklists(userId, ownerId);
     return { data };
   }
@@ -39,7 +39,7 @@ export class ChecklistController {
   async fetchOneChecklist(
     @User('id') userId: string,
     @Param('listId') listId: string,
-  ): Promise<Data<ChecklistType>> {
+  ): Promise<Data<ChecklistApiType>> {
     const data = await this.checklistService.fetchOneChecklist(userId, listId);
     return { data };
   }
@@ -49,7 +49,7 @@ export class ChecklistController {
   async createChecklist(
     @Body() createChecklistDto: CreateChecklistDto,
     @User() currentUser: UserEntity,
-  ): Promise<Data<ChecklistType>> {
+  ): Promise<Data<ChecklistApiType>> {
     const data = await this.checklistService.createChecklist(createChecklistDto, currentUser);
     return { data };
   }
@@ -59,7 +59,7 @@ export class ChecklistController {
     @Body() updateChecklistDto: UpdateChecklistDto,
     @User('id') userId: string,
     @Param('listId') listId: string,
-  ): Promise<Data<ChecklistType>> {
+  ): Promise<Data<ChecklistApiType>> {
     const data = await this.checklistService.updateChecklist(updateChecklistDto, userId, listId);
     return { data };
   }

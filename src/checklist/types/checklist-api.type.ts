@@ -1,5 +1,5 @@
 import { ChecklistEntity } from '../entities';
 
-export type ChecklistType = ChecklistEntity & {
+export type ChecklistApiType = ChecklistEntity & {
   owner_id: string;
 };
