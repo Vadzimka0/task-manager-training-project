@@ -25,6 +25,25 @@ export class UserService {
     private readonly projectService: ProjectService,
   ) {}
 
+  async fetchMembersBySearch(
+    userId: string,
+    search: { query: string },
+    // ): Promise<ProjectApiType[]> {
+  ): Promise<any> {
+    const queryBuilder = this.userRepository
+      .createQueryBuilder('users')
+      .andWhere('users.username LIKE :query', {
+        query: `%${search.query}%`,
+      })
+      .orderBy('users.created_at', 'DESC');
+
+    const members = await queryBuilder.getMany();
+    // const projectsWithOwnerId = members.map((project: ProjectApiType) =>
+    // this.getProjectWithOwnerId(project),
+    // );
+    return members;
+  }
+
   async getById(id: string): Promise<UserEntity> {
     const user = await this.userRepository.findOne({ where: { id } });
     if (user) {
