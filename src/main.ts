@@ -1,6 +1,5 @@
 import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
-import * as cookieParser from 'cookie-parser';
 
 import { AppModule } from './app.module';
 import { HttpExceptionFilter } from './common/exception-filter/http-exception.filter';
@@ -16,7 +15,7 @@ async function bootstrap() {
     }),
   );
   app.useGlobalFilters(new HttpExceptionFilter());
-  app.use(cookieParser());
   await app.listen(3000);
+  // console.log(`Application is running on: ${await app.getUrl()}`);
 }
 bootstrap();

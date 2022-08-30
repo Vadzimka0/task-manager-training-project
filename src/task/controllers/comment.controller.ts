@@ -14,9 +14,9 @@ import { User } from '../../auth/decorators/user.decorator';
 import { JwtAuthGuard } from '../../auth/guards';
 import { Data } from '../../common/types/data';
 import { UserEntity } from '../../user/entities/user.entity';
-import { CreateCommentDto } from '../dto/create-comment.dto';
-import { CommentService } from '../services/comment.service';
-import { CommentApiType } from '../types/comment-api.type';
+import { CreateCommentDto } from '../dto';
+import { CommentService } from '../services';
+import { CommentApiType } from '../types';
 
 @Controller()
 @UseGuards(JwtAuthGuard)

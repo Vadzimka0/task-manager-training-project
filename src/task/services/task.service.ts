@@ -13,15 +13,16 @@ import { ProjectEntity } from '../../project/entities/project.entity';
 import { ProjectService } from '../../project/project.service';
 import { UserEntity } from '../../user/entities/user.entity';
 import { UserService } from '../../user/user.service';
-import { CreateTaskDto } from '../dto/create-task.dto';
-import { TaskEntity } from '../entities/task.entity';
-import { TaskApiType } from '../types/task-api.type';
+import { CreateTaskDto } from '../dto';
+import { TaskAttachmentEntity, TaskEntity } from '../entities';
+import { TaskApiType } from '../types';
 
 @Injectable()
 export class TaskService {
   constructor(
     @InjectRepository(TaskEntity)
     private readonly taskRepository: Repository<TaskEntity>,
+    @InjectRepository(TaskAttachmentEntity)
     private readonly projectService: ProjectService,
     private readonly userService: UserService,
   ) {}

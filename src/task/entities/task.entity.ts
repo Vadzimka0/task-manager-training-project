@@ -1,10 +1,10 @@
 import { Exclude } from 'class-transformer';
 import { Column, Entity, JoinTable, ManyToMany, ManyToOne, OneToMany } from 'typeorm';
 
+import { CommentEntity, TaskAttachmentEntity } from '.';
 import { AbstractEntity } from '../../common/abstract-entity-class';
 import { ProjectEntity } from '../../project/entities/project.entity';
 import { UserEntity } from '../../user/entities/user.entity';
-import { CommentEntity } from './comment.entity';
 
 @Entity({ name: 'tasks' })
 export class TaskEntity extends AbstractEntity {
@@ -34,4 +34,7 @@ export class TaskEntity extends AbstractEntity {
 
   @OneToMany(() => CommentEntity, (comment: CommentEntity) => comment.task)
   comments: CommentEntity[];
+
+  @OneToMany(() => TaskAttachmentEntity, (attachment: TaskAttachmentEntity) => attachment.task)
+  attachments: TaskAttachmentEntity[];
 }
