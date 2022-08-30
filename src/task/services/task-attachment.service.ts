@@ -2,9 +2,9 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
-import { TaskService } from '.';
 import { TaskAttachmentEntity } from '../entities';
 import { TaskAttachmentApiType } from '../types';
+import { TaskService } from './task.service';
 
 @Injectable()
 export class TaskAttachmentService {

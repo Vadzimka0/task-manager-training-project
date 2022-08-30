@@ -8,11 +8,11 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
-import { TaskService } from '.';
 import { UserEntity } from '../../user/entities/user.entity';
 import { CreateCommentDto } from '../dto';
 import { CommentEntity } from '../entities';
 import { CommentApiType } from '../types';
+import { TaskService } from './task.service';
 
 @Injectable()
 export class CommentService {
