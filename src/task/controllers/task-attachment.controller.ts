@@ -3,10 +3,8 @@ import {
   ClassSerializerInterceptor,
   Controller,
   Get,
-  HttpStatus,
   NotFoundException,
   Param,
-  ParseFilePipeBuilder,
   Post,
   Res,
   StreamableFile,
@@ -16,14 +14,13 @@ import {
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { createReadStream } from 'fs';
-import { diskStorage } from 'multer';
 import { join } from 'path';
-import { v4 as uuidv4 } from 'uuid';
 
 import { User } from '../../auth/decorators/user.decorator';
 import { JwtAuthGuard } from '../../auth/guards';
 import { Data } from '../../common/types/data';
-import { isExists } from '../../utils/isExists';
+import { isExists } from '../../utils';
+import { taskAttachmentOptions } from '../../utils/multer/task-attachment-options';
 import { AddAttachmentDto } from '../dto';
 import { TaskAttachmentService } from '../services';
 import { TaskAttachmentApiType } from '../types';
@@ -38,26 +35,10 @@ export class TaskAttachmentController {
   constructor(private readonly taskAttachmentService: TaskAttachmentService) {}
 
   @Post('tasks-attachments')
-  @UseInterceptors(
-    FileInterceptor('file', {
-      storage: diskStorage({
-        destination: './uploads/tasks-attachments',
-        filename: (req, file, cb) => cb(null, uuidv4()),
-      }),
-    }),
-  )
+  @UseInterceptors(FileInterceptor('file', taskAttachmentOptions))
   async addTaskAttachment(
     @User('id') userId: string,
-    @UploadedFile(
-      new ParseFilePipeBuilder()
-        .addMaxSizeValidator({
-          maxSize: 5000000,
-        })
-        .build({
-          errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY,
-        }),
-    )
-    file: Express.Multer.File,
+    @UploadedFile() file: Express.Multer.File,
     @Body() addAttachmentDto: AddAttachmentDto,
   ): Promise<Data<TaskAttachmentApiType>> {
     const data = await this.taskAttachmentService.addTaskAttachment(

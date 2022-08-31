@@ -1,21 +1,25 @@
 import {
   ForbiddenException,
+  forwardRef,
   HttpException,
   HttpStatus,
+  Inject,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, SelectQueryBuilder } from 'typeorm';
 
 import { SPECIAL_ONE_PROJECT_NAME } from '../../common/constants/default-constants';
 import { ProjectEntity } from '../../project/entities/project.entity';
 import { ProjectService } from '../../project/project.service';
 import { UserEntity } from '../../user/entities/user.entity';
 import { UserService } from '../../user/user.service';
+import { haveSameItems } from '../../utils';
 import { CreateTaskDto } from '../dto';
 import { TaskEntity } from '../entities';
-import { TaskApiType } from '../types';
+import { TaskApiType, TaskAttachmentApiType } from '../types';
+import { TaskAttachmentService } from './task-attachment.service';
 
 @Injectable()
 export class TaskService {
@@ -24,6 +28,8 @@ export class TaskService {
     private readonly taskRepository: Repository<TaskEntity>,
     private readonly projectService: ProjectService,
     private readonly userService: UserService,
+    @Inject(forwardRef(() => TaskAttachmentService))
+    private readonly taskAttachmentService: TaskAttachmentService,
   ) {}
 
   async fetchOneTask(userId: string, taskId: string): Promise<TaskApiType> {
@@ -32,14 +38,9 @@ export class TaskService {
   }
 
   async fetchUserTasks(userId: string, ownerId: string): Promise<TaskApiType[]> {
-    if (ownerId) this.idsMatching(ownerId, userId);
+    this.idsMatching(ownerId, userId);
 
-    const queryBuilder = this.taskRepository
-      .createQueryBuilder('tasks')
-      .leftJoinAndSelect('tasks.project', 'project')
-      .leftJoinAndSelect('tasks.performer', 'performer')
-      .leftJoinAndSelect('tasks.members', 'members')
-      // .leftJoinAndSelect('tasks.attachments', 'attachments')
+    const queryBuilder = this.getTasksQueryBuilder()
       .andWhere('project.owner_id = :id', { id: userId })
       .orderBy('tasks.created_at', 'DESC');
 
@@ -51,13 +52,9 @@ export class TaskService {
   }
 
   async fetchProjectTasks(userId: string, projectId: string): Promise<TaskApiType[]> {
-    // TODO: matching projectid and owner
-    const queryBuilder = this.taskRepository
-      .createQueryBuilder('tasks')
-      .leftJoinAndSelect('tasks.project', 'project')
-      .leftJoinAndSelect('tasks.performer', 'performer')
-      .leftJoinAndSelect('tasks.members', 'members')
-      // .leftJoinAndSelect('tasks.attachments', 'attachments')
+    await this.projectService.findProjectForRead(projectId, userId);
+
+    const queryBuilder = this.getTasksQueryBuilder()
       .andWhere('project.id = :id', { id: projectId })
       .orderBy('tasks.created_at', 'DESC');
 
@@ -68,10 +65,20 @@ export class TaskService {
     return tasksWithRelationIds;
   }
 
+  getTasksQueryBuilder(): SelectQueryBuilder<TaskEntity> {
+    return this.taskRepository
+      .createQueryBuilder('tasks')
+      .leftJoinAndSelect('tasks.project', 'project')
+      .leftJoinAndSelect('tasks.performer', 'performer')
+      .leftJoinAndSelect('tasks.members', 'members')
+      .leftJoinAndSelect('tasks.attachments', 'attachments')
+      .leftJoinAndSelect('attachments.task', 'task');
+  }
+
   async createTask(taskDto: CreateTaskDto, currentUser: UserEntity): Promise<TaskApiType> {
     const { owner_id, project_id, assigned_to, members, attachments, ...dtoWithoutRelationItems } =
       taskDto;
-    // if (attachments === undefined) throw new ForbiddenException('attachments must be null');
+    if (attachments === undefined) throw new ForbiddenException('attachments must be null');
     this.idsMatching(owner_id, currentUser.id);
 
     const newTask = new TaskEntity();
@@ -85,7 +92,7 @@ export class TaskService {
 
     const currentMembers = await this.getMembersById(members);
     newTask.members = currentMembers;
-    // newTask.attachments = null;
+    newTask.attachments = null;
 
     const savedTask = await this.taskRepository.save(newTask);
     return this.getTaskWithRelationIds(savedTask as TaskApiType, currentUser.id);
@@ -114,12 +121,12 @@ export class TaskService {
     }
 
     const currentMembersArray = currentTask.members.map((member) => member.id);
-    if (!this.haveSameIds(members, currentMembersArray)) {
+    if (!haveSameItems(members, currentMembersArray)) {
       const updatedMembers = await this.getMembersById(members);
       currentTask.members = updatedMembers;
     }
 
-    // attachments
+    // attachments ???
     const savedTask = await this.taskRepository.save(currentTask);
     return this.getTaskWithRelationIds(savedTask as TaskApiType, currentUser.id);
   }
@@ -160,7 +167,10 @@ export class TaskService {
 
   async getValidTask(userId: string, taskId: string): Promise<TaskEntity> {
     try {
-      const task = await this.taskRepository.findOneBy({ id: taskId });
+      const task = await this.taskRepository.findOne({
+        where: { id: taskId },
+        relations: ['attachments'],
+      });
       if (!task) {
         throw new NotFoundException(`Entity TaskModel, id=${taskId} not found in the database`);
       }
@@ -195,18 +205,6 @@ export class TaskService {
     }
   }
 
-  haveSameIds(arr1: string[], arr2: string[]): boolean {
-    if (!arr1) arr1 = [];
-    if (arr1.length !== arr2.length) return false;
-    const uniqueValues = new Set([...arr1, ...arr2]);
-    for (const value of uniqueValues) {
-      const arr1Count = arr1.filter((e) => e === value).length;
-      const arr2Count = arr2.filter((e) => e === value).length;
-      if (arr1Count !== arr2Count) return false;
-    }
-    return true;
-  }
-
   idsMatching(owner_id: string, user_id: string): void {
     if (owner_id !== user_id) {
       throw new ForbiddenException('Invalid id');
@@ -217,7 +215,11 @@ export class TaskService {
     task.owner_id = userId;
     task.project_id = task.project.id;
     task.assigned_to = task.performer.id;
-    // task.attachments = task.attachments.map( () => ());
+    task.attachments = task.attachments
+      ? task.attachments?.map((attachment: TaskAttachmentApiType) =>
+          this.taskAttachmentService.getAttachmentWithTaskId(attachment),
+        )
+      : null;
     return task;
   }
 }

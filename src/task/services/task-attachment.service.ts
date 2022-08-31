@@ -1,9 +1,9 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { forwardRef, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
 import { TaskAttachmentEntity } from '../entities';
-import { TaskAttachmentApiType } from '../types';
+import { TaskAttachmentApiType, TaskAttachmentData } from '../types';
 import { TaskService } from './task.service';
 
 @Injectable()
@@ -11,13 +11,14 @@ export class TaskAttachmentService {
   constructor(
     @InjectRepository(TaskAttachmentEntity)
     private readonly taskAttachmentRepository: Repository<TaskAttachmentEntity>,
+    @Inject(forwardRef(() => TaskService))
     private readonly taskService: TaskService,
   ) {}
 
   async addTaskAttachment(
     userId: string,
     task_id: string,
-    filedata: any,
+    filedata: TaskAttachmentData,
   ): Promise<TaskAttachmentApiType> {
     const currentTask = await this.taskService.getValidTask(userId, task_id);
 
