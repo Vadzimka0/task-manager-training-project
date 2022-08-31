@@ -1,9 +1,9 @@
-import { IsNotEmpty, IsUUID } from 'class-validator';
+import { IsEnum, IsNotEmpty, IsUUID } from 'class-validator';
+import { FileTypeEnum } from '../../common/enums/file-type.enum';
 
 export class AddAttachmentDto {
-  @IsNotEmpty()
-  // TODO: Enum
-  readonly type: string;
+  @IsEnum(FileTypeEnum)
+  readonly type: FileTypeEnum;
 
   @IsNotEmpty()
   @IsUUID()

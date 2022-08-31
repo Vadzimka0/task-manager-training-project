@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
@@ -30,8 +30,11 @@ export class TaskAttachmentService {
   }
 
   async getFileById(id: string) {
-    // TODO: handle error
-    return await this.taskAttachmentRepository.findOneBy({ id });
+    const file = await this.taskAttachmentRepository.findOneBy({ id });
+    if (!file) {
+      throw new NotFoundException(`Entity TaskAttachmentModel, id=${id} not found in the database`);
+    }
+    return file;
   }
 
   getAttachmentWithTaskId(attachment: TaskAttachmentApiType): TaskAttachmentApiType {
