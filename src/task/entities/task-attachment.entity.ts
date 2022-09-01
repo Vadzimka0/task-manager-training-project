@@ -1,7 +1,7 @@
 import { Exclude } from 'class-transformer';
 import { BeforeInsert, Column, CreateDateColumn, Entity, ManyToOne, PrimaryColumn } from 'typeorm';
 
-import { TaskEntity } from '.';
+import { TaskEntity } from './task.entity';
 
 @Entity({ name: 'task_attachments' })
 export class TaskAttachmentEntity {

@@ -6,7 +6,8 @@ import { HttpExceptionFilter } from './common/exception-filter/http-exception.fi
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  app.setGlobalPrefix('api/v1');
+
+  app.setGlobalPrefix(process.env.URL_PREFIX_PATH);
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
@@ -16,7 +17,10 @@ async function bootstrap() {
     }),
   );
   app.useGlobalFilters(new HttpExceptionFilter());
-  await app.listen(3000);
-  // console.log(`Application is running on: ${await app.getUrl()}`);
+
+  await app.listen(process.env.URL_PORT);
+  console.log(
+    `Application is running on: ${process.env.URL_HOST}:${process.env.URL_PORT}/${process.env.URL_PREFIX_PATH}`,
+  );
 }
 bootstrap();

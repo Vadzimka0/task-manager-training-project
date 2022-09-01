@@ -21,21 +21,21 @@ import { User } from '../../auth/decorators/user.decorator';
 import { JwtAuthGuard } from '../../auth/guards';
 import { Data } from '../../common/types/data';
 import { isExists } from '../../utils';
-import { taskAttachmentOptions } from '../../utils/multer/task-attachment-options';
-import { AddTaskAttachmentDto } from '../dto';
-import { TaskAttachmentService } from '../services';
-import { TaskAttachmentApiType } from '../types';
+import { commentAttachmentOptions } from '../../utils/multer/comment-attachment-options';
+import { AddCommentAttachmentDto } from '../dto';
+import { CommentAttachmentService } from '../services';
+import { CommentAttachmentApiType } from '../types';
 
 import type { Response } from 'express';
 
 @Controller()
 @UseGuards(JwtAuthGuard)
 @UseInterceptors(ClassSerializerInterceptor)
-export class TaskAttachmentController {
+export class CommentAttachmentController {
   private server_url: string;
 
   constructor(
-    private readonly taskAttachmentService: TaskAttachmentService,
+    private readonly commentAttachmentService: CommentAttachmentService,
     private readonly configService: ConfigService,
   ) {
     this.server_url = `${this.configService.get('URL_HOST')}:${this.configService.get(
@@ -43,21 +43,21 @@ export class TaskAttachmentController {
     )}/${this.configService.get('URL_PREFIX_PATH')}/`;
   }
 
-  @Post('tasks-attachments')
-  @UseInterceptors(FileInterceptor('file', taskAttachmentOptions))
+  @Post('comments-attachments')
+  @UseInterceptors(FileInterceptor('file', commentAttachmentOptions))
   async addTaskAttachment(
     @User('id') userId: string,
     @UploadedFile() file: Express.Multer.File,
-    @Body() AddTaskAttachmentDto: AddTaskAttachmentDto,
-  ): Promise<Data<TaskAttachmentApiType>> {
-    const data = await this.taskAttachmentService.addTaskAttachment(
+    @Body() addCommentAttachmentDto: AddCommentAttachmentDto,
+  ): Promise<Data<CommentAttachmentApiType>> {
+    const data = await this.commentAttachmentService.addCommentAttachment(
       userId,
-      AddTaskAttachmentDto.task_id,
+      addCommentAttachmentDto.comment_id,
       {
         id: file.filename,
         url: `${this.server_url}${file.path.substring(file.path.indexOf('/') + 1)}`,
         mimetype: file.mimetype,
-        type: AddTaskAttachmentDto.type,
+        type: addCommentAttachmentDto.type,
         path: file.path,
         filename: file.originalname,
       },
@@ -65,12 +65,12 @@ export class TaskAttachmentController {
     return { data };
   }
 
-  @Get('tasks-attachments/:id')
+  @Get('comments-attachments/:id')
   async getDatabaseFile(
     @Param('id') id: string,
     @Res({ passthrough: true }) res: Response,
   ): Promise<StreamableFile> {
-    const file = await this.taskAttachmentService.getFileById(id);
+    const file = await this.commentAttachmentService.getFileById(id);
 
     const isFileExists = await isExists(file.path);
     if (!isFileExists) {

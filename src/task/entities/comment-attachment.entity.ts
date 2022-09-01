@@ -1,7 +1,7 @@
 import { Exclude } from 'class-transformer';
 import { BeforeInsert, Column, CreateDateColumn, Entity, ManyToOne, PrimaryColumn } from 'typeorm';
 
-import { CommentEntity } from '.';
+import { CommentEntity } from './comment.entity';
 
 @Entity({ name: 'comment_attachments' })
 export class CommentAttachmentEntity {

@@ -1,7 +1,9 @@
 import {
   ForbiddenException,
+  forwardRef,
   HttpException,
   HttpStatus,
+  Inject,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -12,6 +14,7 @@ import { UserEntity } from '../../user/entities/user.entity';
 import { CreateCommentDto } from '../dto';
 import { CommentEntity } from '../entities';
 import { CommentApiType } from '../types';
+import { CommentAttachmentService } from './comment-attachment.service';
 import { TaskService } from './task.service';
 
 @Injectable()
@@ -20,6 +23,8 @@ export class CommentService {
     @InjectRepository(CommentEntity)
     private readonly commentRepository: Repository<CommentEntity>,
     private readonly taskService: TaskService,
+    @Inject(forwardRef(() => CommentAttachmentService))
+    private readonly commentAttachmentService: CommentAttachmentService,
   ) {}
 
   async createComment(
