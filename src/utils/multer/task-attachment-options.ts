@@ -9,7 +9,7 @@ export const taskAttachmentOptions: MulterOptions = {
     fileSize: 5242880, // 5MB
   },
   storage: diskStorage({
-    destination(
+    async destination(
       Request: Request,
       file: Express.Multer.File,
       done: (error: Error | null, filename: string) => void,
@@ -17,7 +17,9 @@ export const taskAttachmentOptions: MulterOptions = {
       const uploadPath = './uploads/tasks-attachments';
 
       if (!existsSync(uploadPath)) {
-        mkdirSync(uploadPath);
+        mkdirSync(uploadPath, {
+          recursive: true,
+        });
       }
 
       done(null, uploadPath);

@@ -27,7 +27,7 @@ export class CommentAttachmentService {
     newCommentAttachment.comment = currentComment;
 
     const savedAttachment = await this.commentAttachmentRepository.save(newCommentAttachment);
-    return this.getAttachmentWithTaskId(savedAttachment as CommentAttachmentApiType);
+    return this.getAttachmentWithCommentId(savedAttachment as CommentAttachmentApiType);
   }
 
   async getFileById(id: string) {
@@ -40,7 +40,7 @@ export class CommentAttachmentService {
     return file;
   }
 
-  getAttachmentWithTaskId(attachment: CommentAttachmentApiType): CommentAttachmentApiType {
+  getAttachmentWithCommentId(attachment: CommentAttachmentApiType): CommentAttachmentApiType {
     attachment.comment_id = attachment.comment.id;
     return attachment;
   }

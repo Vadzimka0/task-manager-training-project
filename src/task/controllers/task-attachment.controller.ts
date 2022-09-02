@@ -15,7 +15,7 @@ import {
 import { ConfigService } from '@nestjs/config';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { createReadStream } from 'fs';
-import { join } from 'path';
+import path, { join } from 'path';
 
 import { User } from '../../auth/decorators/user.decorator';
 import { JwtAuthGuard } from '../../auth/guards';
@@ -48,16 +48,16 @@ export class TaskAttachmentController {
   async addTaskAttachment(
     @User('id') userId: string,
     @UploadedFile() file: Express.Multer.File,
-    @Body() AddTaskAttachmentDto: AddTaskAttachmentDto,
+    @Body() addTaskAttachmentDto: AddTaskAttachmentDto,
   ): Promise<Data<TaskAttachmentApiType>> {
     const data = await this.taskAttachmentService.addTaskAttachment(
       userId,
-      AddTaskAttachmentDto.task_id,
+      addTaskAttachmentDto.task_id,
       {
         id: file.filename,
         url: `${this.server_url}${file.path.substring(file.path.indexOf('/') + 1)}`,
         mimetype: file.mimetype,
-        type: AddTaskAttachmentDto.type,
+        type: addTaskAttachmentDto.type,
         path: file.path,
         filename: file.originalname,
       },
