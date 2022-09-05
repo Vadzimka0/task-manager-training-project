@@ -38,9 +38,9 @@ export class TaskAttachmentController {
     private readonly taskAttachmentService: TaskAttachmentService,
     private readonly configService: ConfigService,
   ) {
-    this.server_url = `${this.configService.get('URL_HOST')}:${this.configService.get(
-      'URL_PORT',
-    )}/${this.configService.get('URL_PREFIX_PATH')}/`;
+    this.server_url = `${this.configService.get('URL_HOST')}/${this.configService.get(
+      'URL_PREFIX_PATH',
+    )}/`;
   }
 
   @Post('tasks-attachments')

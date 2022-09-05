@@ -38,9 +38,9 @@ export class CommentAttachmentController {
     private readonly commentAttachmentService: CommentAttachmentService,
     private readonly configService: ConfigService,
   ) {
-    this.server_url = `${this.configService.get('URL_HOST')}:${this.configService.get(
-      'URL_PORT',
-    )}/${this.configService.get('URL_PREFIX_PATH')}/`;
+    this.server_url = `${this.configService.get('URL_HOST')}/${this.configService.get(
+      'URL_PREFIX_PATH',
+    )}/`;
   }
 
   @Post('comments-attachments')

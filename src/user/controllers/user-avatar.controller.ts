@@ -37,9 +37,9 @@ export class UserAvatarController {
     private readonly userAvatarService: UserAvatarService,
     private readonly configService: ConfigService,
   ) {
-    this.server_url = `${this.configService.get('URL_HOST')}:${this.configService.get(
-      'URL_PORT',
-    )}/${this.configService.get('URL_PREFIX_PATH')}/`;
+    this.server_url = `${this.configService.get('URL_HOST')}/${this.configService.get(
+      'URL_PREFIX_PATH',
+    )}/`;
   }
 
   @HttpCode(200)
