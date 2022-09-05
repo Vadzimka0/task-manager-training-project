@@ -1,20 +1,14 @@
-import {
-  HttpException,
-  HttpStatus,
-  Injectable,
-  NotFoundException,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcrypt';
-import { Repository, UpdateResult } from 'typeorm';
+import { Repository } from 'typeorm';
 
+import { RegisterDto } from '../auth/dto/register.dto';
 import {
   SPECIAL_ONE_PROJECT_COLOR,
   SPECIAL_ONE_PROJECT_NAME,
 } from '../common/constants/default-constants';
 import { ProjectService } from '../project/project.service';
-import { CreateUserDto } from './dto/create-user.dto';
 import { UserEntity } from './entities/user.entity';
 
 @Injectable()
@@ -25,11 +19,7 @@ export class UserService {
     private readonly projectService: ProjectService,
   ) {}
 
-  async fetchMembersBySearch(
-    userId: string,
-    search: { query: string },
-    // ): Promise<ProjectApiType[]> {
-  ): Promise<any> {
+  async fetchMembersBySearch(search: { query: string }): Promise<UserEntity[]> {
     const queryBuilder = this.userRepository
       .createQueryBuilder('users')
       .andWhere('users.username LIKE :query', {
@@ -38,9 +28,6 @@ export class UserService {
       .orderBy('users.created_at', 'DESC');
 
     const members = await queryBuilder.getMany();
-    // const projectsWithOwnerId = members.map((project: ProjectApiType) =>
-    // this.getProjectWithOwnerId(project),
-    // );
     return members;
   }
 
@@ -72,7 +59,7 @@ export class UserService {
     return await this.userRepository.find();
   }
 
-  async createUser(registerDto: CreateUserDto): Promise<UserEntity> {
+  async createUser(registerDto: RegisterDto): Promise<UserEntity> {
     const newUser = new UserEntity();
     Object.assign(newUser, registerDto);
     const user = await this.userRepository.save(newUser);

@@ -6,30 +6,25 @@ import {
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
-import { User } from '../auth/decorators/user.decorator';
 
 import { JwtAuthGuard } from '../auth/guards';
 import { Data } from '../common/types/data';
 import { UserEntity } from './entities/user.entity';
 import { UserService } from './user.service';
 
-@Controller('users')
+@Controller()
 @UseGuards(JwtAuthGuard)
 @UseInterceptors(ClassSerializerInterceptor)
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Get('task-members-search')
-  async fetchMembersBySearch(
-    @User('id') userId: string,
-    @Query() querySearch: { query: string },
-    // ): Promise<Data<UserApiType[]>> {
-  ): Promise<Data<any>> {
-    const data = await this.userService.fetchMembersBySearch(userId, querySearch);
+  async fetchMembersBySearch(@Query() querySearch: { query: string }): Promise<Data<UserEntity[]>> {
+    const data = await this.userService.fetchMembersBySearch(querySearch);
     return { data };
   }
 
-  @Get()
+  @Get('users')
   async getAllUsers(): Promise<{ users: UserEntity[] }> {
     const users = await this.userService.getAllUsers();
     return { users };

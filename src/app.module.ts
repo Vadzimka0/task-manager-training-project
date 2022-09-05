@@ -11,7 +11,10 @@ import { TaskModule } from './task/task.module';
 
 @Module({
   imports: [
-    ConfigModule.forRoot(),
+    ConfigModule.forRoot({
+      // envFilePath: `.${process.env.NODE_ENV}.env`
+    }),
+
     DatabaseModule,
     UserModule,
     AuthModule,

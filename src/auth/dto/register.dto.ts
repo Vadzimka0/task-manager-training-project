@@ -1,4 +1,4 @@
-import { IsBase64, IsEmail, IsNotEmpty, IsOptional } from 'class-validator';
+import { IsBase64, IsEmail, IsNotEmpty } from 'class-validator';
 
 export class RegisterDto {
   @IsEmail()
@@ -9,9 +9,6 @@ export class RegisterDto {
   @IsNotEmpty()
   readonly password: string;
 
-  @IsOptional()
+  @IsNotEmpty()
   readonly username: string;
-
-  // @IsOptional()
-  // readonly photo: string;
 }
