@@ -10,7 +10,7 @@ import * as bcrypt from 'bcrypt';
 
 import PostgresErrorCode from '../database/postgresErrorCode.enum';
 import { UserEntity } from '../user/entities/user.entity';
-import { UserService } from '../user/user.service';
+import { UserService } from '../user/services/user.service';
 import { RegisterDto } from './dto/register.dto';
 import { Register } from './interfaces/register.type';
 import { SuccessResponse } from './interfaces/successResponse.interface';
@@ -35,7 +35,7 @@ export class AuthService {
         ...registerDto,
         password: hashedPassword,
       });
-      delete createdUser.currentHashedRefreshToken;
+      delete createdUser.refresh_token;
       delete createdUser.password;
 
       const user_session = await this.getUserSessionInfo(createdUser);

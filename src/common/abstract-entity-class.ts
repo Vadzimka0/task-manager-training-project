@@ -6,7 +6,4 @@ export abstract class AbstractEntity extends BaseEntity {
 
   @CreateDateColumn()
   created_at: Date;
-
-  // @UpdateDateColumn()
-  // updatedAt: Date;
 }

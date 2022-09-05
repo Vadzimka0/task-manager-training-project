@@ -18,35 +18,44 @@ export class UserEntity {
   @Column({ unique: true })
   email: string;
 
-  @Column({ nullable: true })
-  avatar_url: string;
-
-  @Column({ nullable: true })
+  @Column()
   username: string;
 
-  @Column()
   @Exclude()
+  @Column()
   password: string;
 
-  @Column({ nullable: true })
   @Exclude()
-  currentHashedRefreshToken?: string;
+  @Column({ nullable: true })
+  refresh_token: string;
 
   @OneToMany(() => ProjectEntity, (project: ProjectEntity) => project.owner)
-  projects?: ProjectEntity[];
+  projects: ProjectEntity[];
 
   @OneToMany(() => TaskEntity, (task: TaskEntity) => task.performer)
-  assignedTasks?: TaskEntity[];
+  assigned_tasks: TaskEntity[];
 
   @OneToMany(() => NoteEntity, (note: NoteEntity) => note.owner)
-  notes?: NoteEntity[];
+  notes: NoteEntity[];
 
   @OneToMany(() => ChecklistEntity, (checklist: ChecklistEntity) => checklist.owner)
-  checklists?: ChecklistEntity[];
+  checklists: ChecklistEntity[];
 
   @OneToMany(() => CommentEntity, (comment: CommentEntity) => comment.owner)
-  comments?: CommentEntity[];
+  comments: CommentEntity[];
 
-  // @OneToMany(() => TaskEntity, (task: TaskEntity) => task.owner)
-  // createdTasks?: TaskEntity[];
+  @Exclude()
+  @Column({ nullable: true })
+  mimetype: string;
+
+  @Exclude()
+  @Column({ nullable: true })
+  path: string;
+
+  @Exclude()
+  @Column({ nullable: true })
+  filename: string;
+
+  @Column({ nullable: true })
+  avatar_url: string;
 }

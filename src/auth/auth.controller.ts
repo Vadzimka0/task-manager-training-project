@@ -11,7 +11,7 @@ import {
 } from '@nestjs/common';
 
 import { Data } from '../common/types/data';
-import { UserService } from '../user/user.service';
+import { UserService } from '../user/services/user.service';
 import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
 import { JwtRefreshGuard, LocalAuthGuard } from './guards';

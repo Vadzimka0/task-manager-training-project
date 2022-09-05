@@ -3,13 +3,13 @@ import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcrypt';
 import { Repository } from 'typeorm';
 
-import { RegisterDto } from '../auth/dto/register.dto';
+import { RegisterDto } from '../../auth/dto/register.dto';
 import {
   SPECIAL_ONE_PROJECT_COLOR,
   SPECIAL_ONE_PROJECT_NAME,
-} from '../common/constants/default-constants';
-import { ProjectService } from '../project/project.service';
-import { UserEntity } from './entities/user.entity';
+} from '../../common/constants/default-constants';
+import { ProjectService } from '../../project/project.service';
+import { UserEntity } from '../entities/user.entity';
 
 @Injectable()
 export class UserService {
@@ -73,19 +73,16 @@ export class UserService {
     return user;
   }
 
-  async setCurrentRefreshToken(refresh_token: string, userId: string): Promise<void> {
-    const currentHashedRefreshToken = await bcrypt.hash(refresh_token, 10);
+  async setCurrentRefreshToken(refreshToken: string, userId: string): Promise<void> {
+    const currentRefreshToken = await bcrypt.hash(refreshToken, 10);
     await this.userRepository.update(userId, {
-      currentHashedRefreshToken,
+      refresh_token: currentRefreshToken,
     });
   }
 
   async getUserIfRefreshTokenMatches(refreshToken: string, email: string): Promise<UserEntity> {
     const user = await this.getByEmail(email);
-    const isRefreshTokenMatching = await bcrypt.compare(
-      refreshToken,
-      user.currentHashedRefreshToken,
-    );
+    const isRefreshTokenMatching = await bcrypt.compare(refreshToken, user.refresh_token);
     if (isRefreshTokenMatching) {
       return user;
     }
@@ -94,7 +91,7 @@ export class UserService {
   async removeRefreshToken(email: string): Promise<any> {
     const user = await this.getByEmail(email);
     await this.userRepository.update(user.id, {
-      currentHashedRefreshToken: null,
+      refresh_token: null,
     });
   }
 

@@ -14,7 +14,7 @@ import { SPECIAL_ONE_PROJECT_NAME } from '../../common/constants/default-constan
 import { ProjectEntity } from '../../project/entities/project.entity';
 import { ProjectService } from '../../project/project.service';
 import { UserEntity } from '../../user/entities/user.entity';
-import { UserService } from '../../user/user.service';
+import { UserService } from '../../user/services/user.service';
 import { haveSameItems } from '../../utils';
 import { CreateTaskDto } from '../dto';
 import { TaskEntity } from '../entities';

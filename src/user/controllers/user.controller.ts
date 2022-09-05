@@ -7,10 +7,10 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 
-import { JwtAuthGuard } from '../auth/guards';
-import { Data } from '../common/types/data';
-import { UserEntity } from './entities/user.entity';
-import { UserService } from './user.service';
+import { JwtAuthGuard } from '../../auth/guards';
+import { Data } from '../../common/types/data';
+import { UserEntity } from '../entities/user.entity';
+import { UserService } from '../services/user.service';
 
 @Controller()
 @UseGuards(JwtAuthGuard)
