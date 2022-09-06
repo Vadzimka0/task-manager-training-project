@@ -217,7 +217,7 @@ export class TaskService {
     task.assigned_to = task.performer.id;
     task.attachments = task.attachments
       ? task.attachments?.map((attachment: TaskAttachmentApiType) =>
-          this.taskAttachmentService.getAttachmentWithTaskId(attachment),
+          this.taskAttachmentService.getFullTaskAttachment(attachment),
         )
       : null;
     return task;

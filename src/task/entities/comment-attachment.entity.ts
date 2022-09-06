@@ -12,9 +12,6 @@ export class CommentAttachmentEntity {
   created_at: Date;
 
   @Column()
-  url: string;
-
-  @Column()
   type: string;
 
   @Exclude()

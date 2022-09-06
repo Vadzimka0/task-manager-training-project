@@ -12,7 +12,6 @@ import {
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { createReadStream } from 'fs';
 import { join } from 'path';
@@ -28,22 +27,13 @@ import { TaskAttachmentApiType } from '../types';
 
 import type { Response } from 'express';
 
-@Controller()
+@Controller('tasks-attachments')
 @UseGuards(JwtAuthGuard)
 @UseInterceptors(ClassSerializerInterceptor)
 export class TaskAttachmentController {
-  private server_url: string;
+  constructor(private readonly taskAttachmentService: TaskAttachmentService) {}
 
-  constructor(
-    private readonly taskAttachmentService: TaskAttachmentService,
-    private readonly configService: ConfigService,
-  ) {
-    this.server_url = `${this.configService.get('URL_HOST')}/${this.configService.get(
-      'URL_PREFIX_PATH',
-    )}/`;
-  }
-
-  @Post('tasks-attachments')
+  @Post()
   @UseInterceptors(FileInterceptor('file', taskAttachmentOptions))
   async addTaskAttachment(
     @User('id') userId: string,
@@ -52,20 +42,13 @@ export class TaskAttachmentController {
   ): Promise<Data<TaskAttachmentApiType>> {
     const data = await this.taskAttachmentService.addTaskAttachment(
       userId,
-      addTaskAttachmentDto.task_id,
-      {
-        id: file.filename,
-        url: `${this.server_url}${file.path.substring(file.path.indexOf('/') + 1)}`,
-        mimetype: file.mimetype,
-        type: addTaskAttachmentDto.type,
-        path: file.path,
-        filename: file.originalname,
-      },
+      addTaskAttachmentDto,
+      file,
     );
     return { data };
   }
 
-  @Get('tasks-attachments/:id')
+  @Get(':id')
   async getDatabaseFile(
     @Param('id') id: string,
     @Res({ passthrough: true }) res: Response,

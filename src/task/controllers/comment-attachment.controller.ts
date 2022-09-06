@@ -12,7 +12,6 @@ import {
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { createReadStream } from 'fs';
 import { join } from 'path';
@@ -28,44 +27,28 @@ import { CommentAttachmentApiType } from '../types';
 
 import type { Response } from 'express';
 
-@Controller()
+@Controller('comments-attachments')
 @UseGuards(JwtAuthGuard)
 @UseInterceptors(ClassSerializerInterceptor)
 export class CommentAttachmentController {
-  private server_url: string;
+  constructor(private readonly commentAttachmentService: CommentAttachmentService) {}
 
-  constructor(
-    private readonly commentAttachmentService: CommentAttachmentService,
-    private readonly configService: ConfigService,
-  ) {
-    this.server_url = `${this.configService.get('URL_HOST')}/${this.configService.get(
-      'URL_PREFIX_PATH',
-    )}/`;
-  }
-
-  @Post('comments-attachments')
+  @Post()
   @UseInterceptors(FileInterceptor('file', commentAttachmentOptions))
-  async addTaskAttachment(
+  async addCommentAttachment(
     @User('id') userId: string,
     @UploadedFile() file: Express.Multer.File,
     @Body() addCommentAttachmentDto: AddCommentAttachmentDto,
   ): Promise<Data<CommentAttachmentApiType>> {
     const data = await this.commentAttachmentService.addCommentAttachment(
       userId,
-      addCommentAttachmentDto.comment_id,
-      {
-        id: file.filename,
-        url: `${this.server_url}${file.path.substring(file.path.indexOf('/') + 1)}`,
-        mimetype: file.mimetype,
-        type: addCommentAttachmentDto.type,
-        path: file.path,
-        filename: file.originalname,
-      },
+      addCommentAttachmentDto,
+      file,
     );
     return { data };
   }
 
-  @Get('comments-attachments/:id')
+  @Get(':id')
   async getDatabaseFile(
     @Param('id') id: string,
     @Res({ passthrough: true }) res: Response,

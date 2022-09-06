@@ -55,7 +55,4 @@ export class UserEntity {
   @Exclude()
   @Column({ nullable: true })
   filename: string;
-
-  @Column({ nullable: true })
-  avatar_url: string;
 }

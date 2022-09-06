@@ -13,7 +13,7 @@ import { Repository } from 'typeorm';
 import { UserEntity } from '../../user/entities/user.entity';
 import { CreateCommentDto } from '../dto';
 import { CommentEntity } from '../entities';
-import { CommentApiType } from '../types';
+import { CommentApiType, CommentAttachmentApiType } from '../types';
 import { CommentAttachmentService } from './comment-attachment.service';
 import { TaskService } from './task.service';
 
@@ -54,7 +54,8 @@ export class CommentService {
       .createQueryBuilder('comments')
       .leftJoinAndSelect('comments.task', 'task')
       .leftJoinAndSelect('comments.owner', 'owner')
-      // .leftJoinAndSelect('comments.attachments', 'attachments')
+      .leftJoinAndSelect('comments.attachments', 'attachments')
+      .leftJoinAndSelect('attachments.comment', 'comment')
       .andWhere('task.id = :id', { id: taskId })
       .orderBy('comments.created_at', 'ASC');
 
@@ -94,7 +95,9 @@ export class CommentService {
   getCommentWithRelationIds(comment: CommentApiType): CommentApiType {
     comment.owner_id = comment.owner.id;
     comment.task_id = comment.task.id;
-    // attachments
+    comment.attachments = comment.attachments.map((attachment: CommentAttachmentApiType) =>
+      this.commentAttachmentService.getFullCommentAttachment(attachment),
+    );
     return comment;
   }
 }

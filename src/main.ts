@@ -17,9 +17,7 @@ async function bootstrap() {
   );
   app.useGlobalFilters(new HttpExceptionFilter());
 
-  await app.listen(process.env.URL_PORT);
-  console.log(
-    `Application is running on: ${process.env.URL_HOST}:${process.env.URL_PORT}/${process.env.URL_PREFIX_PATH}`,
-  );
+  await app.listen(3000);
+  console.log(`Application is running on: ${process.env.URL_HOST}/${process.env.URL_PREFIX_PATH}`);
 }
 bootstrap();

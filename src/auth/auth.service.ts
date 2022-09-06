@@ -28,18 +28,18 @@ export class AuthService {
     this.token_type = 'Bearer';
   }
 
-  async register(registerDto: RegisterDto): Promise<Register> {
+  async register(registerDto: RegisterDto): Promise<UserEntity> {
     const hashedPassword = await bcrypt.hash(registerDto.password, 10);
     try {
       const createdUser = await this.userService.createUser({
         ...registerDto,
         password: hashedPassword,
       });
-      delete createdUser.refresh_token;
-      delete createdUser.password;
 
       const user_session = await this.getUserSessionInfo(createdUser);
-      return { ...createdUser, user_session };
+      Object.assign(createdUser, { user_session });
+
+      return createdUser;
     } catch (error) {
       if (error?.code === PostgresErrorCode.UniqueViolation) {
         throw new UnprocessableEntityException('User is already registered.');

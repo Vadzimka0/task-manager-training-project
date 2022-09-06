@@ -11,11 +11,11 @@ import {
 } from '@nestjs/common';
 
 import { Data } from '../common/types/data';
+import { UserEntity } from '../user/entities/user.entity';
 import { UserService } from '../user/services/user.service';
 import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
 import { JwtRefreshGuard, LocalAuthGuard } from './guards';
-import { Register } from './interfaces/register.type';
 import { RequestWithUser } from './interfaces/requestWithUser.interface';
 import { SuccessResponse } from './interfaces/successResponse.interface';
 import { UserSession } from './interfaces/userSession.interface';
@@ -29,7 +29,7 @@ export class AuthController {
   ) {}
 
   @Post('sign-up')
-  async register(@Body() registerDto: RegisterDto): Promise<Data<Register>> {
+  async register(@Body() registerDto: RegisterDto): Promise<Data<UserEntity>> {
     const data = await this.authService.register(registerDto);
     return { data };
   }
