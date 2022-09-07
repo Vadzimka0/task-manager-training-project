@@ -19,6 +19,7 @@ import { UserEntity } from '../user/entities/user.entity';
 import { CreateProjectDto } from './dto/create-project.dto';
 import { ProjectService } from './project.service';
 import { ProjectApiType } from './types/project-api.type';
+import { ProjectStatisticApiType } from './types/projects-statistics-api.type';
 
 @Controller()
 @UseGuards(JwtAuthGuard)
@@ -50,6 +51,15 @@ export class ProjectController {
     @Param('projectId') projectId: string,
   ): Promise<Data<ProjectApiType>> {
     const data = await this.projectService.fetchOneProject(userId, projectId);
+    return { data };
+  }
+
+  @Get('projects-statistics/:ownerId')
+  async fetchProjectStatistics(
+    @User('id') userId: string,
+    @Param('ownerId') ownerId: string,
+  ): Promise<Data<ProjectStatisticApiType[]>> {
+    const data = await this.projectService.fetchProjectStatistics(userId, ownerId);
     return { data };
   }
 

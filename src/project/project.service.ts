@@ -14,6 +14,7 @@ import { UserEntity } from '../user/entities/user.entity';
 import { CreateProjectDto } from './dto/create-project.dto';
 import { ProjectEntity } from './entities/project.entity';
 import { ProjectApiType } from './types/project-api.type';
+import { ProjectStatisticApiType } from './types/projects-statistics-api.type';
 
 @Injectable()
 export class ProjectService {
@@ -50,6 +51,35 @@ export class ProjectService {
   async fetchOneProject(userId: string, projectId: string): Promise<ProjectApiType> {
     const project = await this.findProjectForRead(projectId, userId);
     return this.getProjectWithOwnerId(project as ProjectApiType);
+  }
+
+  async fetchProjectStatistics(
+    userId: string,
+    ownerId: string,
+  ): Promise<ProjectStatisticApiType[]> {
+    this.idsMatching(userId, ownerId);
+
+    const tasksNumbers = await this.projectRepository
+      // .createQueryBuilder('project')
+      // .leftJoinAndSelect('project.owner', 'owner')
+      // .leftJoinAndSelect('project.tasks', 'tasks')
+      // .andWhere('project.owner_id = :id', { id: userId })
+      // .select('project.id')
+      // .loadRelationCountAndMap('project.tasks_number', 'project.tasks')
+      // .getMany();
+      .createQueryBuilder('project')
+      .leftJoinAndSelect('project.owner', 'owner')
+      .leftJoinAndSelect('project.tasks', 'tasks')
+      .andWhere('project.owner_id = :id', { id: userId })
+      .select('project.id')
+      .addSelect('COUNT(tasks.id)', 'tasks_number')
+      .groupBy('project.id')
+      .getRawMany();
+
+    return tasksNumbers.map((projectInfo: ProjectStatisticApiType) => ({
+      ...projectInfo,
+      tasks_number: Number(projectInfo.tasks_number),
+    }));
   }
 
   async createProject(
