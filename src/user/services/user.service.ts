@@ -55,8 +55,38 @@ export class UserService {
   //   throw new HttpException('User with this username does not exist', HttpStatus.NOT_FOUND);
   // }
 
-  async getAllUsers(): Promise<UserEntity[]> {
-    return await this.userRepository.find();
+  // async getAllUsers(): Promise<UserEntity[]> {
+  //   return await this.userRepository.find();
+  // }
+
+  async fetchUserStatistics(userId: string, owner_id: string): Promise<any> {
+    // ids matching
+
+    const ownerTasksQueryBuilder = this.userRepository
+      .createQueryBuilder('user')
+      .leftJoinAndSelect('user.projects', 'projects')
+      .leftJoinAndSelect('projects.tasks', 'tasks')
+      .leftJoinAndSelect('tasks.project', 'project')
+      .andWhere('project.owner_id = :id', { id: userId })
+      .select('user.id')
+      .addSelect('COUNT(tasks.id)', 'tasks_number')
+      .groupBy('user.id');
+
+    const createdTasksObject = await ownerTasksQueryBuilder.getRawMany();
+
+    const completedTasksObject = await ownerTasksQueryBuilder
+      .andWhere('tasks.is_completed = :isCompleted', { isCompleted: true })
+      .getRawMany();
+
+    const created_tasks = +createdTasksObject[0].tasks_number;
+    const completed_tasks = +completedTasksObject[0].tasks_number;
+    const events = `${((completed_tasks / created_tasks) * 100).toFixed(0)}%`;
+
+    return {
+      created_tasks,
+      completed_tasks,
+      events,
+    };
   }
 
   async createUser(registerDto: RegisterDto): Promise<UserEntity> {

@@ -2,10 +2,12 @@ import {
   ClassSerializerInterceptor,
   Controller,
   Get,
+  Param,
   Query,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
+import { User } from '../../auth/decorators/user.decorator';
 
 import { JwtAuthGuard } from '../../auth/guards';
 import { Data } from '../../common/types/data';
@@ -24,9 +26,18 @@ export class UserController {
     return { data };
   }
 
-  @Get('users')
-  async getAllUsers(): Promise<{ users: UserEntity[] }> {
-    const users = await this.userService.getAllUsers();
-    return { users };
+  // @Get('users')
+  // async getAllUsers(): Promise<{ users: UserEntity[] }> {
+  //   const users = await this.userService.getAllUsers();
+  //   return { users };
+  // }
+
+  @Get('users-statistics/:ownerId')
+  async fetchUserStatistics(
+    @User('id') userId: string,
+    @Param('ownerId') ownerId: string,
+  ): Promise<any> {
+    const data = await this.userService.fetchUserStatistics(userId, ownerId);
+    return { data };
   }
 }
