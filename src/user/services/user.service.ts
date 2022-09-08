@@ -1,4 +1,11 @@
-import { HttpException, HttpStatus, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  forwardRef,
+  HttpException,
+  HttpStatus,
+  Inject,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcrypt';
 import { Repository } from 'typeorm';
@@ -8,8 +15,11 @@ import {
   SPECIAL_ONE_PROJECT_COLOR,
   SPECIAL_ONE_PROJECT_NAME,
 } from '../../common/constants/default-constants';
+import { NoteService } from '../../note/note.service';
 import { ProjectService } from '../../project/project.service';
+import { TaskService } from '../../task/services';
 import { UserEntity } from '../entities/user.entity';
+import { UserStatisticsApiType } from '../types/user-statistics-api.type';
 
 @Injectable()
 export class UserService {
@@ -17,6 +27,9 @@ export class UserService {
     @InjectRepository(UserEntity)
     private readonly userRepository: Repository<UserEntity>,
     private readonly projectService: ProjectService,
+    private readonly noteService: NoteService,
+    @Inject(forwardRef(() => TaskService))
+    private readonly taskService: TaskService,
   ) {}
 
   async fetchMembersBySearch(search: { query: string }): Promise<UserEntity[]> {
@@ -59,33 +72,26 @@ export class UserService {
   //   return await this.userRepository.find();
   // }
 
-  async fetchUserStatistics(userId: string, owner_id: string): Promise<any> {
+  async fetchUserStatistics(userId: string, owner_id: string): Promise<UserStatisticsApiType> {
     // ids matching
 
-    const ownerTasksQueryBuilder = this.userRepository
-      .createQueryBuilder('user')
-      .leftJoinAndSelect('user.projects', 'projects')
-      .leftJoinAndSelect('projects.tasks', 'tasks')
-      .leftJoinAndSelect('tasks.project', 'project')
-      .andWhere('project.owner_id = :id', { id: userId })
-      .select('user.id')
-      .addSelect('COUNT(tasks.id)', 'tasks_number')
-      .groupBy('user.id');
+    const { created_tasks, completed_tasks } = await this.taskService.getTasksStatisticsByOwner(
+      userId,
+    );
+    const events = created_tasks
+      ? `${((completed_tasks / created_tasks) * 100).toFixed(0)}%`
+      : '0%';
 
-    const createdTasksObject = await ownerTasksQueryBuilder.getRawMany();
+    const quick_notes = await this.noteService.getQuickNotesStatisticsByOwner(userId);
 
-    const completedTasksObject = await ownerTasksQueryBuilder
-      .andWhere('tasks.is_completed = :isCompleted', { isCompleted: true })
-      .getRawMany();
-
-    const created_tasks = +createdTasksObject[0].tasks_number;
-    const completed_tasks = +completedTasksObject[0].tasks_number;
-    const events = `${((completed_tasks / created_tasks) * 100).toFixed(0)}%`;
+    const todo = await this.taskService.getTodoStatisticsByPerformer(userId);
 
     return {
       created_tasks,
       completed_tasks,
       events,
+      quick_notes,
+      todo,
     };
   }
 

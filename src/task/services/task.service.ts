@@ -18,7 +18,7 @@ import { UserService } from '../../user/services/user.service';
 import { haveSameItems } from '../../utils';
 import { CreateTaskDto } from '../dto';
 import { TaskEntity } from '../entities';
-import { TaskApiType, TaskAttachmentApiType } from '../types';
+import { TaskApiType, TaskAttachmentApiType, TaskStatisticsApiType } from '../types';
 import { TaskAttachmentService } from './task-attachment.service';
 
 @Injectable()
@@ -27,53 +27,11 @@ export class TaskService {
     @InjectRepository(TaskEntity)
     private readonly taskRepository: Repository<TaskEntity>,
     private readonly projectService: ProjectService,
+    @Inject(forwardRef(() => UserService))
     private readonly userService: UserService,
     @Inject(forwardRef(() => TaskAttachmentService))
     private readonly taskAttachmentService: TaskAttachmentService,
   ) {}
-
-  async fetchOneTask(userId: string, taskId: string): Promise<TaskApiType> {
-    const task = await this.getValidTask(userId, taskId);
-    return this.getTaskWithRelationIds(task as TaskApiType, userId);
-  }
-
-  async fetchUserTasks(userId: string, ownerId: string): Promise<TaskApiType[]> {
-    this.idsMatching(ownerId, userId);
-
-    const queryBuilder = this.getTasksQueryBuilder()
-      .andWhere('project.owner_id = :id', { id: userId })
-      .orderBy('tasks.created_at', 'DESC');
-
-    const tasks = await queryBuilder.getMany();
-    const tasksWithRelationIds = tasks.map((task: TaskApiType) =>
-      this.getTaskWithRelationIds(task, userId),
-    );
-    return tasksWithRelationIds;
-  }
-
-  async fetchProjectTasks(userId: string, projectId: string): Promise<TaskApiType[]> {
-    await this.projectService.findProjectForRead(projectId, userId);
-
-    const queryBuilder = this.getTasksQueryBuilder()
-      .andWhere('project.id = :id', { id: projectId })
-      .orderBy('tasks.created_at', 'DESC');
-
-    const tasks = await queryBuilder.getMany();
-    const tasksWithRelationIds = tasks.map((task: TaskApiType) =>
-      this.getTaskWithRelationIds(task, userId),
-    );
-    return tasksWithRelationIds;
-  }
-
-  getTasksQueryBuilder(): SelectQueryBuilder<TaskEntity> {
-    return this.taskRepository
-      .createQueryBuilder('tasks')
-      .leftJoinAndSelect('tasks.project', 'project')
-      .leftJoinAndSelect('tasks.performer', 'performer')
-      .leftJoinAndSelect('tasks.members', 'members')
-      .leftJoinAndSelect('tasks.attachments', 'attachments')
-      .leftJoinAndSelect('attachments.task', 'task');
-  }
 
   async createTask(taskDto: CreateTaskDto, currentUser: UserEntity): Promise<TaskApiType> {
     const { owner_id, project_id, assigned_to, members, attachments, ...dtoWithoutRelationItems } =
@@ -135,6 +93,49 @@ export class TaskService {
     await this.getValidTask(userId, taskId);
     await this.taskRepository.delete({ id: taskId });
     return { id: taskId };
+  }
+
+  async fetchOneTask(userId: string, taskId: string): Promise<TaskApiType> {
+    const task = await this.getValidTask(userId, taskId);
+    return this.getTaskWithRelationIds(task as TaskApiType, userId);
+  }
+
+  async fetchUserTasks(userId: string, ownerId: string): Promise<TaskApiType[]> {
+    this.idsMatching(ownerId, userId);
+
+    const queryBuilder = this.getTasksQueryBuilder()
+      .andWhere('project.owner_id = :id', { id: userId })
+      .orderBy('tasks.created_at', 'DESC');
+
+    const tasks = await queryBuilder.getMany();
+    const tasksWithRelationIds = tasks.map((task: TaskApiType) =>
+      this.getTaskWithRelationIds(task, userId),
+    );
+    return tasksWithRelationIds;
+  }
+
+  async fetchProjectTasks(userId: string, projectId: string): Promise<TaskApiType[]> {
+    await this.projectService.findProjectForRead(projectId, userId);
+
+    const queryBuilder = this.getTasksQueryBuilder()
+      .andWhere('project.id = :id', { id: projectId })
+      .orderBy('tasks.created_at', 'DESC');
+
+    const tasks = await queryBuilder.getMany();
+    const tasksWithRelationIds = tasks.map((task: TaskApiType) =>
+      this.getTaskWithRelationIds(task, userId),
+    );
+    return tasksWithRelationIds;
+  }
+
+  getTasksQueryBuilder(): SelectQueryBuilder<TaskEntity> {
+    return this.taskRepository
+      .createQueryBuilder('tasks')
+      .leftJoinAndSelect('tasks.project', 'project')
+      .leftJoinAndSelect('tasks.performer', 'performer')
+      .leftJoinAndSelect('tasks.members', 'members')
+      .leftJoinAndSelect('tasks.attachments', 'attachments')
+      .leftJoinAndSelect('attachments.task', 'task');
   }
 
   async getProject(userId: string, projectId: string, assignedTo: string): Promise<ProjectEntity> {
@@ -221,5 +222,41 @@ export class TaskService {
         )
       : null;
     return task;
+  }
+
+  async getTasksStatisticsByOwner(ownerId: string): Promise<TaskStatisticsApiType> {
+    const ownerTasksQueryBuilder = this.taskRepository
+      .createQueryBuilder('tasks')
+      .leftJoinAndSelect('tasks.project', 'project')
+      .andWhere('project.owner_id = :id', { id: ownerId })
+      .select('COUNT(tasks)');
+
+    const createdTasksObject = await ownerTasksQueryBuilder.getRawOne();
+    const completedTasksObject = await ownerTasksQueryBuilder
+      .andWhere('tasks.is_completed = :isCompleted', { isCompleted: true })
+      .getRawOne();
+
+    const created_tasks = +createdTasksObject.count;
+    const completed_tasks = +completedTasksObject.count;
+    return { created_tasks, completed_tasks };
+  }
+
+  async getTodoStatisticsByPerformer(ownerId: string): Promise<string> {
+    const performerTasksQueryBuilder = this.taskRepository
+      .createQueryBuilder('tasks')
+      .andWhere('tasks.performer_id = :id', { id: ownerId })
+      .select('COUNT(tasks)');
+
+    const totalPerformerTasksObject = await performerTasksQueryBuilder.getRawOne();
+    const completedPerformerTasksObject = await performerTasksQueryBuilder
+      .andWhere('tasks.is_completed = :isCompleted', { isCompleted: true })
+      .getRawOne();
+
+    const total_performer_tasks = +totalPerformerTasksObject.count;
+    const completed_performer_tasks = +completedPerformerTasksObject.count;
+    const todo = total_performer_tasks
+      ? `${((completed_performer_tasks / total_performer_tasks) * 100).toFixed(0)}%`
+      : '0%';
+    return todo;
   }
 }

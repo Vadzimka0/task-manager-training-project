@@ -7,12 +7,13 @@ import {
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
-import { User } from '../../auth/decorators/user.decorator';
 
+import { User } from '../../auth/decorators/user.decorator';
 import { JwtAuthGuard } from '../../auth/guards';
 import { Data } from '../../common/types/data';
 import { UserEntity } from '../entities/user.entity';
 import { UserService } from '../services/user.service';
+import { UserStatisticsApiType } from '../types/user-statistics-api.type';
 
 @Controller()
 @UseGuards(JwtAuthGuard)
@@ -36,7 +37,7 @@ export class UserController {
   async fetchUserStatistics(
     @User('id') userId: string,
     @Param('ownerId') ownerId: string,
-  ): Promise<any> {
+  ): Promise<Data<UserStatisticsApiType>> {
     const data = await this.userService.fetchUserStatistics(userId, ownerId);
     return { data };
   }

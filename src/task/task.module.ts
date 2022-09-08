@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
@@ -25,7 +25,7 @@ import {
 
 @Module({
   imports: [
-    UserModule,
+    forwardRef(() => UserModule),
     ProjectModule,
     ConfigModule,
     TypeOrmModule.forFeature([
@@ -42,5 +42,6 @@ import {
     CommentAttachmentController,
   ],
   providers: [TaskService, CommentService, TaskAttachmentService, CommentAttachmentService],
+  exports: [TaskService],
 })
 export class TaskModule {}

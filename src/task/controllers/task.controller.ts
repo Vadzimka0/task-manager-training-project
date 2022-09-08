@@ -25,33 +25,6 @@ import { TaskApiType } from '../types';
 export class TaskController {
   constructor(private readonly taskService: TaskService) {}
 
-  @Get('tasks/:taskId')
-  async fetchOneTask(
-    @User('id') userId: string,
-    @Param('taskId') taskId: string,
-  ): Promise<Data<TaskApiType>> {
-    const data = await this.taskService.fetchOneTask(userId, taskId);
-    return { data };
-  }
-
-  @Get('user-tasks/:ownerId')
-  async fetchUserTasks(
-    @User('id') userId: string,
-    @Param('ownerId') ownerId: string,
-  ): Promise<Data<TaskApiType[]>> {
-    const data = await this.taskService.fetchUserTasks(userId, ownerId);
-    return { data };
-  }
-
-  @Get('project-tasks/:projectId')
-  async fetchProjectTasks(
-    @User('id') userId: string,
-    @Param('projectId') projectId: string,
-  ): Promise<Data<TaskApiType[]>> {
-    const data = await this.taskService.fetchProjectTasks(userId, projectId);
-    return { data };
-  }
-
   @Post('tasks')
   async createTask(
     @Body() taskDto: CreateTaskDto,
@@ -77,6 +50,33 @@ export class TaskController {
     @Param('id') taskId: string,
   ): Promise<Data<{ id: string }>> {
     const data = await this.taskService.deleteTask(userId, taskId);
+    return { data };
+  }
+
+  @Get('tasks/:taskId')
+  async fetchOneTask(
+    @User('id') userId: string,
+    @Param('taskId') taskId: string,
+  ): Promise<Data<TaskApiType>> {
+    const data = await this.taskService.fetchOneTask(userId, taskId);
+    return { data };
+  }
+
+  @Get('user-tasks/:ownerId')
+  async fetchUserTasks(
+    @User('id') userId: string,
+    @Param('ownerId') ownerId: string,
+  ): Promise<Data<TaskApiType[]>> {
+    const data = await this.taskService.fetchUserTasks(userId, ownerId);
+    return { data };
+  }
+
+  @Get('project-tasks/:projectId')
+  async fetchProjectTasks(
+    @User('id') userId: string,
+    @Param('projectId') projectId: string,
+  ): Promise<Data<TaskApiType[]>> {
+    const data = await this.taskService.fetchProjectTasks(userId, projectId);
     return { data };
   }
 }

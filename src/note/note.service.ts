@@ -111,4 +111,24 @@ export class NoteService {
     note.owner_id = note.owner.id;
     return note;
   }
+
+  async getQuickNotesStatisticsByOwner(ownerId: string): Promise<string> {
+    const ownerNotesQueryBuilder = this.noteRepository
+      .createQueryBuilder('notes')
+      .andWhere('notes.owner_id = :id', { id: ownerId })
+      .select('COUNT(notes)');
+
+    const createdNotesObject = await ownerNotesQueryBuilder.getRawOne();
+    const completedNotesObject = await ownerNotesQueryBuilder
+      .andWhere('notes.is_completed = :isCompleted', { isCompleted: true })
+      .getRawOne();
+
+    const created_notes = +createdNotesObject.count;
+    const completed_notes = +completedNotesObject.count;
+    const quick_notes = created_notes
+      ? `${((completed_notes / created_notes) * 100).toFixed(0)}%`
+      : '0%';
+
+    return quick_notes;
+  }
 }
