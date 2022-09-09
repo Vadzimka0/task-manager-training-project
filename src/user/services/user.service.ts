@@ -5,6 +5,7 @@ import {
   Inject,
   Injectable,
   NotFoundException,
+  UnprocessableEntityException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcrypt';
@@ -35,6 +36,11 @@ export class UserService {
     private readonly taskService: TaskService,
   ) {}
 
+  async fetchUser(id: string): Promise<UserApiType> {
+    const user = await this.getById(id);
+    return this.userAvatarService.getUserWithAvatarUrl(user as UserApiType);
+  }
+
   async fetchMembersBySearch(search: { query: string }): Promise<UserEntity[]> {
     const queryBuilder = this.userRepository
       .createQueryBuilder('users')
@@ -47,36 +53,12 @@ export class UserService {
     return members;
   }
 
-  async getById(id: string): Promise<UserEntity> {
-    const user = await this.userRepository.findOne({ where: { id } });
-    if (user) {
-      return user;
-    }
-    throw new NotFoundException('User does not exist');
-  }
-
-  async getByEmail(email: string): Promise<UserEntity> {
-    const user = await this.userRepository.findOne({ where: { email } });
-    if (user) {
-      return user;
-    }
-    throw new HttpException('User with this email does not exist', HttpStatus.NOT_FOUND);
-  }
-
-  // async getByName(performer: string): Promise<UserEntity> {
-  //   const user = await this.userRepository.findOneBy({ username: performer });
-  //   if (user) {
-  //     return user;
-  //   }
-  //   throw new HttpException('User with this username does not exist', HttpStatus.NOT_FOUND);
-  // }
-
-  // async getAllUsers(): Promise<UserEntity[]> {
-  //   return await this.userRepository.find();
-  // }
-
   async fetchUserStatistics(userId: string, owner_id: string): Promise<UserStatisticsApiType> {
-    // ids matching
+    if (userId !== owner_id) {
+      throw new UnprocessableEntityException(
+        'The user id is not valid. Statistics are available only to you.',
+      );
+    }
 
     const { created_tasks, completed_tasks } = await this.taskService.getTasksStatisticsByOwner(
       userId,
@@ -96,6 +78,22 @@ export class UserService {
       quick_notes,
       todo,
     };
+  }
+
+  async getById(id: string): Promise<UserEntity> {
+    const user = await this.userRepository.findOne({ where: { id } });
+    if (user) {
+      return user;
+    }
+    throw new UnprocessableEntityException('The user id is not valid');
+  }
+
+  async getByEmail(email: string): Promise<UserEntity> {
+    const user = await this.userRepository.findOne({ where: { email } });
+    if (user) {
+      return user;
+    }
+    throw new UnprocessableEntityException('The user email is not valid');
   }
 
   async createUser(signUpDto: SignUpDto): Promise<UserApiType> {
@@ -139,10 +137,7 @@ export class UserService {
   async getMembersInstances(membersIds: string[]): Promise<UserEntity[]> {
     const currentMembers = [];
     for (const id of membersIds) {
-      const user = await this.userRepository.findOneBy({ id });
-      if (!user) {
-        throw new HttpException('User with this username does not exist', HttpStatus.NOT_FOUND);
-      }
+      const user = await this.getById(id);
       currentMembers.push(user);
     }
     return currentMembers;

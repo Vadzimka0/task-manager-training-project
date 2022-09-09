@@ -12,8 +12,8 @@ import { User } from '../../auth/decorators/user.decorator';
 import { JwtAuthGuard } from '../../auth/guards';
 import { Data } from '../../common/types/data';
 import { UserEntity } from '../entities/user.entity';
-import { UserService } from '../services/user.service';
-import { UserStatisticsApiType } from '../types/user-statistics-api.type';
+import { UserService } from '../services';
+import { UserApiType, UserStatisticsApiType } from '../types';
 
 @Controller()
 @UseGuards(JwtAuthGuard)
@@ -21,17 +21,17 @@ import { UserStatisticsApiType } from '../types/user-statistics-api.type';
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
+  @Get('users/:id')
+  async fetchUser(@Param('id') id: string): Promise<Data<UserApiType>> {
+    const data = await this.userService.fetchUser(id);
+    return { data };
+  }
+
   @Get('task-members-search')
   async fetchMembersBySearch(@Query() querySearch: { query: string }): Promise<Data<UserEntity[]>> {
     const data = await this.userService.fetchMembersBySearch(querySearch);
     return { data };
   }
-
-  // @Get('users')
-  // async getAllUsers(): Promise<{ users: UserEntity[] }> {
-  //   const users = await this.userService.getAllUsers();
-  //   return { users };
-  // }
 
   @Get('users-statistics/:ownerId')
   async fetchUserStatistics(

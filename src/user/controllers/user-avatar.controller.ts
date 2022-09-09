@@ -23,18 +23,22 @@ import { Data } from '../../common/types/data';
 import { isExists } from '../../utils';
 import { avatarOptions } from '../../utils/multer/avatar-options';
 import { UserEntity } from '../entities/user.entity';
-import { UserAvatarService } from '../services/user-avatar.service';
-import { UserApiType } from '../types/user-api.type';
+import { UserAvatarService, UserService } from '../services';
+import { UserApiType } from '../types';
 
 import type { Response } from 'express';
+
 @Controller('users-avatar')
-@UseGuards(JwtAuthGuard)
 @UseInterceptors(ClassSerializerInterceptor)
 export class UserAvatarController {
-  constructor(private readonly userAvatarService: UserAvatarService) {}
+  constructor(
+    private readonly userAvatarService: UserAvatarService,
+    private readonly userService: UserService,
+  ) {}
 
   @HttpCode(200)
   @Post()
+  @UseGuards(JwtAuthGuard)
   @UseInterceptors(FileInterceptor('file', avatarOptions))
   async addTaskAttachment(
     @User() user: UserEntity,
@@ -47,11 +51,10 @@ export class UserAvatarController {
 
   @Get(':id')
   async getDatabaseFile(
-    @User() user: UserEntity,
     @Param('id') id: string,
     @Res({ passthrough: true }) res: Response,
   ): Promise<StreamableFile> {
-    // check id's matching
+    const user = await this.userService.getById(id);
 
     const isFileExists = await isExists(user.path);
     if (!isFileExists) {
