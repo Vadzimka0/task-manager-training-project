@@ -40,11 +40,13 @@ export class UserAvatarService {
     Object.assign(user, filedata);
 
     const savedUser = await this.userRepository.save(user);
-    return this.getUserWithAvatarId(savedUser as UserApiType);
+    return this.getUserWithAvatarUrl(savedUser as UserApiType);
   }
 
-  getUserWithAvatarId(user: UserApiType): UserApiType {
-    user.avatar_url = `${this.server_url}${user.path.substring(user.path.indexOf('/') + 1)}`;
+  getUserWithAvatarUrl(user: UserApiType): UserApiType {
+    user.avatar_url = user.path
+      ? `${this.server_url}${user.path.substring(user.path.indexOf('/') + 1)}`
+      : null;
     return user;
   }
 }

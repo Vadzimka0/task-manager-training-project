@@ -5,7 +5,7 @@ import { Request } from 'express';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 
 import { UserService } from '../../user/services/user.service';
-import { TokenPayload } from '../interfaces/tokenPayload.interface';
+import { TokenPayload } from '../types/token-payload.type';
 
 @Injectable()
 export class JwtRefreshTokenStrategy extends PassportStrategy(Strategy, 'jwt-refresh-token') {

@@ -1,6 +1,6 @@
-export interface UserSession {
+export type UserSessionApiType = {
   access_token: string;
   refresh_token: string;
   token_type: string;
   expires_in: number;
-}
+};

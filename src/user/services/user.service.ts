@@ -10,7 +10,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcrypt';
 import { Repository } from 'typeorm';
 
-import { RegisterDto } from '../../auth/dto/register.dto';
+import { SignUpDto } from '../../auth/dto/sign-up.dto';
 import {
   SPECIAL_ONE_PROJECT_COLOR,
   SPECIAL_ONE_PROJECT_NAME,
@@ -19,13 +19,16 @@ import { NoteService } from '../../note/note.service';
 import { ProjectService } from '../../project/project.service';
 import { TaskService } from '../../task/services';
 import { UserEntity } from '../entities/user.entity';
+import { UserApiType } from '../types/user-api.type';
 import { UserStatisticsApiType } from '../types/user-statistics-api.type';
+import { UserAvatarService } from './user-avatar.service';
 
 @Injectable()
 export class UserService {
   constructor(
     @InjectRepository(UserEntity)
     private readonly userRepository: Repository<UserEntity>,
+    private readonly userAvatarService: UserAvatarService,
     private readonly projectService: ProjectService,
     private readonly noteService: NoteService,
     @Inject(forwardRef(() => TaskService))
@@ -95,9 +98,9 @@ export class UserService {
     };
   }
 
-  async createUser(registerDto: RegisterDto): Promise<UserEntity> {
+  async createUser(signUpDto: SignUpDto): Promise<UserApiType> {
     const newUser = new UserEntity();
-    Object.assign(newUser, registerDto);
+    Object.assign(newUser, signUpDto);
     const user = await this.userRepository.save(newUser);
     const createProjectDto = {
       title: SPECIAL_ONE_PROJECT_NAME,
@@ -106,7 +109,9 @@ export class UserService {
     };
     const project = await this.projectService.createProject(createProjectDto, user);
     project.owner = user;
-    return user;
+
+    delete user.created_at;
+    return this.userAvatarService.getUserWithAvatarUrl(user as UserApiType);
   }
 
   async setCurrentRefreshToken(refreshToken: string, userId: string): Promise<void> {

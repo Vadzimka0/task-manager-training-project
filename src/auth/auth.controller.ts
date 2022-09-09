@@ -5,54 +5,48 @@ import {
   Get,
   HttpCode,
   Post,
-  Req,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
 
 import { Data } from '../common/types/data';
 import { UserEntity } from '../user/entities/user.entity';
-import { UserService } from '../user/services/user.service';
 import { AuthService } from './auth.service';
-import { RegisterDto } from './dto/register.dto';
+import { User } from './decorators/user.decorator';
+import { SignUpDto } from './dto/sign-up.dto';
 import { JwtRefreshGuard, LocalAuthGuard } from './guards';
-import { RequestWithUser } from './interfaces/requestWithUser.interface';
-import { SuccessResponse } from './interfaces/successResponse.interface';
-import { UserSession } from './interfaces/userSession.interface';
+import { SuccessApiType, UserInfoApiType, UserSessionApiType } from './types';
 
-@Controller('auth')
+@Controller()
 @UseInterceptors(ClassSerializerInterceptor)
 export class AuthController {
-  constructor(
-    private readonly authService: AuthService,
-    private readonly userService: UserService,
-  ) {}
+  constructor(private readonly authService: AuthService) {}
 
   @Post('sign-up')
-  async register(@Body() registerDto: RegisterDto): Promise<Data<UserEntity>> {
-    const data = await this.authService.register(registerDto);
+  async signUp(@Body() signUpDto: SignUpDto): Promise<Data<UserInfoApiType>> {
+    const data = await this.authService.signUp(signUpDto);
     return { data };
   }
 
   @HttpCode(200)
   @UseGuards(LocalAuthGuard)
   @Post('sign-in')
-  async logIn(@Req() request: RequestWithUser): Promise<Data<UserSession>> {
-    const data = await this.authService.login(request.user);
+  async signIn(@User() user: UserEntity): Promise<Data<UserSessionApiType>> {
+    const data = await this.authService.signIn(user);
     return { data };
   }
 
   @UseGuards(JwtRefreshGuard)
   @Get('refresh-token')
-  async refresh(@Req() request: RequestWithUser): Promise<Data<UserSession>> {
-    const data = await this.authService.refresh(request.user);
+  async refreshToken(@User() user: UserEntity): Promise<Data<UserSessionApiType>> {
+    const data = await this.authService.refreshToken(user);
     return { data };
   }
 
   @HttpCode(200)
   @Post('sign-out')
-  async logOut(@Body() body: { email: string }): Promise<Data<SuccessResponse>> {
-    const data = await this.authService.logout(body.email);
+  async signOut(@Body() body: { email: string }): Promise<Data<SuccessApiType>> {
+    const data = await this.authService.signOut(body.email);
     return { data };
   }
 }

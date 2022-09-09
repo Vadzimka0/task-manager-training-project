@@ -11,11 +11,8 @@ import * as bcrypt from 'bcrypt';
 import PostgresErrorCode from '../database/postgresErrorCode.enum';
 import { UserEntity } from '../user/entities/user.entity';
 import { UserService } from '../user/services/user.service';
-import { RegisterDto } from './dto/register.dto';
-import { Register } from './interfaces/register.type';
-import { SuccessResponse } from './interfaces/successResponse.interface';
-import { TokenPayload } from './interfaces/tokenPayload.interface';
-import { UserSession } from './interfaces/userSession.interface';
+import { SignUpDto } from './dto/sign-up.dto';
+import { SuccessApiType, TokenPayload, UserInfoApiType, UserSessionApiType } from './types';
 
 @Injectable()
 export class AuthService {
@@ -28,18 +25,19 @@ export class AuthService {
     this.token_type = 'Bearer';
   }
 
-  async register(registerDto: RegisterDto): Promise<UserEntity> {
-    const hashedPassword = await bcrypt.hash(registerDto.password, 10);
+  async signUp(signUpDto: SignUpDto): Promise<UserInfoApiType> {
+    const hashedPassword = await bcrypt.hash(signUpDto.password, 10);
     try {
       const createdUser = await this.userService.createUser({
-        ...registerDto,
+        ...signUpDto,
         password: hashedPassword,
       });
 
       const user_session = await this.getUserSessionInfo(createdUser);
-      Object.assign(createdUser, { user_session });
 
-      return createdUser;
+      const userInfo = Object.assign(createdUser, { user_session });
+
+      return userInfo;
     } catch (error) {
       if (error?.code === PostgresErrorCode.UniqueViolation) {
         throw new UnprocessableEntityException('User is already registered.');
@@ -48,20 +46,20 @@ export class AuthService {
     }
   }
 
-  async login(user: UserEntity): Promise<UserSession> {
+  async signIn(user: UserEntity): Promise<UserSessionApiType> {
     return this.getUserSessionInfo(user);
   }
 
-  async refresh(user: UserEntity): Promise<UserSession> {
+  async refreshToken(user: UserEntity): Promise<UserSessionApiType> {
     return this.getUserSessionInfo(user);
   }
 
-  async logout(email: string): Promise<SuccessResponse> {
+  async signOut(email: string): Promise<SuccessApiType> {
     await this.userService.removeRefreshToken(email);
     return { success: true };
   }
 
-  async getUserSessionInfo(user: UserEntity): Promise<UserSession> {
+  async getUserSessionInfo(user: UserEntity): Promise<UserSessionApiType> {
     const access_token = this.getJwtAccessToken(user.email);
     const refresh_token = this.getJwtRefreshToken(user.email);
     await this.userService.setCurrentRefreshToken(refresh_token, user.id);

@@ -1,6 +1,6 @@
 import { IsBase64, IsEmail, IsNotEmpty } from 'class-validator';
 
-export class RegisterDto {
+export class SignUpDto {
   @IsEmail()
   @IsNotEmpty()
   readonly email: string;
