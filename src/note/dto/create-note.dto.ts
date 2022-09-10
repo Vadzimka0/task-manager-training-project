@@ -8,7 +8,6 @@ export class CreateNoteDto {
   @IsNotEmpty()
   readonly color: string;
 
-  @IsNotEmpty()
   @IsUUID()
   readonly owner_id: string;
 }

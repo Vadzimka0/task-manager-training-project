@@ -16,7 +16,7 @@ import { User } from '../auth/decorators/user.decorator';
 import { JwtAuthGuard } from '../auth/guards';
 import { Data } from '../common/types/data';
 import { UserEntity } from '../user/entities/user.entity';
-import { CreateNoteDto, UpdateNoteDto } from './dto';
+import { CreateNoteDto, FetchUserNotesDto, UpdateNoteDto } from './dto';
 import { NoteService } from './note.service';
 import { NoteApiType } from './types/note-api.type';
 
@@ -27,8 +27,11 @@ export class NoteController {
   constructor(private readonly noteService: NoteService) {}
 
   @Get()
-  async fetchAllOwnersNotes(@User('id') userId: string): Promise<Data<NoteApiType[]>> {
-    const data = await this.noteService.fetchAllOwnersNotes(userId);
+  async fetchUserNotes(
+    @User('id') userId: string,
+    @Body() fetchUserNotesDto: FetchUserNotesDto,
+  ): Promise<Data<NoteApiType[]>> {
+    const data = await this.noteService.fetchUserNotes(userId, fetchUserNotesDto.owner_id);
     return { data };
   }
 

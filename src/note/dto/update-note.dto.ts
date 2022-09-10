@@ -12,7 +12,6 @@ export class UpdateNoteDto {
   @IsBoolean()
   readonly is_completed: string;
 
-  @IsNotEmpty()
   @IsUUID()
   readonly owner_id: string;
 }

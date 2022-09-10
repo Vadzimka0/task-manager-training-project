@@ -1,5 +1,4 @@
 import {
-  ForbiddenException,
   HttpException,
   HttpStatus,
   Injectable,
@@ -21,7 +20,9 @@ export class NoteService {
     private noteRepository: Repository<NoteEntity>,
   ) {}
 
-  async fetchAllOwnersNotes(userId: string): Promise<NoteApiType[]> {
+  async fetchUserNotes(userId: string, ownerId: string): Promise<NoteApiType[]> {
+    this.idsMatching(ownerId, userId);
+
     const queryBuilder = this.noteRepository
       .createQueryBuilder('notes')
       .leftJoinAndSelect('notes.owner', 'owner')
@@ -34,7 +35,7 @@ export class NoteService {
   }
 
   async fetchOneNote(userId: string, noteId: string): Promise<NoteApiType> {
-    const note = await this.findAndValidateNote(userId, noteId);
+    const note = await this.findNoteForRead(userId, noteId);
     return this.getNoteWithOwnerId(note as NoteApiType);
   }
 
@@ -60,7 +61,7 @@ export class NoteService {
     const { owner_id, ...dtoWithoutOwner } = updateNoteDto;
     this.idsMatching(owner_id, userId);
 
-    const currentNote = await this.findAndValidateNote(userId, noteId);
+    const currentNote = await this.findNoteForEdit(userId, noteId);
     Object.assign(currentNote, dtoWithoutOwner);
 
     const savedNote = await this.noteRepository.save(currentNote);
@@ -68,29 +69,27 @@ export class NoteService {
   }
 
   async deleteNote(userId: string, noteId: string): Promise<{ id: string }> {
-    await this.findAndValidateNote(userId, noteId);
+    await this.findNoteForEdit(userId, noteId);
     await this.noteRepository.delete({ id: noteId });
     return { id: noteId };
   }
 
-  async findAndValidateNote(userId: string, noteId: string): Promise<NoteEntity> {
-    try {
-      const note = await this.noteRepository.findOneBy({ id: noteId });
-      if (!note) {
-        throw new InternalServerErrorException(
-          `Entity NoteModel, id=${noteId} not found in the database`,
-        );
-      }
-      if (note.owner.id !== userId) {
-        throw new UnprocessableEntityException('The note id is not valid. You are not the owner');
-      }
-      return note;
-    } catch (err) {
-      throw new HttpException(
-        err.message,
-        err.status ? err.status : HttpStatus.INTERNAL_SERVER_ERROR,
+  async findNoteForRead(userId: string, noteId: string): Promise<NoteEntity> {
+    const note = await this.noteRepository.findOneBy({ id: noteId });
+    if (!note || note.owner.id !== userId) {
+      throw new UnprocessableEntityException('The note id is not valid');
+    }
+    return note;
+  }
+
+  async findNoteForEdit(userId: string, noteId: string): Promise<NoteEntity> {
+    const note = await this.noteRepository.findOneBy({ id: noteId });
+    if (!note || note.owner.id !== userId) {
+      throw new InternalServerErrorException(
+        `Entity NoteModel, id=${noteId} not found in the database`,
       );
     }
+    return note;
   }
 
   validateHexColor(color: string): void {
@@ -103,7 +102,7 @@ export class NoteService {
 
   idsMatching(owner_id: string, user_id: string): void {
     if (owner_id !== user_id) {
-      throw new ForbiddenException('Invalid owner_id');
+      throw new UnprocessableEntityException('The user id is not valid');
     }
   }
 
