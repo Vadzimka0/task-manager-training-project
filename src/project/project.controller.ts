@@ -4,6 +4,7 @@ import {
   Controller,
   Delete,
   Get,
+  HttpCode,
   Param,
   Post,
   Put,
@@ -18,8 +19,7 @@ import { Data } from '../common/types/data';
 import { UserEntity } from '../user/entities/user.entity';
 import { CreateProjectDto } from './dto/create-project.dto';
 import { ProjectService } from './project.service';
-import { ProjectApiType } from './types/project-api.type';
-import { ProjectStatisticApiType } from './types/projects-statistics-api.type';
+import { ProjectApiType, ProjectStatisticApiType } from './types';
 
 @Controller()
 @UseGuards(JwtAuthGuard)
@@ -64,6 +64,7 @@ export class ProjectController {
   }
 
   @Post('projects')
+  @HttpCode(200)
   async createProject(
     @Body() projectDto: CreateProjectDto,
     @User() currentUser: UserEntity,

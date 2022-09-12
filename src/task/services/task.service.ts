@@ -140,13 +140,13 @@ export class TaskService {
 
   async getProject(userId: string, projectId: string, assignedTo: string): Promise<ProjectEntity> {
     if (!assignedTo) {
-      const specialOneProject = await this.projectService.getProjectByTitle(
+      const specialOneProject = await this.projectService.findProjectByTitle(
         SPECIAL_ONE_PROJECT_NAME,
         userId,
       );
       return specialOneProject;
     }
-    const project = await this.projectService.getProjectByProjectId(projectId, userId);
+    const project = await this.projectService.findProjectForRead(projectId, userId);
     return project;
   }
 

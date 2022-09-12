@@ -3,6 +3,7 @@ import {
   HttpException,
   HttpStatus,
   Injectable,
+  InternalServerErrorException,
   NotFoundException,
   UnprocessableEntityException,
 } from '@nestjs/common';
@@ -13,8 +14,7 @@ import { SPECIAL_ONE_PROJECT_NAME } from '../common/constants/default-constants'
 import { UserEntity } from '../user/entities/user.entity';
 import { CreateProjectDto } from './dto/create-project.dto';
 import { ProjectEntity } from './entities/project.entity';
-import { ProjectApiType } from './types/project-api.type';
-import { ProjectStatisticApiType } from './types/projects-statistics-api.type';
+import { ProjectApiType, ProjectStatisticApiType } from './types';
 
 @Injectable()
 export class ProjectService {
@@ -34,7 +34,7 @@ export class ProjectService {
       .createQueryBuilder('projects')
       .leftJoinAndSelect('projects.owner', 'owner')
       .andWhere('projects.owner_id = :id', { id: userId })
-      .orderBy('projects.created_at', 'DESC');
+      .orderBy('projects.created_at', 'ASC');
 
     if (search && search.query) {
       queryBuilder.andWhere('projects.title LIKE :query', {
@@ -128,7 +128,7 @@ export class ProjectService {
     try {
       const project = await this.projectRepository.findOneBy({ id: projectId });
       if (!project) {
-        throw new NotFoundException(
+        throw new InternalServerErrorException(
           `Entity ProjectModel, id=${projectId} not found in the database`,
         );
       }
@@ -174,7 +174,7 @@ export class ProjectService {
 
   idsMatching(owner_id: string, user_id: string): void {
     if (owner_id !== user_id) {
-      throw new ForbiddenException('Invalid id');
+      throw new UnprocessableEntityException('The user id is not valid');
     }
   }
 
@@ -183,7 +183,7 @@ export class ProjectService {
     return project;
   }
 
-  async getProjectByTitle(title: string, currentUserId: string): Promise<ProjectEntity> {
+  async findProjectByTitle(title: string, currentUserId: string): Promise<ProjectEntity> {
     const project = await this.projectRepository
       .createQueryBuilder('projects')
       .where('projects.title = :title', { title: title })
@@ -195,15 +195,15 @@ export class ProjectService {
     return project;
   }
 
-  async getProjectByProjectId(projectId: string, currentUserId: string): Promise<ProjectEntity> {
-    const project = await this.projectRepository
-      .createQueryBuilder('projects')
-      .where('projects.id = :id', { id: projectId })
-      .andWhere('projects.owner_id = :owner_id', { owner_id: currentUserId })
-      .getOne();
-    if (!project) {
-      throw new NotFoundException('Project does not exist');
-    }
-    return project;
-  }
+  // async findProjectById(projectId: string, currentUserId: string): Promise<ProjectEntity> {
+  //   const project = await this.projectRepository
+  //     .createQueryBuilder('projects')
+  //     .where('projects.id = :id', { id: projectId })
+  //     .andWhere('projects.owner_id = :owner_id', { owner_id: currentUserId })
+  //     .getOne();
+  //   if (!project) {
+  //     throw new NotFoundException('Project does not exist');
+  //   }
+  //   return project;
+  // }
 }
