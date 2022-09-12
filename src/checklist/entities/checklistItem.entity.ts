@@ -15,6 +15,8 @@ export class ChecklistItemEntity extends AbstractEntity {
   @Exclude()
   @ManyToOne(() => ChecklistEntity, (checklist) => checklist.items, {
     onDelete: 'CASCADE',
+    onUpdate: 'RESTRICT',
+    orphanedRowAction: 'delete',
   })
   checklist: ChecklistEntity;
 }

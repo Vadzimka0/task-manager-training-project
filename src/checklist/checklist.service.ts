@@ -1,5 +1,4 @@
 import {
-  ForbiddenException,
   HttpException,
   HttpStatus,
   Injectable,
@@ -81,14 +80,6 @@ export class ChecklistService {
     this.idsMatching(owner_id, userId);
 
     const currentChecklist = await this.findAndValidateChecklist(listId, userId);
-    if (
-      (items === null && currentChecklist.items.length) ||
-      (items && items.length && !currentChecklist.items.length) ||
-      (items && currentChecklist.items && items.length !== currentChecklist.items.length)
-    ) {
-      throw new ForbiddenException('The count of items cannot be different from the original');
-    }
-
     Object.assign(currentChecklist, dtoWithoutItemsAndOwner);
     currentChecklist.items = await this.getUpdatedItems(items, listId);
 
@@ -142,8 +133,14 @@ export class ChecklistService {
     }
     const currentItems = [];
     for (const item of items) {
-      const currentItem = await this.findAndValidateChecklistItem(item.id, undefined, listId);
-      Object.assign(currentItem, item);
+      let currentItem: ChecklistItemEntity;
+      const { id, ...itemWithoutId } = item;
+      if (id) {
+        currentItem = await this.findAndValidateChecklistItem(item.id, undefined, listId);
+      } else {
+        currentItem = new ChecklistItemEntity();
+      }
+      Object.assign(currentItem, itemWithoutId);
       await this.checklistItemRepository.save(currentItem);
       currentItems.push(currentItem);
     }
@@ -212,7 +209,7 @@ export class ChecklistService {
 
   idsMatching(owner_id: string, user_id: string): void {
     if (owner_id !== user_id) {
-      throw new ForbiddenException('Invalid ID. You are not an owner');
+      throw new UnprocessableEntityException('The user id is not valid');
     }
   }
 

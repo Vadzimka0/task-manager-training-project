@@ -1,9 +1,9 @@
-import { IsBoolean, IsNotEmpty, IsUUID, MaxLength } from 'class-validator';
+import { IsBoolean, IsNotEmpty, IsOptional, IsUUID, MaxLength } from 'class-validator';
 
 export class UpdateChecklistItemDto {
-  @IsNotEmpty()
+  @IsOptional()
   @IsUUID()
-  readonly id: string;
+  readonly id: string | null;
 
   @IsNotEmpty()
   @MaxLength(512)
