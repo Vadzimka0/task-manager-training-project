@@ -1,5 +1,12 @@
 import { Exclude } from 'class-transformer';
-import { Column, CreateDateColumn, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  ManyToMany,
+  OneToMany,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 
 import { ChecklistEntity } from '../../checklist/entities/checklist.entity';
 import { NoteEntity } from '../../note/entities/note.entity';
@@ -34,6 +41,9 @@ export class UserEntity {
 
   @OneToMany(() => TaskEntity, (task: TaskEntity) => task.performer)
   assigned_tasks: TaskEntity[];
+
+  @ManyToMany(() => TaskEntity, (task: TaskEntity) => task.members)
+  participate_tasks: TaskEntity[];
 
   @OneToMany(() => NoteEntity, (note: NoteEntity) => note.owner)
   notes: NoteEntity[];

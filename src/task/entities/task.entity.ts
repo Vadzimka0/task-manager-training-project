@@ -28,7 +28,7 @@ export class TaskEntity extends AbstractEntity {
   @ManyToOne(() => ProjectEntity, (project) => project.tasks, { eager: true, onDelete: 'CASCADE' })
   project: ProjectEntity;
 
-  @ManyToMany(() => UserEntity, { eager: true })
+  @ManyToMany(() => UserEntity, (user) => user.participate_tasks, { eager: true })
   @JoinTable()
   members: UserEntity[];
 

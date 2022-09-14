@@ -1,12 +1,4 @@
-import {
-  forwardRef,
-  HttpException,
-  HttpStatus,
-  Inject,
-  Injectable,
-  NotFoundException,
-  UnprocessableEntityException,
-} from '@nestjs/common';
+import { forwardRef, Inject, Injectable, UnprocessableEntityException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcrypt';
 import { Repository } from 'typeorm';
@@ -127,14 +119,14 @@ export class UserService {
     }
   }
 
-  async removeRefreshToken(email: string): Promise<any> {
+  async removeRefreshToken(email: string): Promise<void> {
     const user = await this.getByEmail(email);
     await this.userRepository.update(user.id, {
       refresh_token: null,
     });
   }
 
-  async getMembersInstances(membersIds: string[]): Promise<UserEntity[]> {
+  async getMembersInstances(membersIds: string[]): Promise<UserApiType[]> {
     const currentMembers = [];
     for (const id of membersIds) {
       const user = await this.getById(id);

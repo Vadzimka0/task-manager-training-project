@@ -11,14 +11,14 @@ import { UserAvatarService, UserService } from './services';
 
 @Module({
   imports: [
+    forwardRef(() => TaskModule),
     ProjectModule,
     NoteModule,
-    forwardRef(() => TaskModule),
     ConfigModule,
     TypeOrmModule.forFeature([UserEntity]),
   ],
   controllers: [UserController, UserAvatarController],
   providers: [UserService, UserAvatarService],
-  exports: [UserService],
+  exports: [UserService, UserAvatarService],
 })
 export class UserModule {}

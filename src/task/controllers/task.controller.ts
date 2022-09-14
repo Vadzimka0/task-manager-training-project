@@ -4,6 +4,7 @@ import {
   Controller,
   Delete,
   Get,
+  HttpCode,
   Param,
   Post,
   Put,
@@ -26,6 +27,7 @@ export class TaskController {
   constructor(private readonly taskService: TaskService) {}
 
   @Post('tasks')
+  @HttpCode(200)
   async createTask(
     @Body() taskDto: CreateTaskDto,
     @User() currentUser: UserEntity,
@@ -62,6 +64,15 @@ export class TaskController {
     return { data };
   }
 
+  @Get('project-tasks/:projectId')
+  async fetchProjectTasks(
+    @User('id') userId: string,
+    @Param('projectId') projectId: string,
+  ): Promise<Data<TaskApiType[]>> {
+    const data = await this.taskService.fetchProjectTasks(userId, projectId);
+    return { data };
+  }
+
   @Get('user-tasks/:ownerId')
   async fetchUserTasks(
     @User('id') userId: string,
@@ -71,12 +82,21 @@ export class TaskController {
     return { data };
   }
 
-  @Get('project-tasks/:projectId')
-  async fetchProjectTasks(
+  @Get('assigned-tasks/:ownerId')
+  async fetchAssignedTasks(
     @User('id') userId: string,
-    @Param('projectId') projectId: string,
+    @Param('ownerId') ownerId: string,
   ): Promise<Data<TaskApiType[]>> {
-    const data = await this.taskService.fetchProjectTasks(userId, projectId);
+    const data = await this.taskService.fetchAssignedTasks(userId, ownerId);
+    return { data };
+  }
+
+  @Get('participate-in-tasks/:ownerId')
+  async fetchParticipateInTasks(
+    @User('id') userId: string,
+    @Param('ownerId') ownerId: string,
+  ): Promise<Data<TaskApiType[]>> {
+    const data = await this.taskService.fetchParticipateInTasks(userId, ownerId);
     return { data };
   }
 }
