@@ -55,8 +55,8 @@ export class UserAvatarController {
     @Res({ passthrough: true }) res: Response,
   ): Promise<StreamableFile> {
     const user = await this.userService.getById(id);
-
     const isFileExists = await isExists(user.path);
+
     if (!isFileExists) {
       throw new NotFoundException(`sorry, file ${user.filename} not found`);
     }
@@ -67,6 +67,7 @@ export class UserAvatarController {
       'Content-Type': user.mimetype,
       'Content-Disposition': `attachment; filename="${user.filename}"`,
     });
+
     return new StreamableFile(stream);
   }
 }

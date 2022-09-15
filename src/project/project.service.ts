@@ -41,15 +41,15 @@ export class ProjectService {
         query: `%${search.query}%`,
       });
     }
+
     const projects = await queryBuilder.getMany();
-    const projectsWithOwnerId = projects.map((project: ProjectApiType) =>
-      this.getProjectWithOwnerId(project),
-    );
-    return projectsWithOwnerId;
+
+    return projects.map((project: ProjectApiType) => this.getProjectWithOwnerId(project));
   }
 
   async fetchOneProject(userId: string, projectId: string): Promise<ProjectApiType> {
     const project = await this.findProjectForRead(projectId, userId);
+
     return this.getProjectWithOwnerId(project as ProjectApiType);
   }
 
@@ -87,15 +87,17 @@ export class ProjectService {
     currentUser: UserEntity,
   ): Promise<ProjectApiType> {
     this.validateHexColor(projectDto.color);
+
     const { owner_id, ...dtoWithoutOwner } = projectDto;
+
     this.idsMatching(owner_id, currentUser.id);
     await this.checkDuplicateProjectTitle(projectDto.title, currentUser.id);
 
     const newProject = new ProjectEntity();
     Object.assign(newProject, dtoWithoutOwner);
     newProject.owner = currentUser;
-
     const savedProject = await this.projectRepository.save(newProject);
+
     return this.getProjectWithOwnerId(savedProject as ProjectApiType);
   }
 
@@ -109,32 +111,38 @@ export class ProjectService {
     this.idsMatching(owner_id, userId);
 
     const currentProject = await this.findProjectForEdit(projectId, userId);
+
     if (currentProject.title !== projectDto.title) {
       await this.checkDuplicateProjectTitle(projectDto.title, userId);
     }
-    Object.assign(currentProject, dtoWithoutOwner);
 
+    Object.assign(currentProject, dtoWithoutOwner);
     const savedProject = await this.projectRepository.save(currentProject);
+
     return this.getProjectWithOwnerId(savedProject as ProjectApiType);
   }
 
   async deleteProject(userId: string, projectId: string): Promise<{ id: string }> {
     await this.findProjectForEdit(projectId, userId);
     await this.projectRepository.delete({ id: projectId });
+
     return { id: projectId };
   }
 
   async findProjectForRead(projectId: string, userId: string): Promise<ProjectEntity> {
     try {
       const project = await this.projectRepository.findOneBy({ id: projectId });
+
       if (!project) {
         throw new InternalServerErrorException(
           `Entity ProjectModel, id=${projectId} not found in the database`,
         );
       }
+
       if (project.owner.id !== userId) {
         throw new ForbiddenException('Invalid ID. You are not an owner');
       }
+
       return project;
     } catch (err) {
       throw new HttpException(
@@ -146,9 +154,11 @@ export class ProjectService {
 
   async findProjectForEdit(projectId: string, userId: string): Promise<ProjectEntity> {
     const project = await this.findProjectForRead(projectId, userId);
+
     if (project.title === SPECIAL_ONE_PROJECT_NAME) {
       throw new ForbiddenException('This project cannot be edited or deleted');
     }
+
     return project;
   }
 
@@ -159,6 +169,7 @@ export class ProjectService {
       .andWhere('projects.title = :title', { title })
       .andWhere('projects.owner_id = :id', { id })
       .getOne();
+
     if (project) {
       throw new ForbiddenException('Project with that name already exists');
     }
@@ -180,6 +191,7 @@ export class ProjectService {
 
   getProjectWithOwnerId(project: ProjectApiType): ProjectApiType {
     project.owner_id = project.owner.id;
+
     return project;
   }
 
@@ -189,9 +201,11 @@ export class ProjectService {
       .where('projects.title = :title', { title: title })
       .andWhere('projects.owner_id = :id', { id: currentUserId })
       .getOne();
+
     if (!project) {
       throw new NotFoundException('Project does not exist');
     }
+
     return project;
   }
 }

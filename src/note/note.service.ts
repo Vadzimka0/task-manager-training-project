@@ -1,6 +1,4 @@
 import {
-  HttpException,
-  HttpStatus,
   Injectable,
   InternalServerErrorException,
   UnprocessableEntityException,
@@ -30,12 +28,13 @@ export class NoteService {
       .orderBy('notes.created_at', 'ASC');
 
     const notes = await queryBuilder.getMany();
-    const notesWithOwnerId = notes.map((note: NoteApiType) => this.getNoteWithOwnerId(note));
-    return notesWithOwnerId;
+
+    return notes.map((note: NoteApiType) => this.getNoteWithOwnerId(note));
   }
 
   async fetchOneNote(userId: string, noteId: string): Promise<NoteApiType> {
     const note = await this.findNoteForRead(userId, noteId);
+
     return this.getNoteWithOwnerId(note as NoteApiType);
   }
 
@@ -47,8 +46,8 @@ export class NoteService {
     const newNote = new NoteEntity();
     Object.assign(newNote, dtoWithoutOwner);
     newNote.owner = currentUser;
-
     const savedNote = await this.noteRepository.save(newNote);
+
     return this.getNoteWithOwnerId(savedNote as NoteApiType);
   }
 
@@ -63,32 +62,37 @@ export class NoteService {
 
     const currentNote = await this.findNoteForEdit(userId, noteId);
     Object.assign(currentNote, dtoWithoutOwner);
-
     const savedNote = await this.noteRepository.save(currentNote);
+
     return this.getNoteWithOwnerId(savedNote as NoteApiType);
   }
 
   async deleteNote(userId: string, noteId: string): Promise<{ id: string }> {
     await this.findNoteForEdit(userId, noteId);
     await this.noteRepository.delete({ id: noteId });
+
     return { id: noteId };
   }
 
   async findNoteForRead(userId: string, noteId: string): Promise<NoteEntity> {
     const note = await this.noteRepository.findOneBy({ id: noteId });
+
     if (!note || note.owner.id !== userId) {
       throw new UnprocessableEntityException('The note id is not valid');
     }
+
     return note;
   }
 
   async findNoteForEdit(userId: string, noteId: string): Promise<NoteEntity> {
     const note = await this.noteRepository.findOneBy({ id: noteId });
+
     if (!note || note.owner.id !== userId) {
       throw new InternalServerErrorException(
         `Entity NoteModel, id=${noteId} not found in the database`,
       );
     }
+
     return note;
   }
 
@@ -108,6 +112,7 @@ export class NoteService {
 
   getNoteWithOwnerId(note: NoteApiType): NoteApiType {
     note.owner_id = note.owner.id;
+
     return note;
   }
 

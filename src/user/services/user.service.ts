@@ -30,6 +30,7 @@ export class UserService {
 
   async fetchUser(id: string): Promise<UserApiType> {
     const user = await this.getById(id);
+
     return this.userAvatarService.getUserWithAvatarUrl(user as UserApiType);
   }
 
@@ -42,6 +43,7 @@ export class UserService {
       .orderBy('users.created_at', 'DESC');
 
     const members = await queryBuilder.getMany();
+
     return members.map((user) => this.userAvatarService.getUserWithAvatarUrl(user as UserApiType));
   }
 
@@ -74,17 +76,21 @@ export class UserService {
 
   async getById(id: string): Promise<UserEntity> {
     const user = await this.userRepository.findOne({ where: { id } });
+
     if (user) {
       return user;
     }
+
     throw new UnprocessableEntityException('The user id is not valid');
   }
 
   async getByEmail(email: string): Promise<UserEntity> {
     const user = await this.userRepository.findOne({ where: { email } });
+
     if (user) {
       return user;
     }
+
     throw new UnprocessableEntityException('The user email is not valid');
   }
 
@@ -92,6 +98,7 @@ export class UserService {
     const newUser = new UserEntity();
     Object.assign(newUser, signUpDto);
     const user = await this.userRepository.save(newUser);
+
     const createProjectDto = {
       title: SPECIAL_ONE_PROJECT_NAME,
       color: SPECIAL_ONE_PROJECT_COLOR,
@@ -101,6 +108,7 @@ export class UserService {
     project.owner = user;
 
     delete user.created_at;
+
     return this.userAvatarService.getUserWithAvatarUrl(user as UserApiType);
   }
 
@@ -114,9 +122,11 @@ export class UserService {
   async getUserIfRefreshTokenMatches(refreshToken: string, email: string): Promise<UserEntity> {
     const user = await this.getByEmail(email);
     const isRefreshTokenMatching = await bcrypt.compare(refreshToken, user.refresh_token);
+
     if (isRefreshTokenMatching) {
       return user;
     }
+    // TODO: throw error
   }
 
   async removeRefreshToken(email: string): Promise<void> {
@@ -128,10 +138,12 @@ export class UserService {
 
   async getMembersInstances(membersIds: string[]): Promise<UserApiType[]> {
     const currentMembers = [];
+
     for (const id of membersIds) {
       const user = await this.getById(id);
       currentMembers.push(user);
     }
+
     return currentMembers;
   }
 }

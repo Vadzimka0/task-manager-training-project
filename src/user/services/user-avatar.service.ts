@@ -38,8 +38,8 @@ export class UserAvatarService {
     };
 
     Object.assign(user, filedata);
-
     const savedUser = await this.userRepository.save(user);
+
     return this.getUserWithAvatarUrl(savedUser as UserApiType);
   }
 
@@ -47,6 +47,7 @@ export class UserAvatarService {
     user.avatar_url = user.path
       ? `${this.server_url}${user.path.substring(user.path.indexOf('/') + 1)}`
       : null;
+
     return user;
   }
 }

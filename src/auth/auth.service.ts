@@ -56,6 +56,7 @@ export class AuthService {
 
   async signOut(email: string): Promise<SuccessApiType> {
     await this.userService.removeRefreshToken(email);
+
     return { success: true };
   }
 
@@ -66,6 +67,7 @@ export class AuthService {
 
     const expiresInMS = this.configService.get('JWT_ACCESS_TOKEN_EXPIRATION_TIME') * 1000;
     const expires_in = new Date(new Date().getTime() + expiresInMS).getTime();
+
     return { access_token, refresh_token, token_type: this.token_type, expires_in };
   }
 
@@ -75,6 +77,7 @@ export class AuthService {
       secret: this.configService.get('JWT_ACCESS_TOKEN_SECRET'),
       expiresIn: `${this.configService.get('JWT_ACCESS_TOKEN_EXPIRATION_TIME')}s`,
     });
+
     return token;
   }
 
@@ -84,6 +87,7 @@ export class AuthService {
       secret: this.configService.get('JWT_REFRESH_TOKEN_SECRET'),
       expiresIn: `${this.configService.get('JWT_REFRESH_TOKEN_EXPIRATION_TIME')}s`,
     });
+
     return refreshToken;
   }
 
@@ -91,6 +95,7 @@ export class AuthService {
     try {
       const user = await this.userService.getByEmail(email);
       await this.verifyPassword(base64Password, user.password);
+
       return user;
     } catch (error) {
       throw new UnauthorizedException('Invalid credentials.');

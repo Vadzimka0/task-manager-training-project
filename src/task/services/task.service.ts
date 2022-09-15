@@ -41,7 +41,9 @@ export class TaskService {
   async createTask(taskDto: CreateTaskDto, currentUser: UserEntity): Promise<TaskApiType> {
     const { owner_id, project_id, assigned_to, members, attachments, ...dtoWithoutRelationItems } =
       taskDto;
+
     if (attachments === undefined) throw new ForbiddenException('attachments must be null');
+
     this.idsMatching(owner_id, currentUser.id);
 
     const newTask = new TaskEntity();
@@ -55,9 +57,10 @@ export class TaskService {
 
     const currentMembers = await this.getMembersById(members);
     newTask.members = currentMembers;
-    newTask.attachments = null;
 
+    newTask.attachments = null;
     const savedTask = await this.taskRepository.save(newTask);
+
     return this.getTaskWithRelationIds(savedTask as TaskApiType);
   }
 
@@ -84,6 +87,7 @@ export class TaskService {
     }
 
     const currentMembersArray = currentTask.members.map((member) => member.id);
+
     if (!haveSameItems(members, currentMembersArray)) {
       const updatedMembers = await this.getMembersById(members);
       currentTask.members = updatedMembers;
@@ -91,22 +95,26 @@ export class TaskService {
 
     // attachments ???
     const savedTask = await this.taskRepository.save(currentTask);
+
     return this.getTaskWithRelationIds(savedTask as TaskApiType);
   }
 
   async deleteTask(userId: string, taskId: string): Promise<{ id: string }> {
     await this.getValidTask(userId, taskId);
     await this.taskRepository.delete({ id: taskId });
+
     return { id: taskId };
   }
 
   async fetchOneTask(userId: string, taskId: string): Promise<TaskApiType> {
     const task = await this.taskRepository.findOneBy({ id: taskId });
+
     if (!task) {
       throw new InternalServerErrorException(
         `Entity TaskModel, id=${taskId} not found in the database`,
       );
     }
+
     return this.getTaskWithRelationIds(task as TaskApiType);
   }
 
@@ -128,6 +136,7 @@ export class TaskService {
       id: projectId,
     });
     const tasks = await projectTasksQueryBuilder.getMany();
+
     return tasks.map((task: TaskApiType) => this.getTaskWithRelationIds(task));
   }
 
@@ -137,6 +146,7 @@ export class TaskService {
       id: userId,
     });
     const tasks = await userTasksQueryBuilder.getMany();
+
     return tasks.map((task: TaskApiType) => this.getTaskWithRelationIds(task));
   }
 
@@ -146,6 +156,7 @@ export class TaskService {
       id: ownerId,
     });
     const tasks = await assignedTasksQueryBuilder.getMany();
+
     return tasks.map((task: TaskApiType) => this.getTaskWithRelationIds(task));
   }
 
@@ -156,6 +167,7 @@ export class TaskService {
       .relation(UserEntity, 'participate_tasks')
       .of(ownerId)
       .loadMany();
+
     return participateInTasks.map((task: TaskApiType) => this.getTaskWithRelationIds(task));
   }
 
@@ -165,25 +177,29 @@ export class TaskService {
         SPECIAL_ONE_PROJECT_NAME,
         userId,
       );
+
       return specialOneProject;
     }
+
     const project = await this.projectService.findProjectForRead(projectId, userId);
+
     return project;
   }
 
   async getPerformerUser(ownerUser: UserEntity, assignedToId: string): Promise<UserEntity> {
     if (assignedToId) {
-      const assignedToUser = await this.userService.getById(assignedToId);
-      return assignedToUser;
+      return await this.userService.getById(assignedToId);
     }
+
+    //TODO: return null maybe
     return ownerUser;
   }
 
   async getMembersById(membersIds: string[]): Promise<UserEntity[]> {
     if (membersIds) {
-      const currentMembers = await this.userService.getMembersInstances(membersIds);
-      return currentMembers;
+      return await this.userService.getMembersInstances(membersIds);
     }
+
     return null;
   }
 
@@ -193,14 +209,17 @@ export class TaskService {
         where: { id: taskId },
         relations: ['attachments'],
       });
+
       if (!task) {
         throw new InternalServerErrorException(
           `Entity TaskModel, id=${taskId} not found in the database`,
         );
       }
+
       if (task.project.owner.id !== userId) {
         throw new ForbiddenException('Invalid ID. You are not an owner');
       }
+
       return task;
     } catch (err) {
       throw new HttpException(
@@ -213,15 +232,19 @@ export class TaskService {
   async getValidTaskForComment(userId: string, taskId: string): Promise<TaskEntity> {
     try {
       const task = await this.taskRepository.findOneBy({ id: taskId });
+
       if (!task) {
         throw new InternalServerErrorException(
           `Entity TaskModel, id=${taskId} not found in the database`,
         );
       }
+
       const ids = task.members.map((member) => member.id);
+
       if (!ids.includes(userId) && task.project.owner.id !== userId) {
         throw new ForbiddenException('Invalid ID. You are not an owner or member');
       }
+
       return task;
     } catch (err) {
       throw new HttpException(
@@ -251,6 +274,7 @@ export class TaskService {
           this.taskAttachmentService.getFullTaskAttachment(attachment),
         )
       : null;
+
     return task;
   }
 
@@ -268,6 +292,7 @@ export class TaskService {
 
     const created_tasks = +createdTasksObject.count;
     const completed_tasks = +completedTasksObject.count;
+
     return { created_tasks, completed_tasks };
   }
 
@@ -287,6 +312,7 @@ export class TaskService {
     const todo = total_performer_tasks
       ? `${((completed_performer_tasks / total_performer_tasks) * 100).toFixed(0)}%`
       : '0%';
+
     return todo;
   }
 }

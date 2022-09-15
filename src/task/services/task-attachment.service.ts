@@ -42,16 +42,18 @@ export class TaskAttachmentService {
     const newTaskAttachment = new TaskAttachmentEntity();
     Object.assign(newTaskAttachment, filedata);
     newTaskAttachment.task = currentTask;
-
     const savedAttachment = await this.taskAttachmentRepository.save(newTaskAttachment);
+
     return this.getFullTaskAttachment(savedAttachment as TaskAttachmentApiType);
   }
 
   async getFileById(id: string) {
     const file = await this.taskAttachmentRepository.findOneBy({ id });
+
     if (!file) {
       throw new NotFoundException(`Entity TaskAttachmentModel, id=${id} not found in the database`);
     }
+
     return file;
   }
 
@@ -60,6 +62,7 @@ export class TaskAttachmentService {
     attachment.url = `${this.server_url}${attachment.path.substring(
       attachment.path.indexOf('/') + 1,
     )}`;
+
     return attachment;
   }
 }

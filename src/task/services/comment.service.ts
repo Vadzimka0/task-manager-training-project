@@ -36,15 +36,13 @@ export class CommentService {
 
     const newComment = new CommentEntity();
     Object.assign(newComment, dtoWithoutRelationItems);
-
     newComment.owner = currentUser;
 
     const currentTask = await this.taskService.getValidTaskForComment(currentUser.id, task_id);
     newComment.task = currentTask;
-
     // attachments
-
     const savedComment = await this.commentRepository.save(newComment);
+
     return this.getCommentWithRelationIds(savedComment as CommentApiType);
   }
 
@@ -60,29 +58,31 @@ export class CommentService {
       .orderBy('comments.created_at', 'ASC');
 
     const comments = await queryBuilder.getMany();
-    const commentsWithRelationIds = comments.map((comment: CommentApiType) =>
-      this.getCommentWithRelationIds(comment),
-    );
-    return commentsWithRelationIds;
+
+    return comments.map((comment: CommentApiType) => this.getCommentWithRelationIds(comment));
   }
 
   async deleteComment(userId: string, commentId: string): Promise<{ id: string }> {
     await this.getValidComment(userId, commentId);
     await this.commentRepository.delete({ id: commentId });
+
     return { id: commentId };
   }
 
   async getValidComment(userId: string, commentId: string): Promise<CommentEntity> {
     try {
       const comment = await this.commentRepository.findOneBy({ id: commentId });
+
       if (!comment) {
         throw new NotFoundException(
           `Entity CommentModel, id=${commentId} not found in the database`,
         );
       }
+
       if (comment.owner.id !== userId) {
         throw new ForbiddenException('Invalid ID. You are not an owner');
       }
+
       return comment;
     } catch (err) {
       throw new HttpException(
@@ -100,6 +100,7 @@ export class CommentService {
           this.commentAttachmentService.getFullCommentAttachment(attachment),
         )
       : null;
+
     return comment;
   }
 }

@@ -38,17 +38,18 @@ export class ChecklistService {
       .orderBy('checklists.created_at', 'DESC');
 
     const checklists = await queryBuilder.getMany();
-    const checklistsWithOwnerId = checklists.map((checklist: ChecklistApiType) => {
+
+    return checklists.map((checklist: ChecklistApiType) => {
       checklist.owner_id = userId;
       checklist.items = this.getItemsWithChecklistId(checklist);
       return checklist;
     });
-    return checklistsWithOwnerId;
   }
 
   async fetchOneChecklist(userId: string, listId: string): Promise<ChecklistApiType> {
     const checklist = await this.findAndValidateChecklist(listId, userId);
     checklist.items = this.getItemsWithChecklistId(checklist);
+
     return this.getChecklistWithOwnerId(checklist as ChecklistApiType);
   }
 
@@ -64,9 +65,9 @@ export class ChecklistService {
     Object.assign(newChecklist, dtoWithoutItemsAndOwner);
     newChecklist.items = await this.getItemsInstances(items);
     newChecklist.owner = currentUser;
-
     const savedChecklist = await this.checklistRepository.save(newChecklist);
     savedChecklist.items = this.getItemsWithChecklistId(savedChecklist);
+
     return this.getChecklistWithOwnerId(savedChecklist as ChecklistApiType);
   }
 
@@ -82,31 +83,35 @@ export class ChecklistService {
     const currentChecklist = await this.findAndValidateChecklist(listId, userId);
     Object.assign(currentChecklist, dtoWithoutItemsAndOwner);
     currentChecklist.items = await this.getUpdatedItems(items, listId);
-
     const savedChecklist = await this.checklistRepository.save(currentChecklist);
     savedChecklist.items = this.getItemsWithChecklistId(savedChecklist);
+
     return this.getChecklistWithOwnerId(savedChecklist as ChecklistApiType);
   }
 
   async deleteChecklist(userId: string, listId: string): Promise<{ id: string }> {
     await this.findAndValidateChecklist(listId, userId);
     await this.checklistRepository.delete({ id: listId });
+
     return { id: listId };
   }
 
   async deleteChecklistItem(userId: string, itemId: string): Promise<{ id: string }> {
     await this.findAndValidateChecklistItem(itemId, userId);
     await this.checklistItemRepository.delete({ id: itemId });
+
     return { id: itemId };
   }
 
   async deleteChecklistItems(userId: string, itemsIds: string[]): Promise<{ items: string[] }> {
     const items = [];
+
     for (const itemId of itemsIds) {
       const currentItem = await this.findAndValidateChecklistItem(itemId, userId);
       await this.checklistItemRepository.delete({ id: itemId });
       items.push(currentItem.id);
     }
+
     return { items };
   }
 
@@ -114,13 +119,16 @@ export class ChecklistService {
     if (!items) {
       return [];
     }
+
     const listItems = [];
+
     for (const item of items) {
       const newItem = new ChecklistItemEntity();
       Object.assign(newItem, item);
       await this.checklistItemRepository.save(newItem);
       listItems.push(newItem);
     }
+
     return listItems;
   }
 
@@ -131,35 +139,43 @@ export class ChecklistService {
     if (!items) {
       return [];
     }
+
     const currentItems = [];
+
     for (const item of items) {
       let currentItem: ChecklistItemEntity;
       const { id, ...itemWithoutId } = item;
+
       if (id) {
         currentItem = await this.findAndValidateChecklistItem(item.id, undefined, listId);
       } else {
         currentItem = new ChecklistItemEntity();
       }
+
       Object.assign(currentItem, itemWithoutId);
       await this.checklistItemRepository.save(currentItem);
       currentItems.push(currentItem);
     }
+
     return currentItems;
   }
 
   async findAndValidateChecklist(listId: string, userId: string): Promise<ChecklistEntity> {
     try {
       const checklist = await this.checklistRepository.findOneBy({ id: listId });
+
       if (!checklist) {
         throw new InternalServerErrorException(
           `Entity ChecklistModel, id=${listId} not found in the database`,
         );
       }
+
       if (checklist.owner.id !== userId) {
         throw new UnprocessableEntityException(
           'The checklist id is not valid. You are not the owner',
         );
       }
+
       return checklist;
     } catch (err) {
       throw new HttpException(
@@ -179,17 +195,21 @@ export class ChecklistService {
         where: { id: itemId },
         relations: ['checklist'],
       });
+
       if (!checklistItem) {
         throw new InternalServerErrorException(
           `Entity ChecklistItemModel, id=${itemId} not found in the database`,
         );
       }
+
       if (userId && checklistItem.checklist.owner.id !== userId) {
         throw new UnprocessableEntityException('The item id is not valid. You are not the owner');
       }
+
       if (listId && checklistItem.checklist.id !== listId) {
         throw new UnprocessableEntityException('The item id does not belong to current checklist');
       }
+
       return checklistItem;
     } catch (err) {
       throw new HttpException(
@@ -215,6 +235,7 @@ export class ChecklistService {
 
   getChecklistWithOwnerId(checklist: ChecklistApiType): ChecklistApiType {
     checklist.owner_id = checklist.owner.id;
+
     return checklist;
   }
 
