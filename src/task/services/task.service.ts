@@ -6,7 +6,6 @@ import {
   Inject,
   Injectable,
   InternalServerErrorException,
-  NotFoundException,
   UnprocessableEntityException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -115,6 +114,7 @@ export class TaskService {
     return this.taskRepository
       .createQueryBuilder('tasks')
       .leftJoinAndSelect('tasks.project', 'project')
+      .leftJoinAndSelect('project.owner', 'owner')
       .leftJoinAndSelect('tasks.performer', 'performer')
       .leftJoinAndSelect('tasks.members', 'members')
       .leftJoinAndSelect('tasks.attachments', 'attachments')
@@ -214,7 +214,9 @@ export class TaskService {
     try {
       const task = await this.taskRepository.findOneBy({ id: taskId });
       if (!task) {
-        throw new NotFoundException(`Entity TaskModel, id=${taskId} not found in the database`);
+        throw new InternalServerErrorException(
+          `Entity TaskModel, id=${taskId} not found in the database`,
+        );
       }
       const ids = task.members.map((member) => member.id);
       if (!ids.includes(userId) && task.project.owner.id !== userId) {

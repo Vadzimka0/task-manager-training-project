@@ -3,6 +3,7 @@ import {
   ClassSerializerInterceptor,
   Controller,
   Get,
+  HttpCode,
   NotFoundException,
   Param,
   Post,
@@ -34,6 +35,7 @@ export class TaskAttachmentController {
   constructor(private readonly taskAttachmentService: TaskAttachmentService) {}
 
   @Post()
+  @HttpCode(200)
   @UseInterceptors(FileInterceptor('file', taskAttachmentOptions))
   async addTaskAttachment(
     @User('id') userId: string,

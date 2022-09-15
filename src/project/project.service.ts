@@ -194,16 +194,4 @@ export class ProjectService {
     }
     return project;
   }
-
-  // async findProjectById(projectId: string, currentUserId: string): Promise<ProjectEntity> {
-  //   const project = await this.projectRepository
-  //     .createQueryBuilder('projects')
-  //     .where('projects.id = :id', { id: projectId })
-  //     .andWhere('projects.owner_id = :owner_id', { owner_id: currentUserId })
-  //     .getOne();
-  //   if (!project) {
-  //     throw new NotFoundException('Project does not exist');
-  //   }
-  //   return project;
-  // }
 }

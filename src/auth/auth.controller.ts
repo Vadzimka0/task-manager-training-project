@@ -28,8 +28,8 @@ export class AuthController {
     return { data };
   }
 
-  @HttpCode(200)
   @UseGuards(LocalAuthGuard)
+  @HttpCode(200)
   @Post('sign-in')
   async signIn(@User() user: UserEntity): Promise<Data<UserSessionApiType>> {
     const data = await this.authService.signIn(user);
@@ -43,8 +43,8 @@ export class AuthController {
     return { data };
   }
 
-  @HttpCode(200)
   @Post('sign-out')
+  @HttpCode(200)
   async signOut(@Body() body: { email: string }): Promise<Data<SuccessApiType>> {
     const data = await this.authService.signOut(body.email);
     return { data };

@@ -42,7 +42,7 @@ export class UserService {
       .orderBy('users.created_at', 'DESC');
 
     const members = await queryBuilder.getMany();
-    return members;
+    return members.map((user) => this.userAvatarService.getUserWithAvatarUrl(user as UserApiType));
   }
 
   async fetchUserStatistics(userId: string, owner_id: string): Promise<UserStatisticsApiType> {

@@ -36,8 +36,8 @@ export class UserAvatarController {
     private readonly userService: UserService,
   ) {}
 
-  @HttpCode(200)
   @Post()
+  @HttpCode(200)
   @UseGuards(JwtAuthGuard)
   @UseInterceptors(FileInterceptor('file', avatarOptions))
   async addTaskAttachment(

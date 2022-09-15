@@ -4,6 +4,7 @@ import {
   Controller,
   Delete,
   Get,
+  HttpCode,
   Param,
   Post,
   UseGuards,
@@ -25,6 +26,7 @@ export class CommentController {
   constructor(private readonly commentService: CommentService) {}
 
   @Post('comments')
+  @HttpCode(200)
   async createComment(
     @Body() commentDto: CreateCommentDto,
     @User() currentUser: UserEntity,

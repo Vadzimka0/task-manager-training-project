@@ -95,9 +95,11 @@ export class CommentService {
   getCommentWithRelationIds(comment: CommentApiType): CommentApiType {
     comment.owner_id = comment.owner.id;
     comment.task_id = comment.task.id;
-    comment.attachments = comment.attachments.map((attachment: CommentAttachmentApiType) =>
-      this.commentAttachmentService.getFullCommentAttachment(attachment),
-    );
+    comment.attachments = comment.attachments?.length
+      ? comment.attachments.map((attachment: CommentAttachmentApiType) =>
+          this.commentAttachmentService.getFullCommentAttachment(attachment),
+        )
+      : null;
     return comment;
   }
 }
