@@ -11,6 +11,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
 import { UserEntity } from '../../user/entities/user.entity';
+import { removeFilesFromStorage } from '../../utils';
 import { CreateCommentDto } from '../dto';
 import { CommentEntity } from '../entities';
 import { CommentApiType, CommentAttachmentApiType } from '../types';
@@ -36,18 +37,18 @@ export class CommentService {
 
     const newComment = new CommentEntity();
     Object.assign(newComment, dtoWithoutRelationItems);
+
     newComment.owner = currentUser;
 
     const currentTask = await this.taskService.getValidTaskForComment(currentUser.id, task_id);
     newComment.task = currentTask;
-    // attachments
+
     const savedComment = await this.commentRepository.save(newComment);
 
     return this.getCommentWithRelationIds(savedComment as CommentApiType);
   }
 
-  async fetchTaskComments(userId: string, taskId: string): Promise<CommentApiType[]> {
-    // TODO: matching projectid and owner
+  async fetchTaskComments(taskId: string): Promise<CommentApiType[]> {
     const queryBuilder = this.commentRepository
       .createQueryBuilder('comments')
       .leftJoinAndSelect('comments.task', 'task')
@@ -64,9 +65,23 @@ export class CommentService {
 
   async deleteComment(userId: string, commentId: string): Promise<{ id: string }> {
     await this.getValidComment(userId, commentId);
+    const commentAttachmentsPaths = await this.getCommentAttachmentsPaths(commentId);
+
     await this.commentRepository.delete({ id: commentId });
+    await removeFilesFromStorage(commentAttachmentsPaths);
 
     return { id: commentId };
+  }
+
+  async getCommentAttachmentsPaths(commentId: string): Promise<string[]> {
+    const commentAttachmentsPaths = await this.commentRepository
+      .createQueryBuilder('comments')
+      .leftJoinAndSelect('comments.attachments', 'attachments')
+      .andWhere('comments.id = :id', { id: commentId })
+      .select('attachments.path')
+      .getRawMany();
+
+    return commentAttachmentsPaths.map((path) => path.attachments_path);
   }
 
   async getValidComment(userId: string, commentId: string): Promise<CommentEntity> {

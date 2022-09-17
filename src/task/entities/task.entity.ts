@@ -21,7 +21,7 @@ export class TaskEntity extends AbstractEntity {
   is_completed: boolean;
 
   @Exclude()
-  @ManyToOne(() => UserEntity, (user) => user.assigned_tasks, { eager: true })
+  @ManyToOne(() => UserEntity, (user) => user.assigned_tasks, { eager: true, nullable: true })
   performer: UserEntity;
 
   @Exclude()

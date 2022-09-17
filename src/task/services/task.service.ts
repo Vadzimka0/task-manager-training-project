@@ -18,7 +18,7 @@ import { UserEntity } from '../../user/entities/user.entity';
 import { UserAvatarService } from '../../user/services';
 import { UserService } from '../../user/services/user.service';
 import { UserApiType } from '../../user/types';
-import { haveSameItems } from '../../utils';
+import { haveSameItems, removeFilesFromStorage } from '../../utils';
 import { CreateTaskDto } from '../dto';
 import { TaskEntity } from '../entities';
 import { TaskApiType, TaskAttachmentApiType, TaskStatisticsApiType } from '../types';
@@ -58,7 +58,6 @@ export class TaskService {
     const currentMembers = await this.getMembersById(members);
     newTask.members = currentMembers;
 
-    newTask.attachments = null;
     const savedTask = await this.taskRepository.save(newTask);
 
     return this.getTaskWithRelationIds(savedTask as TaskApiType);
@@ -73,18 +72,14 @@ export class TaskService {
       taskDto;
     this.idsMatching(owner_id, currentUser.id);
 
-    const currentTask = await this.getValidTask(currentUser.id, taskId);
+    const currentTask = await this.getValidTaskForEdit(currentUser.id, taskId);
     Object.assign(currentTask, dtoWithoutRelationItems);
 
-    if (currentTask.project.id !== project_id) {
-      const updatedProject = await this.getProject(currentUser.id, project_id, assigned_to);
-      currentTask.project = updatedProject;
-    }
+    const updatedProject = await this.getProject(currentUser.id, project_id, assigned_to);
+    currentTask.project = updatedProject;
 
-    if (currentTask.performer.id !== assigned_to) {
-      const updatedPerformer = await this.getPerformerUser(currentUser, assigned_to);
-      currentTask.performer = updatedPerformer;
-    }
+    const updatedPerformer = await this.getPerformerUser(currentUser, assigned_to);
+    currentTask.performer = updatedPerformer;
 
     const currentMembersArray = currentTask.members.map((member) => member.id);
 
@@ -93,28 +88,47 @@ export class TaskService {
       currentTask.members = updatedMembers;
     }
 
-    // attachments ???
     const savedTask = await this.taskRepository.save(currentTask);
 
     return this.getTaskWithRelationIds(savedTask as TaskApiType);
   }
 
   async deleteTask(userId: string, taskId: string): Promise<{ id: string }> {
-    await this.getValidTask(userId, taskId);
+    await this.getValidTaskForEdit(userId, taskId);
+    const taskAttachmentsPaths = await this.getTaskAttachmentsPaths(taskId);
+    const tasksCommentsAttachmentsPaths = await this.getTaskCommentsAttachmentsPaths(taskId);
+
     await this.taskRepository.delete({ id: taskId });
+    await removeFilesFromStorage([...taskAttachmentsPaths, ...tasksCommentsAttachmentsPaths]);
 
     return { id: taskId };
   }
 
-  async fetchOneTask(userId: string, taskId: string): Promise<TaskApiType> {
-    const task = await this.taskRepository.findOneBy({ id: taskId });
+  async getTaskAttachmentsPaths(taskId: string): Promise<string[]> {
+    const taskAttachmentsPaths = await this.taskRepository
+      .createQueryBuilder('tasks')
+      .leftJoinAndSelect('tasks.attachments', 'attachments')
+      .andWhere('tasks.id = :id', { id: taskId })
+      .select('attachments.path')
+      .getRawMany();
 
-    if (!task) {
-      throw new InternalServerErrorException(
-        `Entity TaskModel, id=${taskId} not found in the database`,
-      );
-    }
+    return taskAttachmentsPaths.map((path) => path.attachments_path);
+  }
 
+  async getTaskCommentsAttachmentsPaths(taskId: string): Promise<string[]> {
+    const taskCommentsAttachmentsPaths = await this.taskRepository
+      .createQueryBuilder('tasks')
+      .leftJoinAndSelect('tasks.comments', 'comments')
+      .leftJoinAndSelect('comments.attachments', 'attachments')
+      .andWhere('tasks.id = :id', { id: taskId })
+      .select('attachments.path')
+      .getRawMany();
+
+    return taskCommentsAttachmentsPaths.map((path) => path.attachments_path);
+  }
+
+  async fetchOneTask(taskId: string): Promise<TaskApiType> {
+    const task = await this.getAnyTaskById(taskId);
     return this.getTaskWithRelationIds(task as TaskApiType);
   }
 
@@ -191,8 +205,7 @@ export class TaskService {
       return await this.userService.getById(assignedToId);
     }
 
-    //TODO: return null maybe
-    return ownerUser;
+    return null;
   }
 
   async getMembersById(membersIds: string[]): Promise<UserEntity[]> {
@@ -203,18 +216,24 @@ export class TaskService {
     return null;
   }
 
-  async getValidTask(userId: string, taskId: string): Promise<TaskEntity> {
-    try {
-      const task = await this.taskRepository.findOne({
-        where: { id: taskId },
-        relations: ['attachments'],
-      });
+  async getAnyTaskById(taskId: string): Promise<TaskEntity> {
+    const task = await this.taskRepository.findOne({
+      where: { id: taskId },
+      relations: ['attachments'],
+    });
 
-      if (!task) {
-        throw new InternalServerErrorException(
-          `Entity TaskModel, id=${taskId} not found in the database`,
-        );
-      }
+    if (!task) {
+      throw new InternalServerErrorException(
+        `Entity TaskModel, id=${taskId} not found in the database`,
+      );
+    }
+
+    return task;
+  }
+
+  async getValidTaskForEdit(userId: string, taskId: string): Promise<TaskEntity> {
+    try {
+      const task = await this.getAnyTaskById(taskId);
 
       if (task.project.owner.id !== userId) {
         throw new ForbiddenException('Invalid ID. You are not an owner');
@@ -231,14 +250,7 @@ export class TaskService {
 
   async getValidTaskForComment(userId: string, taskId: string): Promise<TaskEntity> {
     try {
-      const task = await this.taskRepository.findOneBy({ id: taskId });
-
-      if (!task) {
-        throw new InternalServerErrorException(
-          `Entity TaskModel, id=${taskId} not found in the database`,
-        );
-      }
-
+      const task = await this.getAnyTaskById(taskId);
       const ids = task.members.map((member) => member.id);
 
       if (!ids.includes(userId) && task.project.owner.id !== userId) {
@@ -263,7 +275,7 @@ export class TaskService {
   getTaskWithRelationIds(task: TaskApiType): TaskApiType {
     task.owner_id = task.project.owner.id;
     task.project_id = task.project.id;
-    task.assigned_to = task.performer.id;
+    task.assigned_to = task.performer ? task.performer.id : null;
     task.members = task.members?.length
       ? task.members.map((member: UserApiType) =>
           this.userAvatarService.getUserWithAvatarUrl(member),

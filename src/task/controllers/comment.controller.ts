@@ -36,11 +36,8 @@ export class CommentController {
   }
 
   @Get('tasks-comments/:taskId')
-  async fetchTaskComments(
-    @User('id') userId: string,
-    @Param('taskId') taskId: string,
-  ): Promise<Data<CommentApiType[]>> {
-    const data = await this.commentService.fetchTaskComments(userId, taskId);
+  async fetchTaskComments(@Param('taskId') taskId: string): Promise<Data<CommentApiType[]>> {
+    const data = await this.commentService.fetchTaskComments(taskId);
     return { data };
   }
 

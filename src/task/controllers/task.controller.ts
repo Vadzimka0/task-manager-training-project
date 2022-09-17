@@ -56,11 +56,8 @@ export class TaskController {
   }
 
   @Get('tasks/:taskId')
-  async fetchOneTask(
-    @User('id') userId: string,
-    @Param('taskId') taskId: string,
-  ): Promise<Data<TaskApiType>> {
-    const data = await this.taskService.fetchOneTask(userId, taskId);
+  async fetchOneTask(@Param('taskId') taskId: string): Promise<Data<TaskApiType>> {
+    const data = await this.taskService.fetchOneTask(taskId);
     return { data };
   }
 

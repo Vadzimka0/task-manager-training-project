@@ -12,6 +12,7 @@ import { Repository } from 'typeorm';
 
 import { SPECIAL_ONE_PROJECT_NAME } from '../common/constants/default-constants';
 import { UserEntity } from '../user/entities/user.entity';
+import { removeFilesFromStorage } from '../utils';
 import { CreateProjectDto } from './dto/create-project.dto';
 import { ProjectEntity } from './entities/project.entity';
 import { ProjectApiType, ProjectStatisticApiType } from './types';
@@ -124,9 +125,43 @@ export class ProjectService {
 
   async deleteProject(userId: string, projectId: string): Promise<{ id: string }> {
     await this.findProjectForEdit(projectId, userId);
+    const projectTasksAttachmentsPaths = await this.getProjectTasksAttachmentsPaths(projectId);
+    const projectTasksCommentsAttachmentsPaths = await this.getProjectTasksCommentsAttachmentsPaths(
+      projectId,
+    );
+
     await this.projectRepository.delete({ id: projectId });
+    await removeFilesFromStorage([
+      ...projectTasksAttachmentsPaths,
+      ...projectTasksCommentsAttachmentsPaths,
+    ]);
 
     return { id: projectId };
+  }
+
+  async getProjectTasksAttachmentsPaths(projectId: string): Promise<string[]> {
+    const projectTasksAttachmentsPaths = await this.projectRepository
+      .createQueryBuilder('projects')
+      .leftJoinAndSelect('projects.tasks', 'tasks')
+      .leftJoinAndSelect('tasks.attachments', 'attachments')
+      .andWhere('projects.id = :id', { id: projectId })
+      .select('attachments.path')
+      .getRawMany();
+
+    return projectTasksAttachmentsPaths.map((path) => path.attachments_path);
+  }
+
+  async getProjectTasksCommentsAttachmentsPaths(projectId: string): Promise<string[]> {
+    const projectTasksCommentsAttachmentsPaths = await this.projectRepository
+      .createQueryBuilder('projects')
+      .leftJoinAndSelect('projects.tasks', 'tasks')
+      .leftJoinAndSelect('tasks.comments', 'comments')
+      .leftJoinAndSelect('comments.attachments', 'attachments')
+      .andWhere('projects.id = :id', { id: projectId })
+      .select('attachments.path')
+      .getRawMany();
+
+    return projectTasksCommentsAttachmentsPaths.map((path) => path.attachments_path);
   }
 
   async findProjectForRead(projectId: string, userId: string): Promise<ProjectEntity> {
@@ -198,6 +233,7 @@ export class ProjectService {
   async findProjectByTitle(title: string, currentUserId: string): Promise<ProjectEntity> {
     const project = await this.projectRepository
       .createQueryBuilder('projects')
+      .leftJoinAndSelect('projects.owner', 'owner')
       .where('projects.title = :title', { title: title })
       .andWhere('projects.owner_id = :id', { id: currentUserId })
       .getOne();

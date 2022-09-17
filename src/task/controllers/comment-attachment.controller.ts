@@ -3,6 +3,7 @@ import {
   ClassSerializerInterceptor,
   Controller,
   Get,
+  HttpCode,
   NotFoundException,
   Param,
   Post,
@@ -34,6 +35,7 @@ export class CommentAttachmentController {
   constructor(private readonly commentAttachmentService: CommentAttachmentService) {}
 
   @Post()
+  @HttpCode(200)
   @UseInterceptors(FileInterceptor('file', commentAttachmentOptions))
   async addCommentAttachment(
     @User('id') userId: string,

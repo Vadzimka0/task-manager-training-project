@@ -50,7 +50,7 @@ export class CommentAttachmentService {
     return this.getFullCommentAttachment(savedAttachment as CommentAttachmentApiType);
   }
 
-  async getFileById(id: string) {
+  async getFileById(id: string): Promise<CommentAttachmentEntity> {
     const file = await this.commentAttachmentRepository.findOneBy({ id });
     if (!file) {
       throw new NotFoundException(
