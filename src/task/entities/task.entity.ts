@@ -21,12 +21,12 @@ export class TaskEntity extends AbstractEntity {
   is_completed: boolean;
 
   @Exclude()
-  @ManyToOne(() => UserEntity, (user) => user.assigned_tasks, { eager: true, nullable: true })
-  performer: UserEntity;
-
-  @Exclude()
   @ManyToOne(() => ProjectEntity, (project) => project.tasks, { eager: true, onDelete: 'CASCADE' })
   project: ProjectEntity;
+
+  @Exclude()
+  @ManyToOne(() => UserEntity, (user) => user.assigned_tasks, { eager: true, nullable: true })
+  performer: UserEntity;
 
   @ManyToMany(() => UserEntity, (user) => user.participate_tasks, { eager: true })
   @JoinTable()

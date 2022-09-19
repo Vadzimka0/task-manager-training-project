@@ -36,6 +36,12 @@ export class UserEntity {
   @Column({ nullable: true })
   refresh_token: string;
 
+  @OneToMany(() => NoteEntity, (note: NoteEntity) => note.owner)
+  notes: NoteEntity[];
+
+  @OneToMany(() => ChecklistEntity, (checklist: ChecklistEntity) => checklist.owner)
+  checklists: ChecklistEntity[];
+
   @OneToMany(() => ProjectEntity, (project: ProjectEntity) => project.owner)
   projects: ProjectEntity[];
 
@@ -44,12 +50,6 @@ export class UserEntity {
 
   @ManyToMany(() => TaskEntity, (task: TaskEntity) => task.members)
   participate_tasks: TaskEntity[];
-
-  @OneToMany(() => NoteEntity, (note: NoteEntity) => note.owner)
-  notes: NoteEntity[];
-
-  @OneToMany(() => ChecklistEntity, (checklist: ChecklistEntity) => checklist.owner)
-  checklists: ChecklistEntity[];
 
   @OneToMany(() => CommentEntity, (comment: CommentEntity) => comment.owner)
   comments: CommentEntity[];
