@@ -197,12 +197,12 @@ export class ProjectService {
     return project;
   }
 
-  async checkDuplicateProjectTitle(title: string, id: string): Promise<void> {
+  async checkDuplicateProjectTitle(title: string, id: string): Promise<any> {
     const project = await this.projectRepository
       .createQueryBuilder('projects')
       .leftJoinAndSelect('projects.owner', 'owner')
-      .andWhere('projects.title = :title', { title })
-      .andWhere('projects.owner_id = :id', { id })
+      .where('projects.title = :title', { title })
+      .andWhere('owner.id = :id', { id })
       .getOne();
 
     if (project) {

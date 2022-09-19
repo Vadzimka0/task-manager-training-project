@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { SnakeNamingStrategy } from 'typeorm-naming-strategies';
 
 @Module({
   imports: [
@@ -15,8 +16,8 @@ import { TypeOrmModule } from '@nestjs/typeorm';
         password: configService.get('POSTGRES_PASSWORD'),
         database: configService.get('POSTGRES_DB'),
         entities: [],
-        // autoLoadEntities: true,
-        // namingStrategy: new SnakeNamingStrategy(),
+        namingStrategy: new SnakeNamingStrategy(),
+        autoLoadEntities: true,
         // synchronize: true,
       }),
     }),
