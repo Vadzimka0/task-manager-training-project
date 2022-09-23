@@ -182,7 +182,24 @@ export class TaskService {
       .of(ownerId)
       .loadMany();
 
-    return participateInTasks.map((task: TaskApiType) => this.getTaskWithRelationIds(task));
+    const tasksWithAttachmentRelation = await this.getTasksWithAttachmentRelation(
+      participateInTasks,
+    );
+
+    return tasksWithAttachmentRelation.map((task: TaskApiType) =>
+      this.getTaskWithRelationIds(task),
+    );
+  }
+
+  async getTasksWithAttachmentRelation(tasks: TaskEntity[]): Promise<TaskEntity[]> {
+    const extendedTasks = [];
+
+    for (const task of tasks) {
+      const extendedTask = await this.getAnyTaskById(task.id);
+      extendedTasks.push(extendedTask);
+    }
+
+    return extendedTasks;
   }
 
   async getProject(userId: string, projectId: string, assignedTo: string): Promise<ProjectEntity> {
@@ -219,7 +236,8 @@ export class TaskService {
   async getAnyTaskById(taskId: string): Promise<TaskEntity> {
     const task = await this.taskRepository.findOne({
       where: { id: taskId },
-      relations: ['attachments'],
+      relations: ['attachments.task'],
+      // relations: ['attachments'],
     });
 
     if (!task) {

@@ -27,10 +27,7 @@ export class TaskAttachmentEntity {
   filename: string;
 
   @Exclude()
-  @ManyToOne(() => TaskEntity, (task) => task.attachments, {
-    eager: true,
-    onDelete: 'CASCADE',
-  })
+  @ManyToOne(() => TaskEntity, (task) => task.attachments, { onDelete: 'CASCADE' })
   task: TaskEntity;
 
   @BeforeInsert()

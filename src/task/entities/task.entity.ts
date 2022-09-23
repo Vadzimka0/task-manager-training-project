@@ -35,6 +35,8 @@ export class TaskEntity extends AbstractEntity {
   @OneToMany(() => CommentEntity, (comment: CommentEntity) => comment.task)
   comments: CommentEntity[];
 
-  @OneToMany(() => TaskAttachmentEntity, (attachment: TaskAttachmentEntity) => attachment.task)
+  @OneToMany(() => TaskAttachmentEntity, (attachment: TaskAttachmentEntity) => attachment.task, {
+    eager: true,
+  })
   attachments: TaskAttachmentEntity[];
 }
