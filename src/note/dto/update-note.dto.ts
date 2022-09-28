@@ -1,17 +1,14 @@
-import { IsBoolean, IsNotEmpty, IsUUID, MaxLength } from 'class-validator';
+import { ApiProperty } from '@nestjs/swagger';
+import { IsBoolean, IsNotEmpty } from 'class-validator';
 
-export class UpdateNoteDto {
-  @IsNotEmpty()
-  @MaxLength(512)
-  readonly description: string;
+import { CreateNoteDto } from './create-note.dto';
 
-  @IsNotEmpty()
-  readonly color: string;
-
+export class UpdateNoteDto extends CreateNoteDto {
+  @ApiProperty({
+    description: 'Has to match a boolean value',
+    example: true,
+  })
   @IsNotEmpty()
   @IsBoolean()
-  readonly is_completed: string;
-
-  @IsUUID()
-  readonly owner_id: string;
+  readonly is_completed: boolean;
 }

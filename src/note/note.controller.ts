@@ -11,65 +11,107 @@ import {
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
+import { ApiBearerAuth, ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
 
 import { User } from '../auth/decorators/user.decorator';
 import { JwtAuthGuard } from '../auth/guards';
-import { Data } from '../common/types/data';
+import { ApiOkArrayResponse, ApiOkObjectResponse } from '../common/decorators';
+import { Data, ResponseD } from '../common/types/data';
+import { EntityId } from '../common/types/entity-id-class';
 import { UserEntity } from '../user/entities/user.entity';
-import { CreateNoteDto, FetchUserNotesDto, UpdateNoteDto } from './dto';
+import { CreateNoteDto, NoteResponseDto, UpdateNoteDto } from './dto';
 import { NoteService } from './note.service';
-import { NoteApiType } from './types/note-api.type';
 
-@Controller('notes')
+@ApiTags('Notes:')
+@Controller()
 @UseGuards(JwtAuthGuard)
 @UseInterceptors(ClassSerializerInterceptor)
 export class NoteController {
   constructor(private readonly noteService: NoteService) {}
 
-  @Get()
-  async fetchUserNotes(
-    @User('id') userId: string,
-    @Body() fetchUserNotesDto: FetchUserNotesDto,
-  ): Promise<Data<NoteApiType[]>> {
-    const data = await this.noteService.fetchUserNotes(userId, fetchUserNotesDto.owner_id);
-    return { data };
-  }
-
-  @Get(':id')
-  async fetchOneNote(
-    @User('id') userId: string,
-    @Param('id') noteId: string,
-  ): Promise<Data<NoteApiType>> {
-    const data = await this.noteService.fetchOneNote(userId, noteId);
-    return { data };
-  }
-
-  @Post()
+  @ApiOperation({ summary: 'Create New Note' })
+  @ApiOkObjectResponse(NoteResponseDto)
+  @ApiBearerAuth('access-token')
+  @Post('notes')
   @HttpCode(200)
   async createNote(
     @Body() createNoteDto: CreateNoteDto,
     @User() currentUser: UserEntity,
-  ): Promise<Data<NoteApiType>> {
+  ): Promise<ResponseD<NoteResponseDto>> {
     const data = await this.noteService.createNote(createNoteDto, currentUser);
     return { data };
   }
 
-  @Put(':id')
+  @ApiOperation({ summary: 'Delete Note' })
+  @ApiOkObjectResponse(EntityId)
+  @ApiBearerAuth('access-token')
+  @ApiParam({
+    name: 'id',
+    required: true,
+    description: 'Should be an id of a NOTE that exists in the database',
+    type: String,
+  })
+  @Delete('notes/:id')
+  async deleteNote(
+    @User('id') userId: string,
+    @Param('id') noteId: string,
+  ): Promise<Data<EntityId>> {
+    const data = await this.noteService.deleteNote(userId, noteId);
+    return { data };
+  }
+
+  @ApiOperation({ summary: "Fetch One User's Note" })
+  @ApiOkObjectResponse(NoteResponseDto)
+  @ApiBearerAuth('access-token')
+  @ApiParam({
+    name: 'id',
+    required: true,
+    description: 'Should be an id of a NOTE that exists in the database',
+    type: String,
+  })
+  @Get('notes/:id')
+  async fetchOneNote(
+    @User('id') userId: string,
+    @Param('id') noteId: string,
+  ): Promise<ResponseD<NoteResponseDto>> {
+    const data = await this.noteService.fetchOneNote(userId, noteId);
+    return { data };
+  }
+
+  @ApiOperation({ summary: "Fetch User's Notes" })
+  @ApiOkArrayResponse(NoteResponseDto)
+  @ApiBearerAuth('access-token')
+  @ApiParam({
+    name: 'ownerId',
+    required: true,
+    description: 'Should be an id of a USER that exists in the database',
+    type: String,
+  })
+  @Get('user-notes/:ownerId')
+  async fetchUserNotes(
+    @User('id') userId: string,
+    @Param('ownerId') ownerId: string,
+  ): Promise<ResponseD<NoteResponseDto[]>> {
+    const data = await this.noteService.fetchUserNotes(userId, ownerId);
+    return { data };
+  }
+
+  @ApiOperation({ summary: 'Update Note' })
+  @ApiOkObjectResponse(NoteResponseDto)
+  @ApiBearerAuth('access-token')
+  @ApiParam({
+    name: 'id',
+    required: true,
+    description: 'Should be an id of a NOTE that exists in the database',
+    type: String,
+  })
+  @Put('notes/:id')
   async updateNote(
     @Body() updateNoteDto: UpdateNoteDto,
     @User('id') userId: string,
     @Param('id') noteId: string,
-  ): Promise<Data<NoteApiType>> {
+  ): Promise<ResponseD<NoteResponseDto>> {
     const data = await this.noteService.updateNote(updateNoteDto, userId, noteId);
-    return { data };
-  }
-
-  @Delete(':id')
-  async deleteNote(
-    @User('id') userId: string,
-    @Param('id') noteId: string,
-  ): Promise<Data<{ id: string }>> {
-    const data = await this.noteService.deleteNote(userId, noteId);
     return { data };
   }
 }

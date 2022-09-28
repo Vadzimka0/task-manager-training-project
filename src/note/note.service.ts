@@ -7,9 +7,9 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
 import { UserEntity } from '../user/entities/user.entity';
-import { CreateNoteDto, UpdateNoteDto } from './dto';
+import { CreateNoteDto, NoteResponseDto, UpdateNoteDto } from './dto';
 import { NoteEntity } from './entities/note.entity';
-import { NoteApiType } from './types/note-api.type';
+import { ExtendedNoteType } from './types/extended-note.type';
 
 @Injectable()
 export class NoteService {
@@ -18,7 +18,7 @@ export class NoteService {
     private noteRepository: Repository<NoteEntity>,
   ) {}
 
-  async fetchUserNotes(userId: string, ownerId: string): Promise<NoteApiType[]> {
+  async fetchUserNotes(userId: string, ownerId: string): Promise<NoteResponseDto[]> {
     this.idsMatching(ownerId, userId);
 
     const queryBuilder = this.noteRepository
@@ -29,16 +29,19 @@ export class NoteService {
 
     const notes = await queryBuilder.getMany();
 
-    return notes.map((note: NoteApiType) => this.getNoteWithOwnerId(note));
+    return notes.map((note: ExtendedNoteType) => this.getNoteWithOwnerId(note));
   }
 
-  async fetchOneNote(userId: string, noteId: string): Promise<NoteApiType> {
+  async fetchOneNote(userId: string, noteId: string): Promise<NoteResponseDto> {
     const note = await this.findNoteForRead(userId, noteId);
 
-    return this.getNoteWithOwnerId(note as NoteApiType);
+    return this.getNoteWithOwnerId(note as ExtendedNoteType);
   }
 
-  async createNote(createNoteDto: CreateNoteDto, currentUser: UserEntity): Promise<NoteApiType> {
+  async createNote(
+    createNoteDto: CreateNoteDto,
+    currentUser: UserEntity,
+  ): Promise<NoteResponseDto> {
     this.validateHexColor(createNoteDto.color);
     const { owner_id, ...dtoWithoutOwner } = createNoteDto;
     this.idsMatching(owner_id, currentUser.id);
@@ -48,14 +51,14 @@ export class NoteService {
     newNote.owner = currentUser;
     const savedNote = await this.noteRepository.save(newNote);
 
-    return this.getNoteWithOwnerId(savedNote as NoteApiType);
+    return this.getNoteWithOwnerId(savedNote as ExtendedNoteType);
   }
 
   async updateNote(
     updateNoteDto: UpdateNoteDto,
     userId: string,
     noteId: string,
-  ): Promise<NoteApiType> {
+  ): Promise<NoteResponseDto> {
     this.validateHexColor(updateNoteDto.color);
     const { owner_id, ...dtoWithoutOwner } = updateNoteDto;
     this.idsMatching(owner_id, userId);
@@ -64,7 +67,7 @@ export class NoteService {
     Object.assign(currentNote, dtoWithoutOwner);
     const savedNote = await this.noteRepository.save(currentNote);
 
-    return this.getNoteWithOwnerId(savedNote as NoteApiType);
+    return this.getNoteWithOwnerId(savedNote as ExtendedNoteType);
   }
 
   async deleteNote(userId: string, noteId: string): Promise<{ id: string }> {
@@ -110,7 +113,7 @@ export class NoteService {
     }
   }
 
-  getNoteWithOwnerId(note: NoteApiType): NoteApiType {
+  getNoteWithOwnerId(note: ExtendedNoteType): NoteResponseDto {
     note.owner_id = note.owner.id;
 
     return note;
