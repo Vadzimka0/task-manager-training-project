@@ -1,21 +1,12 @@
+import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { IsNotEmpty, IsOptional, IsUUID, MaxLength, ValidateNested } from 'class-validator';
+import { ValidateNested } from 'class-validator';
 
+import { ChecklistDto } from './create-checklist.dto';
 import { UpdateChecklistItemDto } from './update-checklist-item.dto';
 
-export class UpdateChecklistDto {
-  @IsNotEmpty()
-  @MaxLength(512)
-  readonly title: string;
-
-  @IsNotEmpty()
-  readonly color: string;
-
-  @IsNotEmpty()
-  @IsUUID()
-  readonly owner_id: string;
-
-  @IsOptional()
+export class UpdateChecklistDto extends ChecklistDto {
+  @ApiProperty()
   @ValidateNested({ each: true })
   @Type(() => UpdateChecklistItemDto)
   readonly items: UpdateChecklistItemDto[] | null;
