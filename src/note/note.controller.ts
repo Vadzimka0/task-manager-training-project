@@ -15,12 +15,12 @@ import { ApiBearerAuth, ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger'
 
 import { User } from '../auth/decorators/user.decorator';
 import { JwtAuthGuard } from '../auth/guards';
+import { EntityId, ResponseData } from '../common/classes';
 import { ApiOkArrayResponse, ApiOkObjectResponse } from '../common/decorators';
-import { Data, ResponseD } from '../common/types/data';
-import { EntityId } from '../common/types/entity-id-class';
 import { UserEntity } from '../user/entities/user.entity';
-import { CreateNoteDto, NoteResponseDto, UpdateNoteDto } from './dto';
+import { CreateNoteDto, NoteApiDto, UpdateNoteDto } from './dto';
 import { NoteService } from './note.service';
+import { NoteApiType } from './types/note-api.type';
 
 @ApiTags('Notes:')
 @Controller()
@@ -30,14 +30,14 @@ export class NoteController {
   constructor(private readonly noteService: NoteService) {}
 
   @ApiOperation({ summary: 'Create New Note' })
-  @ApiOkObjectResponse(NoteResponseDto)
+  @ApiOkObjectResponse(NoteApiDto)
   @ApiBearerAuth('access-token')
   @Post('notes')
   @HttpCode(200)
   async createNote(
     @Body() createNoteDto: CreateNoteDto,
     @User() currentUser: UserEntity,
-  ): Promise<ResponseD<NoteResponseDto>> {
+  ): Promise<ResponseData<NoteApiType>> {
     const data = await this.noteService.createNote(createNoteDto, currentUser);
     return { data };
   }
@@ -55,13 +55,13 @@ export class NoteController {
   async deleteNote(
     @User('id') userId: string,
     @Param('id') noteId: string,
-  ): Promise<Data<EntityId>> {
+  ): Promise<ResponseData<EntityId>> {
     const data = await this.noteService.deleteNote(userId, noteId);
     return { data };
   }
 
   @ApiOperation({ summary: "Fetch One User's Note" })
-  @ApiOkObjectResponse(NoteResponseDto)
+  @ApiOkObjectResponse(NoteApiDto)
   @ApiBearerAuth('access-token')
   @ApiParam({
     name: 'id',
@@ -73,13 +73,13 @@ export class NoteController {
   async fetchOneNote(
     @User('id') userId: string,
     @Param('id') noteId: string,
-  ): Promise<ResponseD<NoteResponseDto>> {
+  ): Promise<ResponseData<NoteApiType>> {
     const data = await this.noteService.fetchOneNote(userId, noteId);
     return { data };
   }
 
   @ApiOperation({ summary: "Fetch User's Notes" })
-  @ApiOkArrayResponse(NoteResponseDto)
+  @ApiOkArrayResponse(NoteApiDto)
   @ApiBearerAuth('access-token')
   @ApiParam({
     name: 'ownerId',
@@ -91,13 +91,13 @@ export class NoteController {
   async fetchUserNotes(
     @User('id') userId: string,
     @Param('ownerId') ownerId: string,
-  ): Promise<ResponseD<NoteResponseDto[]>> {
+  ): Promise<ResponseData<NoteApiType[]>> {
     const data = await this.noteService.fetchUserNotes(userId, ownerId);
     return { data };
   }
 
   @ApiOperation({ summary: 'Update Note' })
-  @ApiOkObjectResponse(NoteResponseDto)
+  @ApiOkObjectResponse(NoteApiDto)
   @ApiBearerAuth('access-token')
   @ApiParam({
     name: 'id',
@@ -110,7 +110,7 @@ export class NoteController {
     @Body() updateNoteDto: UpdateNoteDto,
     @User('id') userId: string,
     @Param('id') noteId: string,
-  ): Promise<ResponseD<NoteResponseDto>> {
+  ): Promise<ResponseData<NoteApiType>> {
     const data = await this.noteService.updateNote(updateNoteDto, userId, noteId);
     return { data };
   }

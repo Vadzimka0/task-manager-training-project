@@ -2,7 +2,7 @@ import { Exclude } from 'class-transformer';
 import { Column, Entity, ManyToOne, OneToMany } from 'typeorm';
 
 import { CommentAttachmentEntity, TaskEntity } from '.';
-import { AbstractEntity } from '../../common/abstract-entity-class';
+import { AbstractEntity } from '../../common/classes';
 import { UserEntity } from '../../user/entities/user.entity';
 
 @Entity({ name: 'comments' })

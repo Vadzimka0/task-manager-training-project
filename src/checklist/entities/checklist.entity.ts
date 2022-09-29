@@ -1,7 +1,7 @@
 import { Exclude } from 'class-transformer';
 import { Column, Entity, ManyToOne, OneToMany } from 'typeorm';
 
-import { AbstractEntity } from '../../common/abstract-entity-class';
+import { AbstractEntity } from '../../common/classes';
 import { UserEntity } from '../../user/entities/user.entity';
 import { ChecklistItemEntity } from './checklistItem.entity';
 

@@ -4,7 +4,7 @@ export type Data<T> = {
   data: T;
 };
 
-export class ResponseD<T> {
+export class ResponseData<T> {
   @ApiProperty()
   data: T;
 }

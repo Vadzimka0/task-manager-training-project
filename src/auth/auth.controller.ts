@@ -9,7 +9,7 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 
-import { Data } from '../common/types/data';
+import { Data } from '../common/classes/response-data';
 import { UserEntity } from '../user/entities/user.entity';
 import { AuthService } from './auth.service';
 import { User } from './decorators/user.decorator';

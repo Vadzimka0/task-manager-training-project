@@ -1,5 +1,5 @@
 import { NoteEntity } from '../entities/note.entity';
 
-export type ExtendedNoteType = NoteEntity & {
+export type NoteApiType = NoteEntity & {
   owner_id: string;
 };

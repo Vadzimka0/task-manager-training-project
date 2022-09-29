@@ -10,7 +10,7 @@ import {
 
 import { User } from '../../auth/decorators/user.decorator';
 import { JwtAuthGuard } from '../../auth/guards';
-import { Data } from '../../common/types/data';
+import { Data } from '../../common/classes/response-data';
 import { UserEntity } from '../entities/user.entity';
 import { UserService } from '../services';
 import { UserApiType, UserStatisticsApiType } from '../types';

@@ -14,7 +14,7 @@ import {
 
 import { User } from '../../auth/decorators/user.decorator';
 import { JwtAuthGuard } from '../../auth/guards';
-import { Data } from '../../common/types/data';
+import { Data } from '../../common/classes/response-data';
 import { UserEntity } from '../../user/entities/user.entity';
 import { CreateTaskDto } from '../dto';
 import { TaskService } from '../services';

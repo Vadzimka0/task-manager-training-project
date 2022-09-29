@@ -19,7 +19,7 @@ import { join } from 'path';
 
 import { User } from '../../auth/decorators/user.decorator';
 import { JwtAuthGuard } from '../../auth/guards';
-import { Data } from '../../common/types/data';
+import { Data } from '../../common/classes/response-data';
 import { isExists } from '../../utils';
 import { avatarOptions } from '../../utils/multer/avatar-options';
 import { UserEntity } from '../entities/user.entity';
