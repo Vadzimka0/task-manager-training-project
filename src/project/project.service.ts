@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ForbiddenException,
   HttpException,
   HttpStatus,
@@ -11,6 +12,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
 import { SPECIAL_ONE_PROJECT_NAME } from '../common/constants/default-constants';
+import { MessageEnum, ProjectMessageEnum } from '../common/enums/message.enum';
 import { UserEntity } from '../user/entities/user.entity';
 import { removeFilesFromStorage } from '../utils';
 import { CreateProjectDto } from './dto/create-project.dto';
@@ -175,7 +177,7 @@ export class ProjectService {
       }
 
       if (project.owner.id !== userId) {
-        throw new ForbiddenException('Invalid ID. You are not an owner');
+        throw new ForbiddenException(MessageEnum.INVALID_ID_NOT_OWNER);
       }
 
       return project;
@@ -191,7 +193,7 @@ export class ProjectService {
     const project = await this.findProjectForRead(projectId, userId);
 
     if (project.title === SPECIAL_ONE_PROJECT_NAME) {
-      throw new ForbiddenException('This project cannot be edited or deleted');
+      throw new BadRequestException(ProjectMessageEnum.PROJECT_PROTECTED);
     }
 
     return project;
@@ -206,21 +208,19 @@ export class ProjectService {
       .getOne();
 
     if (project) {
-      throw new ForbiddenException('Project with that name already exists');
+      throw new BadRequestException(ProjectMessageEnum.PROJECT_DUPLICATE);
     }
   }
 
   validateHexColor(color: string): void {
     if (!/^#(?:[0-9a-fA-F]{3}){1,2}$/i.test(color)) {
-      throw new UnprocessableEntityException(
-        'Color is not valid. The length has to be 7 symbols and first one has to be #.',
-      );
+      throw new UnprocessableEntityException(MessageEnum.INVALID_COLOR);
     }
   }
 
   idsMatching(owner_id: string, user_id: string): void {
     if (owner_id !== user_id) {
-      throw new UnprocessableEntityException('The user id is not valid');
+      throw new UnprocessableEntityException(MessageEnum.INVALID_USER_ID);
     }
   }
 
@@ -239,7 +239,7 @@ export class ProjectService {
       .getOne();
 
     if (!project) {
-      throw new NotFoundException('Project does not exist');
+      throw new NotFoundException(ProjectMessageEnum.PROJECT_NOT_EXIST);
     }
 
     return project;
