@@ -12,8 +12,10 @@ import { Repository } from 'typeorm';
 
 import { UserEntity } from '../../user/entities/user.entity';
 import { removeFilesFromStorage } from '../../utils';
-import { CreateCommentDto } from '../dto';
-import { CommentEntity } from '../entities';
+import { CreateCommentDto } from '../dto/create-comment.dto';
+import { CommentEntity } from '../entities/comment.entity';
+// import { CreateCommentDto } from '../dto';
+// import { CommentEntity } from '../entities';
 import { CommentApiType, CommentAttachmentApiType } from '../types';
 import { CommentAttachmentService } from './comment-attachment.service';
 import { TaskService } from './task.service';

@@ -2,9 +2,10 @@ import { forwardRef, Inject, Injectable, NotFoundException } from '@nestjs/commo
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { AddCommentAttachmentDto } from '../dto/add-comment-attachment.dto';
 
-import { AddCommentAttachmentDto } from '../dto';
-import { CommentAttachmentEntity } from '../entities';
+// import { AddCommentAttachmentDto } from '../dto';
+import { CommentAttachmentEntity } from '../entities/comment-attachment.entity';
 import { CommentAttachmentApiType } from '../types';
 import { CommentService } from './comment.service';
 

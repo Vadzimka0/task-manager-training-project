@@ -2,9 +2,10 @@ import { forwardRef, Inject, Injectable, NotFoundException } from '@nestjs/commo
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { AddTaskAttachmentDto } from '../dto/add-task-attachment.dto';
 
-import { AddTaskAttachmentDto } from '../dto';
-import { TaskAttachmentEntity } from '../entities';
+// import { AddTaskAttachmentDto } from '../dto';
+import { TaskAttachmentEntity } from '../entities/task-attachment.entity';
 import { TaskAttachmentApiType } from '../types';
 import { TaskService } from './task.service';
 

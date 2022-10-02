@@ -19,7 +19,7 @@ import { UserAvatarService } from '../../user/services';
 import { UserService } from '../../user/services/user.service';
 import { UserApiType } from '../../user/types';
 import { haveSameItems, removeFilesFromStorage } from '../../utils';
-import { CreateTaskDto } from '../dto';
+import { CreateTaskDto } from '../dto/create-task.dto';
 import { TaskEntity } from '../entities';
 import { TaskApiType, TaskAttachmentApiType, TaskStatisticsApiType } from '../types';
 import { TaskAttachmentService } from './task-attachment.service';
@@ -52,7 +52,7 @@ export class TaskService {
     const currentProject = await this.getProject(currentUser.id, project_id, assigned_to);
     newTask.project = currentProject;
 
-    const assignedToUser = await this.getPerformerUser(currentUser, assigned_to);
+    const assignedToUser = await this.getPerformerUser(assigned_to);
     newTask.performer = assignedToUser;
 
     const currentMembers = await this.getMembersById(members);
@@ -78,7 +78,7 @@ export class TaskService {
     const updatedProject = await this.getProject(currentUser.id, project_id, assigned_to);
     currentTask.project = updatedProject;
 
-    const updatedPerformer = await this.getPerformerUser(currentUser, assigned_to);
+    const updatedPerformer = await this.getPerformerUser(assigned_to);
     currentTask.performer = updatedPerformer;
 
     const currentMembersArray = currentTask.members.map((member) => member.id);
@@ -217,7 +217,7 @@ export class TaskService {
     return project;
   }
 
-  async getPerformerUser(ownerUser: UserEntity, assignedToId: string): Promise<UserEntity> {
+  async getPerformerUser(assignedToId: string): Promise<UserEntity> {
     if (assignedToId) {
       return await this.userService.getById(assignedToId);
     }

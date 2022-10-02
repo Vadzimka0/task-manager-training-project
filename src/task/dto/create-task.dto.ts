@@ -8,6 +8,7 @@ import {
   IsUUID,
   MaxLength,
 } from 'class-validator';
+import { TaskAttachmentEntity } from '../entities/task-attachment.entity';
 
 export class CreateTaskDto {
   @IsNotEmpty()
@@ -44,5 +45,6 @@ export class CreateTaskDto {
   readonly members: string[] | null;
 
   @IsEmpty()
-  readonly attachments: null;
+  // @IsOptional()
+  readonly attachments: null | TaskAttachmentEntity[];
 }
