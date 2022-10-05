@@ -6,7 +6,7 @@ import { CreateNoteDto } from './create-note.dto';
 export class UpdateNoteDto extends CreateNoteDto {
   @ApiProperty({
     description: 'Has to match a boolean value',
-    example: true,
+    example: false,
   })
   @IsNotEmpty()
   @IsBoolean()

@@ -1,14 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
 
-import { UpdateNoteDto } from './update-note.dto';
+import { NoteEntity } from '../entities/note.entity';
 
-export class NoteApiDto extends UpdateNoteDto {
-  @ApiProperty({
-    description: 'Note ID',
-    example: 'd091f63d-157f-4835-9038-e33d3e996fb7',
-  })
-  readonly id: string;
-
-  @ApiProperty()
-  readonly created_at: Date;
+export class NoteApiDto extends NoteEntity {
+  @ApiProperty({ example: 'f60c913b-0859-4797-8dea-c07409ffcf0d' })
+  owner_id: string;
 }

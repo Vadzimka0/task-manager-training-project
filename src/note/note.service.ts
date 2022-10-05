@@ -6,10 +6,10 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
+import { MessageEnum, NoteMessageEnum } from '../common/enums/message.enum';
 import { UserEntity } from '../user/entities/user.entity';
-import { CreateNoteDto, UpdateNoteDto } from './dto';
+import { CreateNoteDto, NoteApiDto, UpdateNoteDto } from './dto';
 import { NoteEntity } from './entities/note.entity';
-import { NoteApiType } from './types/note-api.type';
 
 @Injectable()
 export class NoteService {
@@ -18,7 +18,7 @@ export class NoteService {
     private noteRepository: Repository<NoteEntity>,
   ) {}
 
-  async fetchUserNotes(userId: string, ownerId: string): Promise<NoteApiType[]> {
+  async fetchUserNotes(userId: string, ownerId: string): Promise<NoteApiDto[]> {
     this.idsMatching(ownerId, userId);
 
     const queryBuilder = this.noteRepository
@@ -29,16 +29,16 @@ export class NoteService {
 
     const notes = await queryBuilder.getMany();
 
-    return notes.map((note: NoteApiType) => this.getNoteWithOwnerId(note));
+    return notes.map((note: NoteApiDto) => this.getNoteWithOwnerId(note));
   }
 
-  async fetchOneNote(userId: string, noteId: string): Promise<NoteApiType> {
-    const note = await this.findNoteForRead(userId, noteId);
+  async fetchOneNote(userId: string, noteId: string): Promise<NoteApiDto> {
+    const note = await this.getNoteForRead(userId, noteId);
 
-    return this.getNoteWithOwnerId(note as NoteApiType);
+    return this.getNoteWithOwnerId(note as NoteApiDto);
   }
 
-  async createNote(createNoteDto: CreateNoteDto, currentUser: UserEntity): Promise<NoteApiType> {
+  async createNote(createNoteDto: CreateNoteDto, currentUser: UserEntity): Promise<NoteApiDto> {
     this.validateHexColor(createNoteDto.color);
     const { owner_id, ...dtoWithoutOwner } = createNoteDto;
     this.idsMatching(owner_id, currentUser.id);
@@ -48,43 +48,43 @@ export class NoteService {
     newNote.owner = currentUser;
     const savedNote = await this.noteRepository.save(newNote);
 
-    return this.getNoteWithOwnerId(savedNote as NoteApiType);
+    return this.getNoteWithOwnerId(savedNote as NoteApiDto);
   }
 
   async updateNote(
     updateNoteDto: UpdateNoteDto,
     userId: string,
     noteId: string,
-  ): Promise<NoteApiType> {
+  ): Promise<NoteApiDto> {
     this.validateHexColor(updateNoteDto.color);
     const { owner_id, ...dtoWithoutOwner } = updateNoteDto;
     this.idsMatching(owner_id, userId);
 
-    const currentNote = await this.findNoteForEdit(userId, noteId);
+    const currentNote = await this.getNoteForEdit(userId, noteId);
     Object.assign(currentNote, dtoWithoutOwner);
     const savedNote = await this.noteRepository.save(currentNote);
 
-    return this.getNoteWithOwnerId(savedNote as NoteApiType);
+    return this.getNoteWithOwnerId(savedNote as NoteApiDto);
   }
 
   async deleteNote(userId: string, noteId: string): Promise<{ id: string }> {
-    await this.findNoteForEdit(userId, noteId);
+    await this.getNoteForEdit(userId, noteId);
     await this.noteRepository.delete({ id: noteId });
 
     return { id: noteId };
   }
 
-  async findNoteForRead(userId: string, noteId: string): Promise<NoteEntity> {
+  async getNoteForRead(userId: string, noteId: string): Promise<NoteEntity> {
     const note = await this.noteRepository.findOneBy({ id: noteId });
 
     if (!note || note.owner.id !== userId) {
-      throw new UnprocessableEntityException('The note id is not valid');
+      throw new UnprocessableEntityException(NoteMessageEnum.INVALID_NOTE_ID);
     }
 
     return note;
   }
 
-  async findNoteForEdit(userId: string, noteId: string): Promise<NoteEntity> {
+  async getNoteForEdit(userId: string, noteId: string): Promise<NoteEntity> {
     const note = await this.noteRepository.findOneBy({ id: noteId });
 
     if (!note || note.owner.id !== userId) {
@@ -98,19 +98,17 @@ export class NoteService {
 
   validateHexColor(color: string): void {
     if (!/^#(?:[0-9a-fA-F]{3}){1,2}$/i.test(color)) {
-      throw new UnprocessableEntityException(
-        'Color is not valid. The length has to be 7 symbols and first one has to be #.',
-      );
+      throw new UnprocessableEntityException(MessageEnum.INVALID_COLOR);
     }
   }
 
   idsMatching(owner_id: string, user_id: string): void {
     if (owner_id !== user_id) {
-      throw new UnprocessableEntityException('The user id is not valid');
+      throw new UnprocessableEntityException(MessageEnum.INVALID_USER_ID);
     }
   }
 
-  getNoteWithOwnerId(note: NoteApiType): NoteApiType {
+  getNoteWithOwnerId(note: NoteApiDto): NoteApiDto {
     note.owner_id = note.owner.id;
 
     return note;

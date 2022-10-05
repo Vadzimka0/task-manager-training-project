@@ -18,3 +18,7 @@ export enum CommentMessageEnum {
 export enum AttachmentMessageEnum {
   FILE_NOT_FOUND = 'File not found',
 }
+
+export enum NoteMessageEnum {
+  INVALID_NOTE_ID = 'The note id is not valid',
+}

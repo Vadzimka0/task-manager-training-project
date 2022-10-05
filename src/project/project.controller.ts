@@ -5,7 +5,6 @@ import {
   Delete,
   Get,
   HttpCode,
-  HttpStatus,
   Param,
   Post,
   Put,
@@ -14,12 +13,15 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import {
+  ApiBadRequestResponse,
   ApiBearerAuth,
+  ApiForbiddenResponse,
+  ApiInternalServerErrorResponse,
   ApiOperation,
   ApiParam,
   ApiQuery,
-  ApiResponse,
   ApiTags,
+  ApiUnprocessableEntityResponse,
 } from '@nestjs/swagger';
 
 import { User } from '../auth/decorators/user.decorator';
@@ -43,16 +45,12 @@ export class ProjectController {
   @Post('projects')
   @HttpCode(200)
   @ApiOperation({ summary: 'Create New Project' })
+  @ApiBearerAuth('access-token')
   @ApiOkObjectResponse(ProjectApiDto)
-  @ApiResponse({
-    status: HttpStatus.BAD_REQUEST,
-    description: `"${ProjectMessageEnum.PROJECT_DUPLICATE}";`,
-  })
-  @ApiResponse({
-    status: HttpStatus.UNPROCESSABLE_ENTITY,
+  @ApiBadRequestResponse({ description: `"${ProjectMessageEnum.PROJECT_DUPLICATE}";` })
+  @ApiUnprocessableEntityResponse({
     description: `Possible reasons: "${MessageEnum.INVALID_COLOR}"; "${MessageEnum.INVALID_USER_ID}"`,
   })
-  @ApiBearerAuth('access-token')
   async createProject(
     @Body() projectDto: CreateProjectDto,
     @User() currentUser: UserEntity,
@@ -63,24 +61,16 @@ export class ProjectController {
 
   @Put('projects/:id')
   @ApiOperation({ summary: 'Update Project' })
+  @ApiBearerAuth('access-token')
   @ApiOkObjectResponse(ProjectApiDto)
-  @ApiResponse({
-    status: HttpStatus.BAD_REQUEST,
+  @ApiBadRequestResponse({
     description: `Possible reasons: "${ProjectMessageEnum.PROJECT_PROTECTED}"; "${ProjectMessageEnum.PROJECT_DUPLICATE}";`,
   })
-  @ApiResponse({
-    status: HttpStatus.FORBIDDEN,
-    description: `"${MessageEnum.INVALID_ID_NOT_OWNER}";`,
-  })
-  @ApiResponse({
-    status: HttpStatus.UNPROCESSABLE_ENTITY,
+  @ApiForbiddenResponse({ description: `"${MessageEnum.INVALID_ID_NOT_OWNER}";` })
+  @ApiUnprocessableEntityResponse({
     description: `Possible reasons: "${MessageEnum.INVALID_COLOR}"; "${MessageEnum.INVALID_USER_ID}";`,
   })
-  @ApiResponse({
-    status: HttpStatus.INTERNAL_SERVER_ERROR,
-    description: `"${MessageEnum.ENTITY_NOT_FOUND}";`,
-  })
-  @ApiBearerAuth('access-token')
+  @ApiInternalServerErrorResponse({ description: `"${MessageEnum.ENTITY_NOT_FOUND}";` })
   @ApiParam(getApiParam('id', 'project'))
   async updateProject(
     @Body() projectDto: CreateProjectDto,
@@ -94,19 +84,10 @@ export class ProjectController {
   @Delete('projects/:id')
   @ApiOperation({ summary: 'Delete Project' })
   @ApiOkObjectResponse(EntityId)
-  @ApiResponse({
-    status: HttpStatus.BAD_REQUEST,
-    description: `"${ProjectMessageEnum.PROJECT_PROTECTED}";`,
-  })
-  @ApiResponse({
-    status: HttpStatus.FORBIDDEN,
-    description: `"${MessageEnum.INVALID_ID_NOT_OWNER}";`,
-  })
-  @ApiResponse({
-    status: HttpStatus.INTERNAL_SERVER_ERROR,
-    description: `"${MessageEnum.ENTITY_NOT_FOUND}";`,
-  })
   @ApiBearerAuth('access-token')
+  @ApiBadRequestResponse({ description: `"${ProjectMessageEnum.PROJECT_PROTECTED}";` })
+  @ApiForbiddenResponse({ description: `"${MessageEnum.INVALID_ID_NOT_OWNER}";` })
+  @ApiInternalServerErrorResponse({ description: `"${MessageEnum.ENTITY_NOT_FOUND}";` })
   @ApiParam(getApiParam('id', 'project'))
   async deleteProject(
     @User('id') userId: string,
@@ -118,12 +99,9 @@ export class ProjectController {
 
   @Get('user-projects/:ownerId')
   @ApiOperation({ summary: "Fetch User's Projects" })
-  @ApiOkArrayResponse(ProjectApiDto)
-  @ApiResponse({
-    status: HttpStatus.UNPROCESSABLE_ENTITY,
-    description: `"${MessageEnum.INVALID_USER_ID}";`,
-  })
   @ApiBearerAuth('access-token')
+  @ApiOkArrayResponse(ProjectApiDto)
+  @ApiUnprocessableEntityResponse({ description: `"${MessageEnum.INVALID_USER_ID}";` })
   @ApiParam(getApiParam('ownerId', 'user'))
   async fetchAllUserProjects(
     @User('id') userId: string,
@@ -135,8 +113,8 @@ export class ProjectController {
 
   @Get('projects-search')
   @ApiOperation({ summary: "Fetch User's Projects By Search Query" })
-  @ApiOkArrayResponse(ProjectApiDto)
   @ApiBearerAuth('access-token')
+  @ApiOkArrayResponse(ProjectApiDto)
   @ApiQuery({ name: 'query', example: '?query=Pers' })
   async fetchProjectsBySearch(
     @User('id') userId: string,
@@ -147,17 +125,11 @@ export class ProjectController {
   }
 
   @Get('projects/:projectId')
-  @ApiOperation({ summary: "Fetch One User's Projects" })
-  @ApiOkObjectResponse(ProjectApiDto)
-  @ApiResponse({
-    status: HttpStatus.FORBIDDEN,
-    description: `"${MessageEnum.INVALID_ID_NOT_OWNER}";`,
-  })
-  @ApiResponse({
-    status: HttpStatus.INTERNAL_SERVER_ERROR,
-    description: `"${MessageEnum.ENTITY_NOT_FOUND}";`,
-  })
+  @ApiOperation({ summary: "Fetch One User's Project" })
   @ApiBearerAuth('access-token')
+  @ApiOkObjectResponse(ProjectApiDto)
+  @ApiForbiddenResponse({ description: `"${MessageEnum.INVALID_ID_NOT_OWNER}";` })
+  @ApiInternalServerErrorResponse({ description: `"${MessageEnum.ENTITY_NOT_FOUND}";` })
   @ApiParam(getApiParam('projectId', 'project'))
   async fetchOneProject(
     @User('id') userId: string,
@@ -169,12 +141,9 @@ export class ProjectController {
 
   @Get('projects-statistics/:ownerId')
   @ApiOperation({ summary: 'Fetch Projects Statistics' })
-  @ApiOkArrayResponse(ProjectStatisticApiDto)
-  @ApiResponse({
-    status: HttpStatus.UNPROCESSABLE_ENTITY,
-    description: `"${MessageEnum.INVALID_USER_ID}";`,
-  })
   @ApiBearerAuth('access-token')
+  @ApiOkArrayResponse(ProjectStatisticApiDto)
+  @ApiUnprocessableEntityResponse({ description: `"${MessageEnum.INVALID_USER_ID}";` })
   @ApiParam(getApiParam('ownerId', 'user'))
   async fetchProjectStatistics(
     @User('id') userId: string,

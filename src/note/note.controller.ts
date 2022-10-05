@@ -11,17 +11,24 @@ import {
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiInternalServerErrorResponse,
+  ApiOperation,
+  ApiParam,
+  ApiTags,
+  ApiUnprocessableEntityResponse,
+} from '@nestjs/swagger';
 
 import { User } from '../auth/decorators/user.decorator';
 import { JwtAuthGuard } from '../auth/guards';
-import { EntityId, Data } from '../common/classes';
+import { Data, EntityId } from '../common/classes';
 import { ApiOkArrayResponse, ApiOkObjectResponse } from '../common/decorators';
+import { MessageEnum, NoteMessageEnum } from '../common/enums/message.enum';
 import { UserEntity } from '../user/entities/user.entity';
 import { getApiParam } from '../utils';
 import { CreateNoteDto, NoteApiDto, UpdateNoteDto } from './dto';
 import { NoteService } from './note.service';
-import { NoteApiType } from './types/note-api.type';
 
 @ApiTags('Notes:')
 @Controller()
@@ -33,20 +40,24 @@ export class NoteController {
   @Post('notes')
   @HttpCode(200)
   @ApiOperation({ summary: 'Create New Note' })
-  @ApiOkObjectResponse(NoteApiDto)
   @ApiBearerAuth('access-token')
+  @ApiOkObjectResponse(NoteApiDto)
+  @ApiUnprocessableEntityResponse({
+    description: `Possible reasons: "${MessageEnum.INVALID_COLOR}"; "${MessageEnum.INVALID_USER_ID}"`,
+  })
   async createNote(
     @Body() createNoteDto: CreateNoteDto,
     @User() currentUser: UserEntity,
-  ): Promise<Data<NoteApiType>> {
+  ): Promise<Data<NoteApiDto>> {
     const data = await this.noteService.createNote(createNoteDto, currentUser);
     return { data };
   }
 
   @Delete('notes/:id')
   @ApiOperation({ summary: 'Delete Note' })
-  @ApiOkObjectResponse(EntityId)
   @ApiBearerAuth('access-token')
+  @ApiOkObjectResponse(EntityId)
+  @ApiInternalServerErrorResponse({ description: `"${MessageEnum.ENTITY_NOT_FOUND}";` })
   @ApiParam(getApiParam('id', 'note'))
   async deleteNote(
     @User('id') userId: string,
@@ -58,40 +69,46 @@ export class NoteController {
 
   @Get('notes/:id')
   @ApiOperation({ summary: "Fetch One User's Note" })
-  @ApiOkObjectResponse(NoteApiDto)
   @ApiBearerAuth('access-token')
+  @ApiOkObjectResponse(NoteApiDto)
+  @ApiUnprocessableEntityResponse({ description: `"${NoteMessageEnum.INVALID_NOTE_ID}"` })
   @ApiParam(getApiParam('id', 'note'))
   async fetchOneNote(
     @User('id') userId: string,
     @Param('id') noteId: string,
-  ): Promise<Data<NoteApiType>> {
+  ): Promise<Data<NoteApiDto>> {
     const data = await this.noteService.fetchOneNote(userId, noteId);
     return { data };
   }
 
   @Get('user-notes/:ownerId')
   @ApiOperation({ summary: "Fetch User's Notes" })
-  @ApiOkArrayResponse(NoteApiDto)
   @ApiBearerAuth('access-token')
+  @ApiOkArrayResponse(NoteApiDto)
+  @ApiUnprocessableEntityResponse({ description: `"${MessageEnum.INVALID_USER_ID}"` })
   @ApiParam(getApiParam('ownerId', 'user'))
   async fetchUserNotes(
     @User('id') userId: string,
     @Param('ownerId') ownerId: string,
-  ): Promise<Data<NoteApiType[]>> {
+  ): Promise<Data<NoteApiDto[]>> {
     const data = await this.noteService.fetchUserNotes(userId, ownerId);
     return { data };
   }
 
   @Put('notes/:id')
   @ApiOperation({ summary: 'Update Note' })
-  @ApiOkObjectResponse(NoteApiDto)
   @ApiBearerAuth('access-token')
+  @ApiOkObjectResponse(NoteApiDto)
+  @ApiUnprocessableEntityResponse({
+    description: `Possible reasons: "${MessageEnum.INVALID_COLOR}"; "${MessageEnum.INVALID_USER_ID}"`,
+  })
+  @ApiInternalServerErrorResponse({ description: `"${MessageEnum.ENTITY_NOT_FOUND}";` })
   @ApiParam(getApiParam('id', 'note'))
   async updateNote(
     @Body() updateNoteDto: UpdateNoteDto,
     @User('id') userId: string,
     @Param('id') noteId: string,
-  ): Promise<Data<NoteApiType>> {
+  ): Promise<Data<NoteApiDto>> {
     const data = await this.noteService.updateNote(updateNoteDto, userId, noteId);
     return { data };
   }
