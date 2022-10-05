@@ -86,7 +86,7 @@ export class TaskController {
   async deleteTask(
     @User('id') userId: string,
     @Param('id') taskId: string,
-  ): Promise<Data<{ id: string }>> {
+  ): Promise<Data<EntityId>> {
     const data = await this.taskService.deleteTask(userId, taskId);
     return { data };
   }

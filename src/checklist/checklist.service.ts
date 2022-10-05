@@ -1,4 +1,5 @@
 import {
+  ForbiddenException,
   HttpException,
   HttpStatus,
   Injectable,
@@ -8,6 +9,7 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
+import { ChecklistMessageEnum, MessageEnum } from '../common/enums/message.enum';
 import { UserEntity } from '../user/entities/user.entity';
 import {
   CreateChecklistDto,
@@ -15,8 +17,10 @@ import {
   UpdateChecklistDto,
   UpdateChecklistItemDto,
 } from './dto';
-import { ChecklistEntity, ChecklistItemEntity } from './entities';
-import { ChecklistApiType, ListItemApiType } from './types';
+import { ChecklistApiDto } from './dto/api-dto/checklist-api.dto';
+import { ChecklistItemApiDto } from './dto/api-dto/checklist-item-api.dto';
+import { ChecklistEntity } from './entities/checklist.entity';
+import { ChecklistItemEntity } from './entities/checklistItem.entity';
 
 @Injectable()
 export class ChecklistService {
@@ -27,7 +31,7 @@ export class ChecklistService {
     private checklistItemRepository: Repository<ChecklistItemEntity>,
   ) {}
 
-  async fetchAllUserChecklists(userId: string, ownerId: string): Promise<ChecklistApiType[]> {
+  async fetchAllUserChecklists(userId: string, ownerId: string): Promise<ChecklistApiDto[]> {
     this.idsMatching(ownerId, userId);
 
     const queryBuilder = this.checklistRepository
@@ -39,24 +43,24 @@ export class ChecklistService {
 
     const checklists = await queryBuilder.getMany();
 
-    return checklists.map((checklist: ChecklistApiType) => {
+    return checklists.map((checklist: ChecklistApiDto) => {
       checklist.owner_id = userId;
       checklist.items = this.getItemsWithChecklistId(checklist);
       return checklist;
     });
   }
 
-  async fetchOneChecklist(userId: string, listId: string): Promise<ChecklistApiType> {
+  async fetchOneChecklist(userId: string, listId: string): Promise<ChecklistApiDto> {
     const checklist = await this.findAndValidateChecklist(listId, userId);
     checklist.items = this.getItemsWithChecklistId(checklist);
 
-    return this.getChecklistWithOwnerId(checklist as ChecklistApiType);
+    return this.getChecklistWithOwnerId(checklist as ChecklistApiDto);
   }
 
   async createChecklist(
     createChecklistDto: CreateChecklistDto,
     currentUser: UserEntity,
-  ): Promise<ChecklistApiType> {
+  ): Promise<ChecklistApiDto> {
     this.validateHexColor(createChecklistDto.color);
     const { items, owner_id, ...dtoWithoutItemsAndOwner } = createChecklistDto;
     this.idsMatching(owner_id, currentUser.id);
@@ -68,14 +72,14 @@ export class ChecklistService {
     const savedChecklist = await this.checklistRepository.save(newChecklist);
     savedChecklist.items = this.getItemsWithChecklistId(savedChecklist);
 
-    return this.getChecklistWithOwnerId(savedChecklist as ChecklistApiType);
+    return this.getChecklistWithOwnerId(savedChecklist as ChecklistApiDto);
   }
 
   async updateChecklist(
     updateChecklistDto: UpdateChecklistDto,
     userId: string,
     listId: string,
-  ): Promise<ChecklistApiType> {
+  ): Promise<ChecklistApiDto> {
     this.validateHexColor(updateChecklistDto.color);
     const { items, owner_id, ...dtoWithoutItemsAndOwner } = updateChecklistDto;
     this.idsMatching(owner_id, userId);
@@ -86,7 +90,7 @@ export class ChecklistService {
     const savedChecklist = await this.checklistRepository.save(currentChecklist);
     savedChecklist.items = this.getItemsWithChecklistId(savedChecklist);
 
-    return this.getChecklistWithOwnerId(savedChecklist as ChecklistApiType);
+    return this.getChecklistWithOwnerId(savedChecklist as ChecklistApiDto);
   }
 
   async deleteChecklist(userId: string, listId: string): Promise<{ id: string }> {
@@ -171,9 +175,7 @@ export class ChecklistService {
       }
 
       if (checklist.owner.id !== userId) {
-        throw new UnprocessableEntityException(
-          'The checklist id is not valid. You are not the owner',
-        );
+        throw new ForbiddenException(MessageEnum.INVALID_ID_NOT_OWNER);
       }
 
       return checklist;
@@ -203,11 +205,11 @@ export class ChecklistService {
       }
 
       if (userId && checklistItem.checklist.owner.id !== userId) {
-        throw new UnprocessableEntityException('The item id is not valid. You are not the owner');
+        throw new ForbiddenException(MessageEnum.INVALID_ID_NOT_OWNER);
       }
 
       if (listId && checklistItem.checklist.id !== listId) {
-        throw new UnprocessableEntityException('The item id does not belong to current checklist');
+        throw new ForbiddenException(ChecklistMessageEnum.ITEM_NOT_BELONG_TO_CHECKLIST);
       }
 
       return checklistItem;
@@ -221,27 +223,26 @@ export class ChecklistService {
 
   validateHexColor(color: string): void {
     if (!/^#(?:[0-9a-fA-F]{3}){1,2}$/i.test(color)) {
-      throw new UnprocessableEntityException(
-        'Color is not valid. The length has to be 7 symbols and first one has to be #.',
-      );
+      throw new UnprocessableEntityException(MessageEnum.INVALID_COLOR);
     }
   }
 
   idsMatching(owner_id: string, user_id: string): void {
     if (owner_id !== user_id) {
-      throw new UnprocessableEntityException('The user id is not valid');
+      throw new UnprocessableEntityException(MessageEnum.INVALID_USER_ID);
     }
   }
 
-  getChecklistWithOwnerId(checklist: ChecklistApiType): ChecklistApiType {
+  getChecklistWithOwnerId(checklist: ChecklistApiDto): ChecklistApiDto {
     checklist.owner_id = checklist.owner.id;
 
     return checklist;
   }
 
-  getItemsWithChecklistId(checklist: ChecklistEntity): ListItemApiType[] {
-    return checklist.items.map((item: ListItemApiType) => {
+  getItemsWithChecklistId(checklist: ChecklistEntity): ChecklistItemApiDto[] {
+    return checklist.items.map((item: ChecklistItemApiDto) => {
       item.checklist_id = checklist.id;
+
       return item;
     });
   }

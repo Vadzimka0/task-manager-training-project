@@ -22,3 +22,7 @@ export enum AttachmentMessageEnum {
 export enum NoteMessageEnum {
   INVALID_NOTE_ID = 'The note id is not valid',
 }
+
+export enum ChecklistMessageEnum {
+  ITEM_NOT_BELONG_TO_CHECKLIST = 'The item id does not belong to current checklist',
+}

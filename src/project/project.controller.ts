@@ -92,7 +92,7 @@ export class ProjectController {
   async deleteProject(
     @User('id') userId: string,
     @Param('id') projectId: string,
-  ): Promise<Data<{ id: string }>> {
+  ): Promise<Data<EntityId>> {
     const data = await this.projectService.deleteProject(userId, projectId);
     return { data };
   }
