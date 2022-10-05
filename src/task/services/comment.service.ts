@@ -5,18 +5,18 @@ import {
   HttpStatus,
   Inject,
   Injectable,
-  NotFoundException,
+  InternalServerErrorException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
+import { MessageEnum } from '../../common/enums/message.enum';
 import { UserEntity } from '../../user/entities/user.entity';
 import { removeFilesFromStorage } from '../../utils';
+import { CommentApiDto } from '../dto/api-dto/comment-api.dto';
+import { CommentAttachmentApiDto } from '../dto/api-dto/comment-attachment-api.dto';
 import { CreateCommentDto } from '../dto/create-comment.dto';
 import { CommentEntity } from '../entities/comment.entity';
-// import { CreateCommentDto } from '../dto';
-// import { CommentEntity } from '../entities';
-import { CommentApiType, CommentAttachmentApiType } from '../types';
 import { CommentAttachmentService } from './comment-attachment.service';
 import { TaskService } from './task.service';
 
@@ -33,7 +33,7 @@ export class CommentService {
   async createComment(
     commentDto: CreateCommentDto,
     currentUser: UserEntity,
-  ): Promise<CommentApiType> {
+  ): Promise<CommentApiDto> {
     const { owner_id, task_id, ...dtoWithoutRelationItems } = commentDto;
     this.taskService.idsMatching(owner_id, currentUser.id);
 
@@ -47,10 +47,12 @@ export class CommentService {
 
     const savedComment = await this.commentRepository.save(newComment);
 
-    return this.getCommentWithRelationIds(savedComment as CommentApiType);
+    return this.getCommentWithRelationIds(savedComment as CommentApiDto);
   }
 
-  async fetchTaskComments(taskId: string): Promise<CommentApiType[]> {
+  async fetchTaskComments(taskId: string): Promise<CommentApiDto[]> {
+    await this.taskService.getAnyTaskById(taskId);
+
     const queryBuilder = this.commentRepository
       .createQueryBuilder('comments')
       .leftJoinAndSelect('comments.task', 'task')
@@ -62,7 +64,7 @@ export class CommentService {
 
     const comments = await queryBuilder.getMany();
 
-    return comments.map((comment: CommentApiType) => this.getCommentWithRelationIds(comment));
+    return comments.map((comment: CommentApiDto) => this.getCommentWithRelationIds(comment));
   }
 
   async deleteComment(userId: string, commentId: string): Promise<{ id: string }> {
@@ -91,13 +93,13 @@ export class CommentService {
       const comment = await this.commentRepository.findOneBy({ id: commentId });
 
       if (!comment) {
-        throw new NotFoundException(
+        throw new InternalServerErrorException(
           `Entity CommentModel, id=${commentId} not found in the database`,
         );
       }
 
       if (comment.owner.id !== userId) {
-        throw new ForbiddenException('Invalid ID. You are not an owner');
+        throw new ForbiddenException(MessageEnum.INVALID_ID_NOT_OWNER);
       }
 
       return comment;
@@ -109,11 +111,11 @@ export class CommentService {
     }
   }
 
-  getCommentWithRelationIds(comment: CommentApiType): CommentApiType {
+  getCommentWithRelationIds(comment: CommentApiDto): CommentApiDto {
     comment.owner_id = comment.owner.id;
     comment.task_id = comment.task.id;
     comment.attachments = comment.attachments?.length
-      ? comment.attachments.map((attachment: CommentAttachmentApiType) =>
+      ? comment.attachments.map((attachment: CommentAttachmentApiDto) =>
           this.commentAttachmentService.getFullCommentAttachment(attachment),
         )
       : null;

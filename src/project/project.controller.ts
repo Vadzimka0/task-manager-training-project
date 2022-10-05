@@ -30,12 +30,8 @@ import { ApiOkArrayResponse, ApiOkObjectResponse } from '../common/decorators';
 import { MessageEnum, ProjectMessageEnum } from '../common/enums/message.enum';
 import { UserEntity } from '../user/entities/user.entity';
 import { getApiParam } from '../utils';
-import { CreateProjectDto } from './dto/create-project.dto';
-import { ProjectApiDto } from './dto/project-api.dto';
+import { CreateProjectDto, ProjectApiDto, ProjectStatisticApiDto } from './dto';
 import { ProjectService } from './project.service';
-import { ProjectApiType, ProjectStatisticApiType } from './types';
-import { Project } from './types/project-api.type';
-import { ProjectStatisticApiDto } from './types/projects-statistics-api.type';
 
 @ApiTags('Projects:')
 @Controller()
@@ -60,8 +56,7 @@ export class ProjectController {
   async createProject(
     @Body() projectDto: CreateProjectDto,
     @User() currentUser: UserEntity,
-  ): Promise<Data<Project>> {
-    // ): Promise<Data<ProjectApiType>> {
+  ): Promise<Data<ProjectApiDto>> {
     const data = await this.projectService.createProject(projectDto, currentUser);
     return { data };
   }
@@ -91,7 +86,7 @@ export class ProjectController {
     @Body() projectDto: CreateProjectDto,
     @User('id') userId: string,
     @Param('id') projectId: string,
-  ): Promise<Data<ProjectApiType>> {
+  ): Promise<Data<ProjectApiDto>> {
     const data = await this.projectService.updateProject(projectDto, userId, projectId);
     return { data };
   }
@@ -133,7 +128,7 @@ export class ProjectController {
   async fetchAllUserProjects(
     @User('id') userId: string,
     @Param('ownerId') ownerId: string,
-  ): Promise<Data<ProjectApiType[]>> {
+  ): Promise<Data<ProjectApiDto[]>> {
     const data = await this.projectService.fetchUserProjects(userId, ownerId);
     return { data };
   }
@@ -146,7 +141,7 @@ export class ProjectController {
   async fetchProjectsBySearch(
     @User('id') userId: string,
     @Query() querySearch: { query: string },
-  ): Promise<Data<ProjectApiType[]>> {
+  ): Promise<Data<ProjectApiDto[]>> {
     const data = await this.projectService.fetchUserProjects(userId, undefined, querySearch);
     return { data };
   }
@@ -167,7 +162,7 @@ export class ProjectController {
   async fetchOneProject(
     @User('id') userId: string,
     @Param('projectId') projectId: string,
-  ): Promise<Data<ProjectApiType>> {
+  ): Promise<Data<ProjectApiDto>> {
     const data = await this.projectService.fetchOneProject(userId, projectId);
     return { data };
   }
@@ -184,7 +179,7 @@ export class ProjectController {
   async fetchProjectStatistics(
     @User('id') userId: string,
     @Param('ownerId') ownerId: string,
-  ): Promise<Data<ProjectStatisticApiType[]>> {
+  ): Promise<Data<ProjectStatisticApiDto[]>> {
     const data = await this.projectService.fetchProjectStatistics(userId, ownerId);
     return { data };
   }

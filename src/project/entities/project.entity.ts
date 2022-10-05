@@ -8,11 +8,11 @@ import { UserEntity } from '../../user/entities/user.entity';
 
 @Entity({ name: 'projects' })
 export class ProjectEntity extends AbstractEntity {
-  @ApiProperty()
+  @ApiProperty({ example: 'education' })
   @Column({ length: 32 })
   title: string;
 
-  @ApiProperty()
+  @ApiProperty({ example: '#ff6347' })
   @Column({ length: 8 })
   color: string;
 

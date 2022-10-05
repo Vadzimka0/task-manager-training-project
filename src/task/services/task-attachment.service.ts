@@ -1,12 +1,11 @@
-import { forwardRef, Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { forwardRef, Inject, Injectable, InternalServerErrorException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { AddTaskAttachmentDto } from '../dto/add-task-attachment.dto';
 
-// import { AddTaskAttachmentDto } from '../dto';
+import { AddTaskAttachmentDto } from '../dto/add-task-attachment.dto';
+import { TaskAttachmentApiDto } from '../dto/api-dto/task-attachment-api.dto';
 import { TaskAttachmentEntity } from '../entities/task-attachment.entity';
-import { TaskAttachmentApiType } from '../types';
 import { TaskService } from './task.service';
 
 @Injectable()
@@ -29,7 +28,7 @@ export class TaskAttachmentService {
     userId: string,
     addTaskAttachmentDto: AddTaskAttachmentDto,
     file: Express.Multer.File,
-  ): Promise<TaskAttachmentApiType> {
+  ): Promise<TaskAttachmentApiDto> {
     const currentTask = await this.taskService.getValidTaskForEdit(
       userId,
       addTaskAttachmentDto.task_id,
@@ -48,20 +47,22 @@ export class TaskAttachmentService {
     newTaskAttachment.task = currentTask;
     const savedAttachment = await this.taskAttachmentRepository.save(newTaskAttachment);
 
-    return this.getFullTaskAttachment(savedAttachment as TaskAttachmentApiType);
+    return this.getFullTaskAttachment(savedAttachment as TaskAttachmentApiDto);
   }
 
   async getFileById(id: string) {
     const file = await this.taskAttachmentRepository.findOneBy({ id });
 
     if (!file) {
-      throw new NotFoundException(`Entity TaskAttachmentModel, id=${id} not found in the database`);
+      throw new InternalServerErrorException(
+        `Entity TaskAttachmentModel, id=${id} not found in the database`,
+      );
     }
 
     return file;
   }
 
-  getFullTaskAttachment(attachment: TaskAttachmentApiType): TaskAttachmentApiType {
+  getFullTaskAttachment(attachment: TaskAttachmentApiDto): TaskAttachmentApiDto {
     attachment.task_id = attachment.task.id;
     attachment.url = `${this.server_url}${attachment.path.substring(
       attachment.path.indexOf('/') + 1,

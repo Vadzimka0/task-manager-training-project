@@ -1,14 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
 
-import { CreateProjectDto } from './create-project.dto';
+import { ProjectEntity } from '../entities/project.entity';
 
-export class ProjectApiDto extends CreateProjectDto {
-  @ApiProperty({
-    description: 'Project ID',
-    example: '6d2e0a12-739e-4a03-a570-606aa4fc686c',
-  })
-  readonly id: string;
-
-  @ApiProperty()
-  readonly created_at: Date;
+export class ProjectApiDto extends ProjectEntity {
+  @ApiProperty({ example: 'f60c913b-0859-4797-8dea-c07409ffcf0d' })
+  owner_id: string;
 }

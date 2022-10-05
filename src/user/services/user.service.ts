@@ -8,6 +8,7 @@ import {
   SPECIAL_ONE_PROJECT_COLOR,
   SPECIAL_ONE_PROJECT_NAME,
 } from '../../common/constants/default-constants';
+import { MessageEnum } from '../../common/enums/message.enum';
 import { NoteService } from '../../note/note.service';
 import { ProjectService } from '../../project/project.service';
 import { TaskService } from '../../task/services';
@@ -81,7 +82,7 @@ export class UserService {
       return user;
     }
 
-    throw new UnprocessableEntityException('The user id is not valid');
+    throw new UnprocessableEntityException(MessageEnum.INVALID_USER_ID);
   }
 
   async getByEmail(email: string): Promise<UserEntity> {

@@ -15,9 +15,8 @@ import { SPECIAL_ONE_PROJECT_NAME } from '../common/constants/default-constants'
 import { MessageEnum, ProjectMessageEnum } from '../common/enums/message.enum';
 import { UserEntity } from '../user/entities/user.entity';
 import { removeFilesFromStorage } from '../utils';
-import { CreateProjectDto } from './dto/create-project.dto';
+import { CreateProjectDto, ProjectApiDto, ProjectStatisticApiDto } from './dto';
 import { ProjectEntity } from './entities/project.entity';
-import { ProjectApiType, ProjectStatisticApiType } from './types';
 
 @Injectable()
 export class ProjectService {
@@ -30,7 +29,7 @@ export class ProjectService {
     userId: string,
     ownerId?: string,
     search?: { query: string },
-  ): Promise<ProjectApiType[]> {
+  ): Promise<ProjectApiDto[]> {
     if (ownerId) this.idsMatching(ownerId, userId);
 
     const queryBuilder = this.projectRepository
@@ -47,19 +46,16 @@ export class ProjectService {
 
     const projects = await queryBuilder.getMany();
 
-    return projects.map((project: ProjectApiType) => this.getProjectWithOwnerId(project));
+    return projects.map((project: ProjectApiDto) => this.getProjectWithOwnerId(project));
   }
 
-  async fetchOneProject(userId: string, projectId: string): Promise<ProjectApiType> {
+  async fetchOneProject(userId: string, projectId: string): Promise<ProjectApiDto> {
     const project = await this.findProjectForRead(projectId, userId);
 
-    return this.getProjectWithOwnerId(project as ProjectApiType);
+    return this.getProjectWithOwnerId(project as ProjectApiDto);
   }
 
-  async fetchProjectStatistics(
-    userId: string,
-    ownerId: string,
-  ): Promise<ProjectStatisticApiType[]> {
+  async fetchProjectStatistics(userId: string, ownerId: string): Promise<ProjectStatisticApiDto[]> {
     this.idsMatching(userId, ownerId);
 
     const tasksNumbers = await this.projectRepository
@@ -79,7 +75,7 @@ export class ProjectService {
       .groupBy('project.id')
       .getRawMany();
 
-    return tasksNumbers.map((projectInfo: ProjectStatisticApiType) => ({
+    return tasksNumbers.map((projectInfo: ProjectStatisticApiDto) => ({
       ...projectInfo,
       tasks_number: Number(projectInfo.tasks_number),
     }));
@@ -88,7 +84,7 @@ export class ProjectService {
   async createProject(
     projectDto: CreateProjectDto,
     currentUser: UserEntity,
-  ): Promise<ProjectApiType> {
+  ): Promise<ProjectApiDto> {
     this.validateHexColor(projectDto.color);
 
     const { owner_id, ...dtoWithoutOwner } = projectDto;
@@ -101,14 +97,14 @@ export class ProjectService {
     newProject.owner = currentUser;
     const savedProject = await this.projectRepository.save(newProject);
 
-    return this.getProjectWithOwnerId(savedProject as ProjectApiType);
+    return this.getProjectWithOwnerId(savedProject as ProjectApiDto);
   }
 
   async updateProject(
     projectDto: CreateProjectDto,
     userId: string,
     projectId: string,
-  ): Promise<ProjectApiType> {
+  ): Promise<ProjectApiDto> {
     this.validateHexColor(projectDto.color);
     const { owner_id, ...dtoWithoutOwner } = projectDto;
     this.idsMatching(owner_id, userId);
@@ -122,7 +118,7 @@ export class ProjectService {
     Object.assign(currentProject, dtoWithoutOwner);
     const savedProject = await this.projectRepository.save(currentProject);
 
-    return this.getProjectWithOwnerId(savedProject as ProjectApiType);
+    return this.getProjectWithOwnerId(savedProject as ProjectApiDto);
   }
 
   async deleteProject(userId: string, projectId: string): Promise<{ id: string }> {
@@ -199,7 +195,7 @@ export class ProjectService {
     return project;
   }
 
-  async checkDuplicateProjectTitle(title: string, id: string): Promise<any> {
+  async checkDuplicateProjectTitle(title: string, id: string): Promise<void> {
     const project = await this.projectRepository
       .createQueryBuilder('projects')
       .leftJoinAndSelect('projects.owner', 'owner')
@@ -224,7 +220,7 @@ export class ProjectService {
     }
   }
 
-  getProjectWithOwnerId(project: ProjectApiType): ProjectApiType {
+  getProjectWithOwnerId(project: ProjectApiDto): ProjectApiDto {
     project.owner_id = project.owner.id;
 
     return project;

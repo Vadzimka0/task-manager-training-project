@@ -1,12 +1,11 @@
-import { forwardRef, Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { forwardRef, Inject, Injectable, InternalServerErrorException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { AddCommentAttachmentDto } from '../dto/add-comment-attachment.dto';
 
-// import { AddCommentAttachmentDto } from '../dto';
+import { AddCommentAttachmentDto } from '../dto';
+import { CommentAttachmentApiDto } from '../dto/api-dto/comment-attachment-api.dto';
 import { CommentAttachmentEntity } from '../entities/comment-attachment.entity';
-import { CommentAttachmentApiType } from '../types';
 import { CommentService } from './comment.service';
 
 @Injectable()
@@ -29,7 +28,7 @@ export class CommentAttachmentService {
     userId: string,
     addCommentAttachmentDto: AddCommentAttachmentDto,
     file: Express.Multer.File,
-  ): Promise<CommentAttachmentApiType> {
+  ): Promise<CommentAttachmentApiDto> {
     const currentComment = await this.commentService.getValidComment(
       userId,
       addCommentAttachmentDto.comment_id,
@@ -48,20 +47,20 @@ export class CommentAttachmentService {
     newCommentAttachment.comment = currentComment;
 
     const savedAttachment = await this.commentAttachmentRepository.save(newCommentAttachment);
-    return this.getFullCommentAttachment(savedAttachment as CommentAttachmentApiType);
+    return this.getFullCommentAttachment(savedAttachment as CommentAttachmentApiDto);
   }
 
   async getFileById(id: string): Promise<CommentAttachmentEntity> {
     const file = await this.commentAttachmentRepository.findOneBy({ id });
     if (!file) {
-      throw new NotFoundException(
+      throw new InternalServerErrorException(
         `Entity CommentAttachmentModel, id=${id} not found in the database`,
       );
     }
     return file;
   }
 
-  getFullCommentAttachment(attachment: CommentAttachmentApiType): CommentAttachmentApiType {
+  getFullCommentAttachment(attachment: CommentAttachmentApiDto): CommentAttachmentApiDto {
     attachment.comment_id = attachment.comment.id;
     attachment.url = `${this.server_url}${attachment.path.substring(
       attachment.path.indexOf('/') + 1,

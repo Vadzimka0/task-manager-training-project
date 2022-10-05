@@ -10,15 +10,29 @@ import {
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
+import {
+  ApiBearerAuth,
+  ApiForbiddenResponse,
+  ApiInternalServerErrorResponse,
+  ApiOperation,
+  ApiParam,
+  ApiTags,
+  ApiUnprocessableEntityResponse,
+} from '@nestjs/swagger';
 
 import { User } from '../../auth/decorators/user.decorator';
 import { JwtAuthGuard } from '../../auth/guards';
+import { EntityId } from '../../common/classes';
 import { Data } from '../../common/classes/response-data';
+import { ApiOkArrayResponse, ApiOkObjectResponse } from '../../common/decorators';
+import { CommentMessageEnum, MessageEnum } from '../../common/enums/message.enum';
 import { UserEntity } from '../../user/entities/user.entity';
+import { getApiParam } from '../../utils';
 import { CreateCommentDto } from '../dto';
+import { CommentApiDto } from '../dto/api-dto/comment-api.dto';
 import { CommentService } from '../services';
-import { CommentApiType } from '../types';
 
+@ApiTags('Tasks Comments:')
 @Controller()
 @UseGuards(JwtAuthGuard)
 @UseInterceptors(ClassSerializerInterceptor)
@@ -27,21 +41,38 @@ export class CommentController {
 
   @Post('comments')
   @HttpCode(200)
+  @ApiOperation({ summary: 'Create New Comment' })
+  @ApiBearerAuth('access-token')
+  @ApiOkObjectResponse(CommentApiDto)
+  @ApiForbiddenResponse({ description: `"${CommentMessageEnum.INVALID_ID_NOT_OWNER_OR_MEMBER}"` })
+  @ApiUnprocessableEntityResponse({ description: `"${MessageEnum.INVALID_USER_ID}"` })
+  @ApiInternalServerErrorResponse({ description: `"${MessageEnum.ENTITY_NOT_FOUND}";` })
   async createComment(
     @Body() commentDto: CreateCommentDto,
     @User() currentUser: UserEntity,
-  ): Promise<Data<CommentApiType>> {
+  ): Promise<Data<CommentApiDto>> {
     const data = await this.commentService.createComment(commentDto, currentUser);
     return { data };
   }
 
   @Get('tasks-comments/:taskId')
-  async fetchTaskComments(@Param('taskId') taskId: string): Promise<Data<CommentApiType[]>> {
+  @ApiOperation({ summary: 'Fetch Task Comments' })
+  @ApiBearerAuth('access-token')
+  @ApiOkArrayResponse(CommentApiDto)
+  @ApiInternalServerErrorResponse({ description: `"${MessageEnum.ENTITY_NOT_FOUND}";` })
+  @ApiParam(getApiParam('taskId', 'task'))
+  async fetchTaskComments(@Param('taskId') taskId: string): Promise<Data<CommentApiDto[]>> {
     const data = await this.commentService.fetchTaskComments(taskId);
     return { data };
   }
 
   @Delete('comments/:commentId')
+  @ApiOperation({ summary: 'Delete Comment' })
+  @ApiBearerAuth('access-token')
+  @ApiOkObjectResponse(EntityId)
+  @ApiForbiddenResponse({ description: `"${MessageEnum.INVALID_ID_NOT_OWNER}"` })
+  @ApiInternalServerErrorResponse({ description: `"${MessageEnum.ENTITY_NOT_FOUND}";` })
+  @ApiParam(getApiParam('commentId', 'comment'))
   async deleteComment(
     @User('id') userId: string,
     @Param('commentId') commentId: string,
