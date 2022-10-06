@@ -1,4 +1,10 @@
-import { forwardRef, Inject, Injectable, UnprocessableEntityException } from '@nestjs/common';
+import {
+  forwardRef,
+  Inject,
+  Injectable,
+  UnprocessableEntityException,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcrypt';
 import { Repository } from 'typeorm';
@@ -35,7 +41,7 @@ export class UserService {
     return this.userAvatarService.getUserWithAvatarUrl(user as UserApiType);
   }
 
-  async fetchMembersBySearch(search: { query: string }): Promise<UserEntity[]> {
+  async fetchMembersBySearch(search: { query: string }): Promise<UserApiType[]> {
     const queryBuilder = this.userRepository
       .createQueryBuilder('users')
       .andWhere('users.username LIKE :query', {
@@ -50,9 +56,7 @@ export class UserService {
 
   async fetchUserStatistics(userId: string, owner_id: string): Promise<UserStatisticsApiType> {
     if (userId !== owner_id) {
-      throw new UnprocessableEntityException(
-        'The user id is not valid. Statistics are available only to you.',
-      );
+      throw new UnprocessableEntityException(MessageEnum.INVALID_USER_ID_STATISTICS_ONLY_TO_YOU);
     }
 
     const { created_tasks, completed_tasks } = await this.taskService.getTasksStatisticsByOwner(
@@ -82,7 +86,8 @@ export class UserService {
       return user;
     }
 
-    throw new UnprocessableEntityException(MessageEnum.INVALID_USER_ID);
+    // throw new UnprocessableEntityException(MessageEnum.INVALID_USER_ID);
+    throw new InternalServerErrorException(`Entity UserModel, id=${id} not found in the database`);
   }
 
   async getByEmail(email: string): Promise<UserEntity> {

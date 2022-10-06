@@ -16,52 +16,67 @@ import { TaskEntity } from '../../task/entities/task.entity';
 
 @Entity({ name: 'users' })
 export class UserEntity {
+  // @ApiProperty()
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
+  // @ApiProperty()
   @CreateDateColumn()
   created_at: Date;
 
+  // @ApiProperty()
   @Column({ unique: true })
   email: string;
 
+  // @ApiProperty()
   @Column()
   username: string;
 
+  // @ApiHideProperty()
   @Exclude()
   @Column()
   password: string;
 
+  // @ApiHideProperty()
   @Exclude()
   @Column({ nullable: true })
   refresh_token: string;
 
-  @OneToMany(() => NoteEntity, (note: NoteEntity) => note.owner)
+  // @ApiHideProperty()
+  @OneToMany(() => NoteEntity, (note) => note.owner)
   notes: NoteEntity[];
 
-  @OneToMany(() => ChecklistEntity, (checklist: ChecklistEntity) => checklist.owner)
+  // @ApiHideProperty()
+  @OneToMany(() => ChecklistEntity, (checklist) => checklist.owner)
   checklists: ChecklistEntity[];
 
-  @OneToMany(() => ProjectEntity, (project: ProjectEntity) => project.owner)
+  // @ApiHideProperty()
+  @OneToMany(() => ProjectEntity, (project) => project.owner)
   projects: ProjectEntity[];
 
-  @OneToMany(() => TaskEntity, (task: TaskEntity) => task.performer)
+  // @ApiHideProperty()
+  @OneToMany(() => TaskEntity, (task) => task.performer)
   assigned_tasks: TaskEntity[];
 
-  @ManyToMany(() => TaskEntity, (task: TaskEntity) => task.members)
+  // @ApiHideProperty()
+  @ManyToMany(() => TaskEntity, (task) => task.members)
   participate_tasks: TaskEntity[];
 
-  @OneToMany(() => CommentEntity, (comment: CommentEntity) => comment.owner)
+  // @ApiHideProperty()
+  @OneToMany(() => CommentEntity, (comment) => comment.owner)
   comments: CommentEntity[];
 
+  // @ApiHideProperty()
   @Exclude()
   @Column({ nullable: true })
   mimetype: string;
 
+  // @ApiHideProperty()
   @Exclude()
   @Column({ nullable: true })
   path: string;
 
+  // @ApiHideProperty()
   @Exclude()
   @Column({ nullable: true })
   filename: string;

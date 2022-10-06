@@ -1,6 +1,7 @@
 export enum MessageEnum {
   INVALID_ID_NOT_OWNER = 'Invalid ID. You are not an owner',
   INVALID_USER_ID = 'The user id is not valid',
+  INVALID_USER_ID_STATISTICS_ONLY_TO_YOU = 'The user id is not valid. Statistics are available only to you.',
   INVALID_COLOR = 'Color is not valid. The length has to be 7 symbols and first one has to be #.',
   ENTITY_NOT_FOUND = 'Entity %Model, id=% not found in the database',
 }
@@ -25,4 +26,8 @@ export enum NoteMessageEnum {
 
 export enum ChecklistMessageEnum {
   ITEM_NOT_BELONG_TO_CHECKLIST = 'The item id does not belong to current checklist',
+}
+
+export enum AvatarMessageEnum {
+  AVATAR_COULD_NOT_BE_ATTACHED = 'The avatar could not be attached to user. The user is not found.',
 }

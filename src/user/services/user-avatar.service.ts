@@ -2,7 +2,9 @@ import { Injectable, UnprocessableEntityException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { AvatarMessageEnum } from '../../common/enums/message.enum';
 
+import { AddAvatarDto } from '../dto/add-avatar.dto';
 import { UserEntity } from '../entities/user.entity';
 import { UserApiType } from '../types/user-api.type';
 
@@ -20,15 +22,9 @@ export class UserAvatarService {
     )}/`;
   }
 
-  async addAvatar(
-    user: UserEntity,
-    addAvatarDto: { user_id: string },
-    file: any,
-  ): Promise<UserApiType> {
+  async addAvatar(user: UserEntity, addAvatarDto: AddAvatarDto, file: any): Promise<UserApiType> {
     if (user.id !== addAvatarDto.user_id) {
-      throw new UnprocessableEntityException(
-        'The avatar could not be attached to user. The user is not found.',
-      );
+      throw new UnprocessableEntityException(AvatarMessageEnum.AVATAR_COULD_NOT_BE_ATTACHED);
     }
 
     const filedata = {

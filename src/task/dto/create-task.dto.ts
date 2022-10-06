@@ -1,6 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
-  IsArray,
   IsBoolean,
   IsDateString,
   IsEmpty,
@@ -9,6 +8,7 @@ import {
   IsUUID,
   MaxLength,
 } from 'class-validator';
+
 import { TaskAttachmentEntity } from '../entities/task-attachment.entity';
 
 export class CreateTaskDto {
@@ -39,8 +39,8 @@ export class CreateTaskDto {
     example: '86fd5b28-eb9b-4c31-b19c-209a7ab050a4',
   })
   @IsOptional()
-  @IsNotEmpty()
-  @IsUUID()
+  // @IsNotEmpty()
+  // @IsUUID()
   readonly assigned_to: string | null;
 
   @ApiProperty({
@@ -64,9 +64,9 @@ export class CreateTaskDto {
     example: ['fb4cad39-9add-4633-8050-b933ad1d7458', 'cc6864ed-9ca0-40b7-a4aa-e17563ace1ce'],
   })
   @IsOptional()
-  @IsNotEmpty()
-  @IsArray()
-  readonly members: string[] | null;
+  // @IsNotEmpty()
+  // @IsArray()
+  readonly members: null | string[];
 
   @ApiProperty({
     description: 'Has to match null',

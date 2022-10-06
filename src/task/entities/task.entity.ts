@@ -4,8 +4,8 @@ import { Column, Entity, JoinTable, ManyToMany, ManyToOne, OneToMany } from 'typ
 
 import { AbstractEntity } from '../../common/classes';
 import { ProjectEntity } from '../../project/entities/project.entity';
+import { UserApiDto } from '../../user/dto/user-api.dto';
 import { UserEntity } from '../../user/entities/user.entity';
-import { User } from '../../user/types/user-api.type';
 import { TaskAttachmentApiDto } from '../dto/api-dto/task-attachment-api.dto';
 import { CommentEntity } from './comment.entity';
 import { TaskAttachmentEntity } from './task-attachment.entity';
@@ -38,7 +38,8 @@ export class TaskEntity extends AbstractEntity {
   @ManyToOne(() => UserEntity, (user) => user.assigned_tasks, { eager: true, nullable: true })
   performer: UserEntity;
 
-  @ApiProperty({ type: () => [User], nullable: true })
+  // @ApiProperty({ type: () => [UserEntity], nullable: true })
+  @ApiProperty({ type: () => [UserApiDto], nullable: true })
   @ManyToMany(() => UserEntity, (user) => user.participate_tasks, { eager: true })
   @JoinTable()
   members: UserEntity[];

@@ -14,20 +14,39 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
+import {
+  ApiBearerAuth,
+  ApiBody,
+  ApiConsumes,
+  ApiInternalServerErrorResponse,
+  ApiNotFoundResponse,
+  ApiOkResponse,
+  ApiOperation,
+  ApiParam,
+  ApiTags,
+  ApiUnprocessableEntityResponse,
+} from '@nestjs/swagger';
 import { createReadStream } from 'fs';
 import { join } from 'path';
 
 import { User } from '../../auth/decorators/user.decorator';
 import { JwtAuthGuard } from '../../auth/guards';
 import { Data } from '../../common/classes/response-data';
-import { isExists } from '../../utils';
+import { ApiOkObjectResponse } from '../../common/decorators';
+import {
+  AttachmentMessageEnum,
+  AvatarMessageEnum,
+  MessageEnum,
+} from '../../common/enums/message.enum';
+import { getApiParam, isExists } from '../../utils';
 import { avatarOptions } from '../../utils/multer/avatar-options';
+import { AddAvatarDto, AvatarUploadDto } from '../dto/add-avatar.dto';
+import { UserApiDto } from '../dto/user-api.dto';
 import { UserEntity } from '../entities/user.entity';
 import { UserAvatarService, UserService } from '../services';
-import { UserApiType } from '../types';
 
 import type { Response } from 'express';
-
+@ApiTags('Users Avatars:')
 @Controller('users-avatar')
 @UseInterceptors(ClassSerializerInterceptor)
 export class UserAvatarController {
@@ -40,16 +59,30 @@ export class UserAvatarController {
   @HttpCode(200)
   @UseGuards(JwtAuthGuard)
   @UseInterceptors(FileInterceptor('file', avatarOptions))
+  @ApiOperation({ summary: 'Add Avatar' })
+  @ApiBearerAuth('access-token')
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({ type: AvatarUploadDto })
+  @ApiOkObjectResponse(UserApiDto)
+  @ApiUnprocessableEntityResponse({
+    description: `"${AvatarMessageEnum.AVATAR_COULD_NOT_BE_ATTACHED}"`,
+  })
   async addTaskAttachment(
     @User() user: UserEntity,
     @UploadedFile() file: Express.Multer.File,
-    @Body() addAvatarDto: { user_id: string },
-  ): Promise<Data<UserApiType>> {
+    @Body() addAvatarDto: AddAvatarDto,
+  ): Promise<Data<UserApiDto>> {
     const data = await this.userAvatarService.addAvatar(user, addAvatarDto, file);
     return { data };
   }
 
   @Get(':id')
+  @ApiOperation({ summary: 'Download Avatar' })
+  @ApiBearerAuth('access-token')
+  @ApiOkResponse({ schema: { type: 'string', format: 'binary' } })
+  @ApiNotFoundResponse({ description: `"${AttachmentMessageEnum.FILE_NOT_FOUND}";` })
+  @ApiInternalServerErrorResponse({ description: `"${MessageEnum.ENTITY_NOT_FOUND}";` })
+  @ApiParam(getApiParam('id', 'user'))
   async getDatabaseFile(
     @Param('id') id: string,
     @Res({ passthrough: true }) res: Response,
@@ -58,7 +91,7 @@ export class UserAvatarController {
     const isFileExists = await isExists(user.path);
 
     if (!isFileExists) {
-      throw new NotFoundException(`sorry, file ${user.filename} not found`);
+      throw new NotFoundException(AttachmentMessageEnum.FILE_NOT_FOUND);
     }
 
     const stream = createReadStream(join(process.cwd(), user.path));
