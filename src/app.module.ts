@@ -5,9 +5,9 @@ import { AuthModule } from './auth/auth.module';
 import { ChecklistModule } from './checklist/checklist.module';
 import { DatabaseModule } from './database/database.module';
 import { NoteModule } from './note/note.module';
-import { UserModule } from './user/user.module';
 import { ProjectModule } from './project/project.module';
 import { TaskModule } from './task/task.module';
+import { UserModule } from './user/user.module';
 
 @Module({
   imports: [
@@ -16,8 +16,8 @@ import { TaskModule } from './task/task.module';
     }),
 
     DatabaseModule,
-    UserModule,
     AuthModule,
+    UserModule,
     NoteModule,
     ChecklistModule,
     ProjectModule,

@@ -29,7 +29,7 @@ import { JwtAuthGuard } from '../auth/guards';
 import { EntityId } from '../common/classes';
 import { Data } from '../common/classes/response-data';
 import { ApiOkArrayResponse, ApiOkObjectResponse } from '../common/decorators';
-import { MessageEnum, ProjectMessageEnum } from '../common/enums/message.enum';
+import { MessageEnum, ProjectMessageEnum } from '../common/enums/messages.enum';
 import { UserEntity } from '../user/entities/user.entity';
 import { getApiParam } from '../utils';
 import { CreateProjectDto, ProjectApiDto, ProjectStatisticApiDto } from './dto';
@@ -115,7 +115,7 @@ export class ProjectController {
   @ApiOperation({ summary: "Fetch User's Projects By Search Query" })
   @ApiBearerAuth('access-token')
   @ApiOkArrayResponse(ProjectApiDto)
-  @ApiQuery({ name: 'query', example: '?query=Pers' })
+  @ApiQuery({ name: 'query', example: 'Pers' })
   async fetchProjectsBySearch(
     @User('id') userId: string,
     @Query() querySearch: { query: string },

@@ -9,7 +9,7 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
-import { ChecklistMessageEnum, MessageEnum } from '../common/enums/message.enum';
+import { ChecklistMessageEnum, MessageEnum } from '../common/enums/messages.enum';
 import { UserEntity } from '../user/entities/user.entity';
 import {
   CreateChecklistDto,

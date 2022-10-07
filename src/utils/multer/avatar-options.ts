@@ -4,7 +4,8 @@ import { Request } from 'express';
 import { existsSync, mkdirSync } from 'fs';
 import { diskStorage } from 'multer';
 import { extname } from 'path';
-import { ExpressRequestInterface } from '../../auth/types';
+
+import { ExpressRequestType } from '../../auth/types';
 
 export const avatarOptions: MulterOptions = {
   fileFilter(
@@ -41,7 +42,7 @@ export const avatarOptions: MulterOptions = {
       done(null, uploadPath);
     },
     filename(
-      req: ExpressRequestInterface,
+      req: ExpressRequestType,
       file: Express.Multer.File,
       done: (error: Error | null, filename: string) => void,
     ) {

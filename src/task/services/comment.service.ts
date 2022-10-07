@@ -10,7 +10,7 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
-import { MessageEnum } from '../../common/enums/message.enum';
+import { MessageEnum } from '../../common/enums/messages.enum';
 import { UserEntity } from '../../user/entities/user.entity';
 import { removeFilesFromStorage } from '../../utils';
 import { CommentApiDto } from '../dto/api-dto/comment-api.dto';

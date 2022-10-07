@@ -24,7 +24,7 @@ import { User } from '../auth/decorators/user.decorator';
 import { JwtAuthGuard } from '../auth/guards';
 import { Data, EntityId } from '../common/classes';
 import { ApiOkArrayResponse, ApiOkObjectResponse } from '../common/decorators';
-import { MessageEnum, NoteMessageEnum } from '../common/enums/message.enum';
+import { MessageEnum, NoteMessageEnum } from '../common/enums/messages.enum';
 import { UserEntity } from '../user/entities/user.entity';
 import { getApiParam } from '../utils';
 import { CreateNoteDto, NoteApiDto, UpdateNoteDto } from './dto';

@@ -8,11 +8,13 @@ import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 
+import { MessageEnum } from '../common/enums/messages.enum';
 import PostgresErrorCode from '../database/postgresErrorCode.enum';
 import { UserEntity } from '../user/entities/user.entity';
 import { UserService } from '../user/services/user.service';
-import { SignUpDto } from './dto/sign-up.dto';
-import { SuccessApiType, TokenPayload, UserInfoApiType, UserSessionApiType } from './types';
+import { SignUpDto } from './dto';
+import { SuccessApiDto, UserInfoApiDto, UserSessionApiDto } from './dto/api-dto';
+import { TokenPayload } from './types';
 
 @Injectable()
 export class AuthService {
@@ -25,7 +27,7 @@ export class AuthService {
     this.token_type = 'Bearer';
   }
 
-  async signUp(signUpDto: SignUpDto): Promise<UserInfoApiType> {
+  async signUp(signUpDto: SignUpDto): Promise<UserInfoApiDto> {
     const hashedPassword = await bcrypt.hash(signUpDto.password, 10);
     try {
       const createdUser = await this.userService.createUser({
@@ -35,32 +37,30 @@ export class AuthService {
 
       const user_session = await this.getUserSessionInfo(createdUser);
 
-      const userInfo = Object.assign(createdUser, { user_session });
-
-      return userInfo;
+      return Object.assign(createdUser, { user_session });
     } catch (error) {
       if (error?.code === PostgresErrorCode.UniqueViolation) {
-        throw new UnprocessableEntityException('User is already registered.');
+        throw new UnprocessableEntityException(MessageEnum.USER_ALREADY_REGISTERED);
       }
       throw new InternalServerErrorException('Something went wrong');
     }
   }
 
-  async signIn(user: UserEntity): Promise<UserSessionApiType> {
+  async signIn(user: UserEntity): Promise<UserSessionApiDto> {
     return this.getUserSessionInfo(user);
   }
 
-  async refreshToken(user: UserEntity): Promise<UserSessionApiType> {
+  async refreshToken(user: UserEntity): Promise<UserSessionApiDto> {
     return this.getUserSessionInfo(user);
   }
 
-  async signOut(email: string): Promise<SuccessApiType> {
+  async signOut(email: string): Promise<SuccessApiDto> {
     await this.userService.removeRefreshToken(email);
 
     return { success: true };
   }
 
-  async getUserSessionInfo(user: UserEntity): Promise<UserSessionApiType> {
+  async getUserSessionInfo(user: UserEntity): Promise<UserSessionApiDto> {
     const access_token = this.getJwtAccessToken(user.email);
     const refresh_token = this.getJwtRefreshToken(user.email);
     await this.userService.setCurrentRefreshToken(refresh_token, user.id);
@@ -98,14 +98,14 @@ export class AuthService {
 
       return user;
     } catch (error) {
-      throw new UnauthorizedException('Invalid credentials.');
+      throw new UnauthorizedException(MessageEnum.INVALID_CREDENTIALS);
     }
   }
 
   private async verifyPassword(base64Password: string, hashedPassword: string) {
     const isPasswordMatching = await bcrypt.compare(base64Password, hashedPassword);
     if (!isPasswordMatching) {
-      throw new UnauthorizedException('Invalid credentials.');
+      throw new UnauthorizedException(MessageEnum.INVALID_CREDENTIALS);
     }
   }
 }

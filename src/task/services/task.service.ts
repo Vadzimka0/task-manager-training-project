@@ -12,7 +12,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, SelectQueryBuilder } from 'typeorm';
 
 import { SPECIAL_ONE_PROJECT_NAME } from '../../common/constants/default-constants';
-import { CommentMessageEnum, MessageEnum } from '../../common/enums/message.enum';
+import { CommentMessageEnum, MessageEnum } from '../../common/enums/messages.enum';
 import { ProjectEntity } from '../../project/entities/project.entity';
 import { ProjectService } from '../../project/project.service';
 import { UserEntity } from '../../user/entities/user.entity';

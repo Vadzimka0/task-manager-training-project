@@ -21,7 +21,7 @@ import { User } from '../../auth/decorators/user.decorator';
 import { JwtAuthGuard } from '../../auth/guards';
 import { Data } from '../../common/classes/response-data';
 import { ApiOkArrayResponse, ApiOkObjectResponse } from '../../common/decorators';
-import { MessageEnum } from '../../common/enums/message.enum';
+import { MessageEnum } from '../../common/enums/messages.enum';
 import { getApiParam } from '../../utils';
 import { UserApiDto } from '../dto/user-api.dto';
 import { UserStatisticsApiDto } from '../dto/user-statistics-api.dto';
@@ -50,7 +50,7 @@ export class UserController {
   @ApiOperation({ summary: 'Fetch Members By Search Query' })
   @ApiBearerAuth('access-token')
   @ApiOkArrayResponse(UserApiDto)
-  @ApiQuery({ name: 'query', example: '?query=Raf' })
+  @ApiQuery({ name: 'query', example: 'afa' })
   async fetchMembersBySearch(@Query() querySearch: { query: string }): Promise<Data<UserEntity[]>> {
     const data = await this.userService.fetchMembersBySearch(querySearch);
     return { data };

@@ -8,44 +8,67 @@ import {
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
+import {
+  ApiBody,
+  ApiOperation,
+  ApiTags,
+  ApiUnauthorizedResponse,
+  ApiUnprocessableEntityResponse,
+} from '@nestjs/swagger';
 
 import { Data } from '../common/classes/response-data';
+import { ApiObjectResponse, ApiOkObjectResponse } from '../common/decorators';
+import { MessageEnum } from '../common/enums/messages.enum';
 import { UserEntity } from '../user/entities/user.entity';
 import { AuthService } from './auth.service';
 import { User } from './decorators/user.decorator';
-import { SignUpDto } from './dto/sign-up.dto';
+import { RefreshTokenDto, SignInDto, SignOutDto, SignUpDto } from './dto';
+import { SuccessApiDto, UserInfoApiDto, UserSessionApiDto } from './dto/api-dto';
 import { JwtRefreshGuard, LocalAuthGuard } from './guards';
-import { SuccessApiType, UserInfoApiType, UserSessionApiType } from './types';
 
+@ApiTags('Auth:')
 @Controller()
 @UseInterceptors(ClassSerializerInterceptor)
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Post('sign-up')
-  async signUp(@Body() signUpDto: SignUpDto): Promise<Data<UserInfoApiType>> {
+  @ApiOperation({ summary: 'Registration' })
+  @ApiObjectResponse(201, UserInfoApiDto)
+  @ApiUnprocessableEntityResponse({ description: `"${MessageEnum.USER_ALREADY_REGISTERED}";` })
+  async signUp(@Body() signUpDto: SignUpDto): Promise<Data<UserInfoApiDto>> {
     const data = await this.authService.signUp(signUpDto);
     return { data };
   }
 
-  @UseGuards(LocalAuthGuard)
-  @HttpCode(200)
   @Post('sign-in')
-  async signIn(@User() user: UserEntity): Promise<Data<UserSessionApiType>> {
+  @HttpCode(200)
+  @UseGuards(LocalAuthGuard)
+  @ApiOperation({ summary: 'Loginization' })
+  @ApiBody({ type: SignInDto })
+  @ApiOkObjectResponse(UserSessionApiDto)
+  @ApiUnauthorizedResponse({ description: `"${MessageEnum.INVALID_CREDENTIALS}";` })
+  async signIn(@User() user: UserEntity): Promise<Data<UserSessionApiDto>> {
     const data = await this.authService.signIn(user);
     return { data };
   }
 
-  @UseGuards(JwtRefreshGuard)
   @Get('refresh-token')
-  async refreshToken(@User() user: UserEntity): Promise<Data<UserSessionApiType>> {
+  @UseGuards(JwtRefreshGuard)
+  @ApiOperation({ summary: 'Update Tokens' })
+  @ApiBody({ type: RefreshTokenDto })
+  @ApiOkObjectResponse(UserSessionApiDto)
+  @ApiUnauthorizedResponse({ description: `"${MessageEnum.INVALID_REFRESH_TOKEN}";` })
+  async refreshToken(@User() user: UserEntity): Promise<Data<UserSessionApiDto>> {
     const data = await this.authService.refreshToken(user);
     return { data };
   }
 
   @Post('sign-out')
   @HttpCode(200)
-  async signOut(@Body() body: { email: string }): Promise<Data<SuccessApiType>> {
+  @ApiOperation({ summary: 'Log Out' })
+  @ApiOkObjectResponse(SuccessApiDto)
+  async signOut(@Body() body: SignOutDto): Promise<Data<SuccessApiDto>> {
     const data = await this.authService.signOut(body.email);
     return { data };
   }

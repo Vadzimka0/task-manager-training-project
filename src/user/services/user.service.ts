@@ -14,7 +14,7 @@ import {
   SPECIAL_ONE_PROJECT_COLOR,
   SPECIAL_ONE_PROJECT_NAME,
 } from '../../common/constants/default-constants';
-import { MessageEnum } from '../../common/enums/message.enum';
+import { MessageEnum } from '../../common/enums/messages.enum';
 import { NoteService } from '../../note/note.service';
 import { ProjectService } from '../../project/project.service';
 import { TaskService } from '../../task/services';

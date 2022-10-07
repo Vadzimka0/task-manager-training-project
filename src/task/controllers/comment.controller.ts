@@ -25,7 +25,7 @@ import { JwtAuthGuard } from '../../auth/guards';
 import { EntityId } from '../../common/classes';
 import { Data } from '../../common/classes/response-data';
 import { ApiOkArrayResponse, ApiOkObjectResponse } from '../../common/decorators';
-import { CommentMessageEnum, MessageEnum } from '../../common/enums/message.enum';
+import { CommentMessageEnum, MessageEnum } from '../../common/enums/messages.enum';
 import { UserEntity } from '../../user/entities/user.entity';
 import { getApiParam } from '../../utils';
 import { CreateCommentDto } from '../dto';

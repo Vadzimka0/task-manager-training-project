@@ -37,7 +37,7 @@ import {
   AttachmentMessageEnum,
   AvatarMessageEnum,
   MessageEnum,
-} from '../../common/enums/message.enum';
+} from '../../common/enums/messages.enum';
 import { getApiParam, isExists } from '../../utils';
 import { avatarOptions } from '../../utils/multer/avatar-options';
 import { AddAvatarDto, AvatarUploadDto } from '../dto/add-avatar.dto';

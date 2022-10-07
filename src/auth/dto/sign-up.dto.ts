@@ -1,4 +1,4 @@
-import { ApiHideProperty, ApiProperty } from '@nestjs/swagger';
+import { ApiProperty } from '@nestjs/swagger';
 import { IsBase64, IsEmail, IsNotEmpty } from 'class-validator';
 
 export class SignUpDto {
@@ -7,7 +7,7 @@ export class SignUpDto {
   @IsNotEmpty()
   readonly email: string;
 
-  @ApiHideProperty()
+  @ApiProperty({ example: 'Y29nbml0ZXE=' })
   @IsBase64()
   @IsNotEmpty()
   readonly password: string;

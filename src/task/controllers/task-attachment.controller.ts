@@ -33,7 +33,7 @@ import { User } from '../../auth/decorators/user.decorator';
 import { JwtAuthGuard } from '../../auth/guards';
 import { Data } from '../../common/classes/response-data';
 import { ApiOkObjectResponse } from '../../common/decorators';
-import { AttachmentMessageEnum, MessageEnum } from '../../common/enums/message.enum';
+import { AttachmentMessageEnum, MessageEnum } from '../../common/enums/messages.enum';
 import { getApiParam, isExists } from '../../utils';
 import { taskAttachmentOptions } from '../../utils/multer/task-attachment-options';
 import { AddTaskAttachmentDto } from '../dto';

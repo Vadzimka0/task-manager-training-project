@@ -6,7 +6,7 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
-import { MessageEnum, NoteMessageEnum } from '../common/enums/message.enum';
+import { MessageEnum, NoteMessageEnum } from '../common/enums/messages.enum';
 import { UserEntity } from '../user/entities/user.entity';
 import { CreateNoteDto, NoteApiDto, UpdateNoteDto } from './dto';
 import { NoteEntity } from './entities/note.entity';

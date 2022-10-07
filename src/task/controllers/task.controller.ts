@@ -27,7 +27,7 @@ import { JwtAuthGuard } from '../../auth/guards';
 import { EntityId } from '../../common/classes';
 import { Data } from '../../common/classes/response-data';
 import { ApiOkArrayResponse, ApiOkObjectResponse } from '../../common/decorators';
-import { MessageEnum, ProjectMessageEnum } from '../../common/enums/message.enum';
+import { MessageEnum, ProjectMessageEnum } from '../../common/enums/messages.enum';
 import { UserEntity } from '../../user/entities/user.entity';
 import { getApiParam } from '../../utils';
 import { TaskApiDto } from '../dto/api-dto/task-api.dto';
