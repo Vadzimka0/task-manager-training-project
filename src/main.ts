@@ -23,7 +23,6 @@ async function bootstrap() {
     .setDescription("Vadzim Dzianisik's training project at the company Cogniteq")
     .setVersion('0.0.1')
     .addBearerAuth({ type: 'http', scheme: 'bearer', bearerFormat: 'JWT' }, 'access-token')
-    // .addBearerAuth({ type: 'http', scheme: 'bearer', bearerFormat: 'JWT' }, 'refresh-token')
     .build();
   const document = SwaggerModule.createDocument(app, options);
   SwaggerModule.setup(`${process.env.URL_PREFIX_PATH}/swagger`, app, document);

@@ -14,7 +14,6 @@ export class CreateChecklistItemDto {
     description: 'Has to match a boolean value',
     example: false,
   })
-  @IsNotEmpty()
   @IsBoolean()
   readonly is_completed: boolean;
 }

@@ -1,14 +1,10 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsBoolean, IsNotEmpty } from 'class-validator';
+import { IsBoolean } from 'class-validator';
 
 import { CreateNoteDto } from './create-note.dto';
 
 export class UpdateNoteDto extends CreateNoteDto {
-  @ApiProperty({
-    description: 'Has to match a boolean value',
-    example: false,
-  })
-  @IsNotEmpty()
+  @ApiProperty({ example: false })
   @IsBoolean()
   readonly is_completed: boolean;
 }

@@ -1,5 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
+  IsArray,
   IsBoolean,
   IsDateString,
   IsEmpty,
@@ -25,12 +26,10 @@ export class CreateTaskDto {
   readonly description: string;
 
   @ApiProperty({ example: '2024-01-25T11:00:00' })
-  @IsNotEmpty()
   @IsDateString()
   readonly due_date: Date;
 
   @ApiProperty({ example: false })
-  @IsNotEmpty()
   @IsBoolean()
   readonly is_completed: boolean;
 
@@ -39,15 +38,13 @@ export class CreateTaskDto {
     example: '86fd5b28-eb9b-4c31-b19c-209a7ab050a4',
   })
   @IsOptional()
-  // @IsNotEmpty()
-  // @IsUUID()
+  @IsUUID()
   readonly assigned_to: string | null;
 
   @ApiProperty({
     description: 'Has to match a project id',
     example: 'b905021b-59e1-4c4a-a7e2-ee80fa4ef38e',
   })
-  @IsNotEmpty()
   @IsUUID()
   readonly project_id: string;
 
@@ -55,24 +52,21 @@ export class CreateTaskDto {
     description: 'Should be an owner ID of a USER that exists in the database',
     example: 'f60c913b-0859-4797-8dea-c07409ffcf0d',
   })
-  @IsNotEmpty()
   @IsUUID()
   readonly owner_id: string;
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     description: 'Should be an array of users IDs that exists in the database OR nul',
     example: ['fb4cad39-9add-4633-8050-b933ad1d7458', 'cc6864ed-9ca0-40b7-a4aa-e17563ace1ce'],
   })
   @IsOptional()
-  // @IsNotEmpty()
-  // @IsArray()
+  @IsArray()
   readonly members: null | string[];
 
   @ApiProperty({
-    description: 'Has to match null',
+    description: 'Has to match only NULL',
     example: null,
   })
   @IsEmpty()
-  // @IsOptional()
   readonly attachments: null | TaskAttachmentEntity[];
 }

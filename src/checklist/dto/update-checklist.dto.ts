@@ -1,13 +1,14 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { ValidateNested } from 'class-validator';
+import { IsOptional, ValidateNested } from 'class-validator';
 
 import { ChecklistDto } from './create-checklist.dto';
 import { UpdateChecklistItemDto } from './update-checklist-item.dto';
 
 export class UpdateChecklistDto extends ChecklistDto {
-  @ApiProperty()
+  @ApiPropertyOptional()
   @ValidateNested({ each: true })
   @Type(() => UpdateChecklistItemDto)
+  @IsOptional()
   readonly items: UpdateChecklistItemDto[] | null;
 }

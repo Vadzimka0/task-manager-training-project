@@ -17,8 +17,7 @@ import {
   UpdateChecklistDto,
   UpdateChecklistItemDto,
 } from './dto';
-import { ChecklistApiDto } from './dto/api-dto/checklist-api.dto';
-import { ChecklistItemApiDto } from './dto/api-dto/checklist-item-api.dto';
+import { ChecklistApiDto, ChecklistItemApiDto } from './dto/api-dto';
 import { ChecklistEntity } from './entities/checklist.entity';
 import { ChecklistItemEntity } from './entities/checklistItem.entity';
 

@@ -1,13 +1,14 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEnum, IsNotEmpty, IsUUID } from 'class-validator';
+import { IsEnum, IsUUID } from 'class-validator';
 
 import { FileTypeEnum } from '../../common/enums/file-type.enum';
 
 export class AddCommentAttachmentDto {
+  @ApiProperty({ enum: ['image', 'file'] })
   @IsEnum(FileTypeEnum)
   readonly type: FileTypeEnum;
 
-  @IsNotEmpty()
+  @ApiProperty({ example: '43ba4eb8-ee52-4adb-b2f8-df4a01b00d9a' })
   @IsUUID()
   readonly comment_id: string;
 }

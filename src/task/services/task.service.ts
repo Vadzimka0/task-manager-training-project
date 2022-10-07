@@ -45,7 +45,7 @@ export class TaskService {
     const { owner_id, project_id, assigned_to, members, attachments, ...dtoWithoutRelationItems } =
       taskDto;
 
-    if (attachments === undefined) throw new ForbiddenException('attachments must be null');
+    if (attachments !== null) throw new ForbiddenException('attachments must be null');
 
     this.idsMatching(owner_id, currentUser.id);
 
@@ -73,6 +73,9 @@ export class TaskService {
   ): Promise<TaskApiDto> {
     const { owner_id, project_id, assigned_to, members, attachments, ...dtoWithoutRelationItems } =
       taskDto;
+
+    if (attachments !== null) throw new ForbiddenException('attachments must be null');
+
     this.idsMatching(owner_id, currentUser.id);
 
     const currentTask = await this.getValidTaskForEdit(currentUser.id, taskId);
@@ -84,9 +87,9 @@ export class TaskService {
     const updatedPerformer = await this.getPerformerUser(assigned_to);
     currentTask.performer = updatedPerformer;
 
-    const currentMembersArray = currentTask.members.map((member) => member.id);
+    const currentMembersIds = currentTask.members.map((member) => member.id);
 
-    if (!haveSameItems(members, currentMembersArray)) {
+    if (!haveSameItems(members, currentMembersIds)) {
       const updatedMembers = await this.getMembersById(members);
       currentTask.members = updatedMembers;
     }
