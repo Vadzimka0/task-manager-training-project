@@ -1,4 +1,6 @@
-export function getApiParam(idName: string, entityName: string) {
+import { ApiParamOptions } from '@nestjs/swagger';
+
+export function getApiParam(idName: string, entityName: string): ApiParamOptions {
   return {
     name: idName,
     required: true,
