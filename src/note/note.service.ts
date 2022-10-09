@@ -13,11 +13,19 @@ import { NoteEntity } from './entities/note.entity';
 
 @Injectable()
 export class NoteService {
+  /**
+   * @ignore
+   */
   constructor(
     @InjectRepository(NoteEntity)
     private noteRepository: Repository<NoteEntity>,
   ) {}
 
+  /**
+   * A method that fetches user notes from the database
+   * @param userId An userId from JWT
+   * @param ownerId An ownerId from request body
+   */
   async fetchUserNotes(userId: string, ownerId: string): Promise<NoteApiDto[]> {
     this.idsMatching(ownerId, userId);
 
@@ -32,12 +40,21 @@ export class NoteService {
     return notes.map((note: NoteApiDto) => this.getNoteWithOwnerId(note));
   }
 
+  /**
+   * A method that fetches one note from the database
+   * @param userId An userId from JWT
+   * @param noteId A noteId of a note. A note with this id should exist in the database
+   */
   async fetchOneNote(userId: string, noteId: string): Promise<NoteApiDto> {
-    const note = await this.getNoteForRead(userId, noteId);
+    const note = await this.fetchNoteForRead(userId, noteId);
 
     return this.getNoteWithOwnerId(note as NoteApiDto);
   }
 
+  /**
+   * A method that creates a note in the database
+   * @param currentUser An user from JWT
+   */
   async createNote(createNoteDto: CreateNoteDto, currentUser: UserEntity): Promise<NoteApiDto> {
     this.validateHexColor(createNoteDto.color);
     const { owner_id, ...dtoWithoutOwner } = createNoteDto;
@@ -51,6 +68,11 @@ export class NoteService {
     return this.getNoteWithOwnerId(savedNote as NoteApiDto);
   }
 
+  /**
+   * A method that updates a note in the database
+   * @param userId An userId from JWT
+   * @param noteId A noteId of a note. A note with this id should exist in the database
+   */
   async updateNote(
     updateNoteDto: UpdateNoteDto,
     userId: string,
@@ -60,21 +82,32 @@ export class NoteService {
     const { owner_id, ...dtoWithoutOwner } = updateNoteDto;
     this.idsMatching(owner_id, userId);
 
-    const currentNote = await this.getNoteForEdit(userId, noteId);
+    const currentNote = await this.fetchNoteForEdit(userId, noteId);
     Object.assign(currentNote, dtoWithoutOwner);
     const savedNote = await this.noteRepository.save(currentNote);
 
     return this.getNoteWithOwnerId(savedNote as NoteApiDto);
   }
 
+  /**
+   * A method that deletes a note from the database
+   * @param userId An userId from JWT
+   * @param noteId A noteId of a note. A note with this id should exist in the database
+   * @returns A promise with the id of deleted note
+   */
   async deleteNote(userId: string, noteId: string): Promise<{ id: string }> {
-    await this.getNoteForEdit(userId, noteId);
+    await this.fetchNoteForEdit(userId, noteId);
     await this.noteRepository.delete({ id: noteId });
 
     return { id: noteId };
   }
 
-  async getNoteForRead(userId: string, noteId: string): Promise<NoteEntity> {
+  /**
+   * A method that fetches a note from the database for GET requests. If the note does not exist, the 422 error will be thrown according to the requirements
+   * @param userId An userId from JWT
+   * @param noteId A noteId of a note. A note with this id should exist in the database
+   */
+  async fetchNoteForRead(userId: string, noteId: string): Promise<NoteEntity> {
     const note = await this.noteRepository.findOneBy({ id: noteId });
 
     if (!note || note.owner.id !== userId) {
@@ -84,7 +117,12 @@ export class NoteService {
     return note;
   }
 
-  async getNoteForEdit(userId: string, noteId: string): Promise<NoteEntity> {
+  /**
+   * A method that fetches a note from the database for POST and DELETE requests. If the note does not exist, the 500 error will be thrown according to the requirements
+   * @param userId An userId from JWT
+   * @param noteId A noteId of a note. A note with this id should exist in the database
+   */
+  async fetchNoteForEdit(userId: string, noteId: string): Promise<NoteEntity> {
     const note = await this.noteRepository.findOneBy({ id: noteId });
 
     if (!note || note.owner.id !== userId) {
@@ -96,24 +134,39 @@ export class NoteService {
     return note;
   }
 
+  /**
+   * A method that validates color
+   */
   validateHexColor(color: string): void {
     if (!/^#(?:[0-9a-fA-F]{3}){1,2}$/i.test(color)) {
       throw new UnprocessableEntityException(MessageEnum.INVALID_COLOR);
     }
   }
 
+  /**
+   * A method that compares user identifiers from JWT and request body
+   * @param owner_id An owner_id from request body
+   * @param user_id An user_id from JWT
+   */
   idsMatching(owner_id: string, user_id: string): void {
     if (owner_id !== user_id) {
       throw new UnprocessableEntityException(MessageEnum.INVALID_USER_ID);
     }
   }
 
+  /**
+   * A method that adds the necessary property owner_id into note according to the requirements
+   */
   getNoteWithOwnerId(note: NoteApiDto): NoteApiDto {
     note.owner_id = note.owner.id;
 
     return note;
   }
 
+  /**
+   * A method that calculates notes statistics by user
+   * @returns A percentage of completed notes to total notes by owner
+   */
   async getQuickNotesStatisticsByOwner(ownerId: string): Promise<string> {
     const ownerNotesQueryBuilder = this.noteRepository
       .createQueryBuilder('notes')
