@@ -167,7 +167,7 @@ export class NoteService {
    * A method that calculates notes statistics by user
    * @returns A percentage of completed notes to total notes by owner
    */
-  async getQuickNotesStatisticsByOwner(ownerId: string): Promise<string> {
+  async fetchQuickNotesStatisticsByOwner(ownerId: string): Promise<string> {
     const ownerNotesQueryBuilder = this.noteRepository
       .createQueryBuilder('notes')
       .andWhere('notes.owner_id = :id', { id: ownerId })

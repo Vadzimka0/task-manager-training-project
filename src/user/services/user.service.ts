@@ -25,6 +25,9 @@ import { UserAvatarService } from './user-avatar.service';
 
 @Injectable()
 export class UserService {
+  /**
+   * @ignore
+   */
   constructor(
     @InjectRepository(UserEntity)
     private readonly userRepository: Repository<UserEntity>,
@@ -35,12 +38,20 @@ export class UserService {
     private readonly taskService: TaskService,
   ) {}
 
-  async fetchUser(id: string): Promise<UserApiType> {
-    const user = await this.getById(id);
+  /**
+   * A method that returns one user in the required format
+   * @param id An id of user
+   */
+  async getUser(id: string): Promise<UserApiType> {
+    const user = await this.fetchUserById(id);
 
-    return this.userAvatarService.getUserWithAvatarUrl(user as UserApiType);
+    return this.userAvatarService.getRequiredFormatUser(user as UserApiType);
   }
 
+  /**
+   * A method that fetches users from the database (search by username)
+   * @param search An object with property of query string of a URL
+   */
   async fetchMembersBySearch(search: { query: string }): Promise<UserApiType[]> {
     const queryBuilder = this.userRepository
       .createQueryBuilder('users')
@@ -51,10 +62,15 @@ export class UserService {
 
     const members = await queryBuilder.getMany();
 
-    return members.map((user) => this.userAvatarService.getUserWithAvatarUrl(user as UserApiType));
+    return members.map((user) => this.userAvatarService.getRequiredFormatUser(user as UserApiType));
   }
 
-  async fetchUserStatistics(userId: string, owner_id: string): Promise<UserStatisticsApiType> {
+  /**
+   * A method that receives the statistics by user
+   * @param userId An userId from JWT
+   * @param owner_id An owner_id from URI Parameters
+   */
+  async getUserStatistics(userId: string, owner_id: string): Promise<UserStatisticsApiType> {
     if (userId !== owner_id) {
       throw new UnprocessableEntityException(MessageEnum.INVALID_USER_ID_STATISTICS_ONLY_TO_YOU);
     }
@@ -66,7 +82,7 @@ export class UserService {
       ? `${((completed_tasks / created_tasks) * 100).toFixed(0)}%`
       : '0%';
 
-    const quick_notes = await this.noteService.getQuickNotesStatisticsByOwner(userId);
+    const quick_notes = await this.noteService.fetchQuickNotesStatisticsByOwner(userId);
 
     const todo = await this.taskService.fetchTodoStatisticsByPerformer(userId);
 
@@ -79,7 +95,11 @@ export class UserService {
     };
   }
 
-  async getById(id: string): Promise<UserEntity> {
+  /**
+   * A method that fetches an user by id from the database
+   * @param id An id of user
+   */
+  async fetchUserById(id: string): Promise<UserEntity> {
     const user = await this.userRepository.findOne({ where: { id } });
 
     if (user) {
@@ -90,7 +110,11 @@ export class UserService {
     throw new InternalServerErrorException(`Entity UserModel, id=${id} not found in the database`);
   }
 
-  async getByEmail(email: string): Promise<UserEntity> {
+  /**
+   * A method that fetches an user by email from the database
+   * @param email An email of user
+   */
+  async fetchUserByEmail(email: string): Promise<UserEntity> {
     const user = await this.userRepository.findOne({ where: { email } });
 
     if (user) {
@@ -100,6 +124,9 @@ export class UserService {
     throw new UnprocessableEntityException('The user email is not valid');
   }
 
+  /**
+   * A method that creates an user with 'Personal' project in the database
+   */
   async createUser(signUpDto: SignUpDto): Promise<UserApiType> {
     const newUser = new UserEntity();
     Object.assign(newUser, signUpDto);
@@ -115,9 +142,12 @@ export class UserService {
 
     delete user.created_at;
 
-    return this.userAvatarService.getUserWithAvatarUrl(user as UserApiType);
+    return this.userAvatarService.getRequiredFormatUser(user as UserApiType);
   }
 
+  /**
+   * A method that updates refresh token in the database
+   */
   async setCurrentRefreshToken(refreshToken: string, userId: string): Promise<void> {
     const currentRefreshToken = await bcrypt.hash(refreshToken, 10);
     await this.userRepository.update(userId, {
@@ -125,28 +155,39 @@ export class UserService {
     });
   }
 
+  /**
+   * A method that returns user if refresh token matches
+   */
   async getUserIfRefreshTokenMatches(refreshToken: string, email: string): Promise<UserEntity> {
-    const user = await this.getByEmail(email);
+    const user = await this.fetchUserByEmail(email);
     const isRefreshTokenMatching = await bcrypt.compare(refreshToken, user.refresh_token);
 
     if (isRefreshTokenMatching) {
       return user;
     }
-    // TODO: throw error
+    // else: handle error in jwt-refresh.guard.ts
   }
 
+  /**
+   * A method that nullifies user refresh token
+   */
   async removeRefreshToken(email: string): Promise<void> {
-    const user = await this.getByEmail(email);
+    const user = await this.fetchUserByEmail(email);
     await this.userRepository.update(user.id, {
       refresh_token: null,
     });
   }
 
+  /**
+   * A method that returns list of users
+   * @param membersIds List of users identifiers
+   * @returns A promise with the list of users
+   */
   async getMembersInstances(membersIds: string[]): Promise<UserApiType[]> {
     const currentMembers = [];
 
     for (const id of membersIds) {
-      const user = await this.getById(id);
+      const user = await this.fetchUserById(id);
       currentMembers.push(user);
     }
 

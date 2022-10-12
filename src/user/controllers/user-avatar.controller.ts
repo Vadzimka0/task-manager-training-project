@@ -87,7 +87,7 @@ export class UserAvatarController {
     @Param('id') id: string,
     @Res({ passthrough: true }) res: Response,
   ): Promise<StreamableFile> {
-    const user = await this.userService.getById(id);
+    const user = await this.userService.fetchUserById(id);
     const isFileExists = await isExists(user.path);
 
     if (!isFileExists) {

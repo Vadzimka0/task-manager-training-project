@@ -36,10 +36,13 @@ export class UserAvatarService {
     Object.assign(user, filedata);
     const savedUser = await this.userRepository.save(user);
 
-    return this.getUserWithAvatarUrl(savedUser as UserApiType);
+    return this.getRequiredFormatUser(savedUser as UserApiType);
   }
 
-  getUserWithAvatarUrl(user: UserApiType): UserApiType {
+  /**
+   * A method that adds the avatar_url property to User according to the requirements
+   */
+  getRequiredFormatUser(user: UserApiType): UserApiType {
     user.avatar_url = user.path
       ? `${this.server_url}${user.path.substring(user.path.indexOf('/') + 1)}`
       : null;

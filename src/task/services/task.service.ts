@@ -296,7 +296,7 @@ export class TaskService {
    */
   async getUserPerformer(assignedToId: string): Promise<UserEntity> {
     if (assignedToId) {
-      return await this.userService.getById(assignedToId);
+      return await this.userService.fetchUserById(assignedToId);
     }
 
     return null;
@@ -398,7 +398,7 @@ export class TaskService {
     task.assigned_to = task.performer ? task.performer.id : null;
     task.members = task.members?.length
       ? task.members.map((member: UserApiType) =>
-          this.userAvatarService.getUserWithAvatarUrl(member),
+          this.userAvatarService.getRequiredFormatUser(member),
         )
       : null;
     task.attachments = task.attachments?.length

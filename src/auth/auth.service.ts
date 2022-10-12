@@ -93,7 +93,7 @@ export class AuthService {
 
   async getAuthenticatedUser(email: string, base64Password: string) {
     try {
-      const user = await this.userService.getByEmail(email);
+      const user = await this.userService.fetchUserByEmail(email);
       await this.verifyPassword(base64Password, user.password);
 
       return user;

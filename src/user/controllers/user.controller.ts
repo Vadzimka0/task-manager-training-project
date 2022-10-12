@@ -41,8 +41,8 @@ export class UserController {
   @ApiOkObjectResponse(UserApiDto)
   @ApiInternalServerErrorResponse({ description: `"${MessageEnum.ENTITY_NOT_FOUND}";` })
   @ApiParam(getApiParam('id', 'user'))
-  async fetchUser(@Param('id') id: string): Promise<Data<UserApiDto>> {
-    const data = await this.userService.fetchUser(id);
+  async getUser(@Param('id') id: string): Promise<Data<UserApiDto>> {
+    const data = await this.userService.getUser(id);
     return { data };
   }
 
@@ -64,11 +64,11 @@ export class UserController {
     description: `"${MessageEnum.INVALID_USER_ID_STATISTICS_ONLY_TO_YOU}";`,
   })
   @ApiParam(getApiParam('ownerId', 'user'))
-  async fetchUserStatistics(
+  async getUserStatistics(
     @User('id') userId: string,
     @Param('ownerId') ownerId: string,
   ): Promise<Data<UserStatisticsApiDto>> {
-    const data = await this.userService.fetchUserStatistics(userId, ownerId);
+    const data = await this.userService.getUserStatistics(userId, ownerId);
     return { data };
   }
 }
