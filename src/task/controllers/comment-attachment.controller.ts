@@ -84,7 +84,7 @@ export class CommentAttachmentController {
     @Param('id') id: string,
     @Res({ passthrough: true }) res: Response,
   ): Promise<StreamableFile> {
-    const file = await this.commentAttachmentService.getFileById(id);
+    const file = await this.commentAttachmentService.fetchFileById(id);
 
     const isFileExists = await isExists(file.path);
     if (!isFileExists) {

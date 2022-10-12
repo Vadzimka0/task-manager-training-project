@@ -22,6 +22,9 @@ import { TaskService } from './task.service';
 
 @Injectable()
 export class CommentService {
+  /**
+   * @ignore
+   */
   constructor(
     @InjectRepository(CommentEntity)
     private readonly commentRepository: Repository<CommentEntity>,
@@ -30,6 +33,10 @@ export class CommentService {
     private readonly commentAttachmentService: CommentAttachmentService,
   ) {}
 
+  /**
+   * A method that creates a comment in the database
+   * @param currentUser An user from JWT
+   */
   async createComment(
     commentDto: CreateCommentDto,
     currentUser: UserEntity,
@@ -47,11 +54,15 @@ export class CommentService {
 
     const savedComment = await this.commentRepository.save(newComment);
 
-    return this.getCommentWithRelationIds(savedComment as CommentApiDto);
+    return this.getRequiredFormatComment(savedComment as CommentApiDto);
   }
 
+  /**
+   * A method that fetches task comments from the database
+   * @param taskId A taskId of a task. A task with this id should exist in the database
+   */
   async fetchTaskComments(taskId: string): Promise<CommentApiDto[]> {
-    await this.taskService.getAnyTaskById(taskId);
+    await this.taskService.fetchTask(taskId);
 
     const queryBuilder = this.commentRepository
       .createQueryBuilder('comments')
@@ -64,11 +75,17 @@ export class CommentService {
 
     const comments = await queryBuilder.getMany();
 
-    return comments.map((comment: CommentApiDto) => this.getCommentWithRelationIds(comment));
+    return comments.map((comment: CommentApiDto) => this.getRequiredFormatComment(comment));
   }
 
+  /**
+   * A method that deletes a comment from the database. Files related to this comment are also deleted from the storage.
+   * @param userId An userId from JWT
+   * @param commentId A commentId of a comment. A comment with this id should exist in the database
+   * @returns A promise with the id of deleted comment
+   */
   async deleteComment(userId: string, commentId: string): Promise<{ id: string }> {
-    await this.getValidComment(userId, commentId);
+    await this.fetchComment(userId, commentId);
     const commentAttachmentsPaths = await this.getCommentAttachmentsPaths(commentId);
 
     await this.commentRepository.delete({ id: commentId });
@@ -77,6 +94,11 @@ export class CommentService {
     return { id: commentId };
   }
 
+  /**
+   * A method that fetches comment attachments from the database
+   * @param commentId A commentId of a comment. A comment with this id should exist in the database
+   * @returns A promise with the list of attachments paths
+   */
   async getCommentAttachmentsPaths(commentId: string): Promise<string[]> {
     const commentAttachmentsPaths = await this.commentRepository
       .createQueryBuilder('comments')
@@ -88,7 +110,12 @@ export class CommentService {
     return commentAttachmentsPaths.map((path) => path.attachments_path);
   }
 
-  async getValidComment(userId: string, commentId: string): Promise<CommentEntity> {
+  /**
+   * A method that fetches a comment from the database
+   * @param userId An userId from JWT
+   * @param commentId A commentId of a comment. A comment with this id should exist in the database
+   */
+  async fetchComment(userId: string, commentId: string): Promise<CommentEntity> {
     try {
       const comment = await this.commentRepository.findOneBy({ id: commentId });
 
@@ -111,12 +138,15 @@ export class CommentService {
     }
   }
 
-  getCommentWithRelationIds(comment: CommentApiDto): CommentApiDto {
+  /**
+   * A method that adds properties: owner_id, task_id, attachments to Comment according to the requirements
+   */
+  getRequiredFormatComment(comment: CommentApiDto): CommentApiDto {
     comment.owner_id = comment.owner.id;
     comment.task_id = comment.task.id;
     comment.attachments = comment.attachments?.length
       ? comment.attachments.map((attachment: CommentAttachmentApiDto) =>
-          this.commentAttachmentService.getFullCommentAttachment(attachment),
+          this.commentAttachmentService.getRequiredFormatCommentAttachment(attachment),
         )
       : null;
 

@@ -97,8 +97,8 @@ export class TaskController {
   @ApiOkObjectResponse(TaskApiDto)
   @ApiInternalServerErrorResponse({ description: `"${MessageEnum.ENTITY_NOT_FOUND}";` })
   @ApiParam(getApiParam('id', 'task'))
-  async fetchOneTask(@Param('id') id: string): Promise<Data<TaskApiDto>> {
-    const data = await this.taskService.fetchOneTask(id);
+  async getTask(@Param('id') id: string): Promise<Data<TaskApiDto>> {
+    const data = await this.taskService.getTask(id);
     return { data };
   }
 

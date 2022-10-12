@@ -31,7 +31,7 @@ export class ProjectService {
   /**
    * A method that fetches user projects from the database
    * @param userId An userId from JWT
-   * @param ownerId An ownerId from URI param
+   * @param ownerId An ownerId from URI Parameters
    * @param search An object with property of query string of a URL
    */
   async fetchUserProjects(
@@ -72,7 +72,7 @@ export class ProjectService {
   /**
    * A method that calculates the number of tasks for each project by user
    * @param userId An userId from JWT
-   * @param ownerId An ownerId from URI param
+   * @param ownerId An ownerId from URI Parameters
    */
   async fetchProjectStatistics(userId: string, ownerId: string): Promise<ProjectStatisticApiDto[]> {
     this.idsMatching(userId, ownerId);

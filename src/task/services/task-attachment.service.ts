@@ -12,6 +12,9 @@ import { TaskService } from './task.service';
 export class TaskAttachmentService {
   private server_url: string;
 
+  /**
+   * @ignore
+   */
   constructor(
     @InjectRepository(TaskAttachmentEntity)
     private readonly taskAttachmentRepository: Repository<TaskAttachmentEntity>,
@@ -24,6 +27,10 @@ export class TaskAttachmentService {
     )}/`;
   }
 
+  /**
+   * A method that create a task attachment in the database
+   * @param userId An userId from JWT
+   */
   async addTaskAttachment(
     userId: string,
     addTaskAttachmentDto: AddTaskAttachmentDto,
@@ -47,10 +54,14 @@ export class TaskAttachmentService {
     newTaskAttachment.task = currentTask;
     const savedAttachment = await this.taskAttachmentRepository.save(newTaskAttachment);
 
-    return this.getFullTaskAttachment(savedAttachment as TaskAttachmentApiDto);
+    return this.getRequiredFormatTaskAttachment(savedAttachment as TaskAttachmentApiDto);
   }
 
-  async getFileById(id: string) {
+  /**
+   * A method that fetches task attachment from the database
+   * @param id An id from attachment
+   */
+  async fetchFileById(id: string) {
     const file = await this.taskAttachmentRepository.findOneBy({ id });
 
     if (!file) {
@@ -62,7 +73,10 @@ export class TaskAttachmentService {
     return file;
   }
 
-  getFullTaskAttachment(attachment: TaskAttachmentApiDto): TaskAttachmentApiDto {
+  /**
+   * A method that adds properties task_id and url to TaskAttachment according to the requirements
+   */
+  getRequiredFormatTaskAttachment(attachment: TaskAttachmentApiDto): TaskAttachmentApiDto {
     attachment.task_id = attachment.task.id;
     attachment.url = `${this.server_url}${attachment.path.substring(
       attachment.path.indexOf('/') + 1,

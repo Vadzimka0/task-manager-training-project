@@ -84,7 +84,7 @@ export class TaskAttachmentController {
     @Param('id') id: string,
     @Res({ passthrough: true }) res: Response,
   ): Promise<StreamableFile> {
-    const file = await this.taskAttachmentService.getFileById(id);
+    const file = await this.taskAttachmentService.fetchFileById(id);
 
     const isFileExists = await isExists(file.path);
     if (!isFileExists) {

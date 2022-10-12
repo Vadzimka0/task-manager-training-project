@@ -59,7 +59,7 @@ export class UserService {
       throw new UnprocessableEntityException(MessageEnum.INVALID_USER_ID_STATISTICS_ONLY_TO_YOU);
     }
 
-    const { created_tasks, completed_tasks } = await this.taskService.getTasksStatisticsByOwner(
+    const { created_tasks, completed_tasks } = await this.taskService.fetchTasksStatisticsByOwner(
       userId,
     );
     const events = created_tasks
@@ -68,7 +68,7 @@ export class UserService {
 
     const quick_notes = await this.noteService.getQuickNotesStatisticsByOwner(userId);
 
-    const todo = await this.taskService.getTodoStatisticsByPerformer(userId);
+    const todo = await this.taskService.fetchTodoStatisticsByPerformer(userId);
 
     return {
       created_tasks,

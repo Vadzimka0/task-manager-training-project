@@ -12,6 +12,9 @@ import { CommentService } from './comment.service';
 export class CommentAttachmentService {
   private server_url: string;
 
+  /**
+   * @ignore
+   */
   constructor(
     @InjectRepository(CommentAttachmentEntity)
     private readonly commentAttachmentRepository: Repository<CommentAttachmentEntity>,
@@ -24,12 +27,16 @@ export class CommentAttachmentService {
     )}/`;
   }
 
+  /**
+   * A method that create a comment attachment in the database
+   * @param userId An userId from JWT
+   */
   async addCommentAttachment(
     userId: string,
     addCommentAttachmentDto: AddCommentAttachmentDto,
     file: Express.Multer.File,
   ): Promise<CommentAttachmentApiDto> {
-    const currentComment = await this.commentService.getValidComment(
+    const currentComment = await this.commentService.fetchComment(
       userId,
       addCommentAttachmentDto.comment_id,
     );
@@ -47,10 +54,14 @@ export class CommentAttachmentService {
     newCommentAttachment.comment = currentComment;
 
     const savedAttachment = await this.commentAttachmentRepository.save(newCommentAttachment);
-    return this.getFullCommentAttachment(savedAttachment as CommentAttachmentApiDto);
+    return this.getRequiredFormatCommentAttachment(savedAttachment as CommentAttachmentApiDto);
   }
 
-  async getFileById(id: string): Promise<CommentAttachmentEntity> {
+  /**
+   * A method that fetches comment attachment from the database
+   * @param id An id from attachment
+   */
+  async fetchFileById(id: string): Promise<CommentAttachmentEntity> {
     const file = await this.commentAttachmentRepository.findOneBy({ id });
     if (!file) {
       throw new InternalServerErrorException(
@@ -60,7 +71,10 @@ export class CommentAttachmentService {
     return file;
   }
 
-  getFullCommentAttachment(attachment: CommentAttachmentApiDto): CommentAttachmentApiDto {
+  /**
+   * A method that adds properties comment_id and url to CommentAttachment according to the requirements
+   */
+  getRequiredFormatCommentAttachment(attachment: CommentAttachmentApiDto): CommentAttachmentApiDto {
     attachment.comment_id = attachment.comment.id;
     attachment.url = `${this.server_url}${attachment.path.substring(
       attachment.path.indexOf('/') + 1,

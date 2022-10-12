@@ -36,7 +36,7 @@ export class ChecklistService {
   /**
    * A method that fetches user checklists from the database
    * @param userId An userId from JWT
-   * @param ownerId An ownerId from URI param
+   * @param ownerId An ownerId from URI Parameters
    */
   async fetchUserChecklists(userId: string, ownerId: string): Promise<ChecklistApiDto[]> {
     this.idsMatching(ownerId, userId);
@@ -143,7 +143,7 @@ export class ChecklistService {
   /**
    * A method that deletes checklist items from the database
    * @param userId An userId from JWT
-   * @param itemsIds List of a checklist items identifiers. A checklist items with this id should exist in the database
+   * @param itemsIds List of checklist items identifiers. A checklist items with this id should exist in the database
    * @returns A promise with the list of deleted checklist items identifiers
    */
   async deleteChecklistItems(userId: string, itemsIds: string[]): Promise<{ items: string[] }> {

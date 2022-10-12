@@ -29,6 +29,9 @@ import { TaskAttachmentService } from './task-attachment.service';
 
 @Injectable()
 export class TaskService {
+  /**
+   * @ignore
+   */
   constructor(
     @InjectRepository(TaskEntity)
     private readonly taskRepository: Repository<TaskEntity>,
@@ -41,6 +44,10 @@ export class TaskService {
     private readonly taskAttachmentService: TaskAttachmentService,
   ) {}
 
+  /**
+   * A method that creates a task in the database
+   * @param currentUser An user from JWT
+   */
   async createTask(taskDto: CreateTaskDto, currentUser: UserEntity): Promise<TaskApiDto> {
     const { owner_id, project_id, assigned_to, members, attachments, ...dtoWithoutRelationItems } =
       taskDto;
@@ -55,7 +62,7 @@ export class TaskService {
     const currentProject = await this.getProject(currentUser.id, project_id, assigned_to);
     newTask.project = currentProject;
 
-    const assignedToUser = await this.getPerformerUser(assigned_to);
+    const assignedToUser = await this.getUserPerformer(assigned_to);
     newTask.performer = assignedToUser;
 
     const currentMembers = await this.getMembersById(members);
@@ -63,9 +70,14 @@ export class TaskService {
 
     const savedTask = await this.taskRepository.save(newTask);
 
-    return this.getTaskWithRelationIds(savedTask as TaskApiDto);
+    return this.getRequiredFormatTask(savedTask as TaskApiDto);
   }
 
+  /**
+   * A method that updates a task in the database
+   * @param currentUser An user from JWT
+   * @param taskId A taskId of a task. A task with this id should exist in the database
+   */
   async updateTask(
     taskDto: CreateTaskDto,
     currentUser: UserEntity,
@@ -84,7 +96,7 @@ export class TaskService {
     const updatedProject = await this.getProject(currentUser.id, project_id, assigned_to);
     currentTask.project = updatedProject;
 
-    const updatedPerformer = await this.getPerformerUser(assigned_to);
+    const updatedPerformer = await this.getUserPerformer(assigned_to);
     currentTask.performer = updatedPerformer;
 
     const currentMembersIds = currentTask.members.map((member) => member.id);
@@ -96,13 +108,19 @@ export class TaskService {
 
     const savedTask = await this.taskRepository.save(currentTask);
 
-    return this.getTaskWithRelationIds(savedTask as TaskApiDto);
+    return this.getRequiredFormatTask(savedTask as TaskApiDto);
   }
 
+  /**
+   * A method that deletes a task from the database. Files related to this task are also deleted from the storage.
+   * @param userId An userId from JWT
+   * @param taskId A taskId of a task. A task with this id should exist in the database
+   * @returns A promise with the id of deleted task
+   */
   async deleteTask(userId: string, taskId: string): Promise<{ id: string }> {
     await this.getValidTaskForEdit(userId, taskId);
-    const taskAttachmentsPaths = await this.getTaskAttachmentsPaths(taskId);
-    const tasksCommentsAttachmentsPaths = await this.getTaskCommentsAttachmentsPaths(taskId);
+    const taskAttachmentsPaths = await this.fetchTaskAttachmentsPaths(taskId);
+    const tasksCommentsAttachmentsPaths = await this.fetchTaskCommentsAttachmentsPaths(taskId);
 
     await this.taskRepository.delete({ id: taskId });
     await removeFilesFromStorage([...taskAttachmentsPaths, ...tasksCommentsAttachmentsPaths]);
@@ -110,7 +128,12 @@ export class TaskService {
     return { id: taskId };
   }
 
-  async getTaskAttachmentsPaths(taskId: string): Promise<string[]> {
+  /**
+   * A method that fetches tasks attachments from the database that belong to the task
+   * @param taskId A taskId of a task. A task with this id should exist in the database
+   * @returns A promise with the list of attachments paths
+   */
+  async fetchTaskAttachmentsPaths(taskId: string): Promise<string[]> {
     const taskAttachmentsPaths = await this.taskRepository
       .createQueryBuilder('tasks')
       .leftJoinAndSelect('tasks.attachments', 'attachments')
@@ -121,7 +144,12 @@ export class TaskService {
     return taskAttachmentsPaths.map((path) => path.attachments_path);
   }
 
-  async getTaskCommentsAttachmentsPaths(taskId: string): Promise<string[]> {
+  /**
+   * A method that fetches comments attachments from the database that belong to the task
+   * @param taskId A taskId of a task. A task with this id should exist in the database
+   * @returns A promise with the list of attachments paths
+   */
+  async fetchTaskCommentsAttachmentsPaths(taskId: string): Promise<string[]> {
     const taskCommentsAttachmentsPaths = await this.taskRepository
       .createQueryBuilder('tasks')
       .leftJoinAndSelect('tasks.comments', 'comments')
@@ -133,11 +161,19 @@ export class TaskService {
     return taskCommentsAttachmentsPaths.map((path) => path.attachments_path);
   }
 
-  async fetchOneTask(taskId: string): Promise<TaskApiDto> {
-    const task = await this.getAnyTaskById(taskId);
-    return this.getTaskWithRelationIds(task as TaskApiDto);
+  /**
+   * A method that returns one task in the required format
+   * @param taskId A taskId of a task. A task with this id should exist in the database
+   */
+  async getTask(taskId: string): Promise<TaskApiDto> {
+    const task = await this.fetchTask(taskId);
+
+    return this.getRequiredFormatTask(task as TaskApiDto);
   }
 
+  /**
+   * A method that creates QueryBuilder for tasks
+   */
   getTasksQueryBuilder(): SelectQueryBuilder<TaskEntity> {
     return this.taskRepository
       .createQueryBuilder('tasks')
@@ -150,6 +186,11 @@ export class TaskService {
       .orderBy('tasks.created_at', 'ASC');
   }
 
+  /**
+   * A method that fetches project tasks of user
+   * @param userId An userId from JWT
+   * @param projectId A projectId of a project. A project with this id should exist in the database
+   */
   async fetchProjectTasks(userId: string, projectId: string): Promise<TaskApiDto[]> {
     await this.projectService.fetchProject(projectId, userId);
     const projectTasksQueryBuilder = this.getTasksQueryBuilder().andWhere('project.id = :id', {
@@ -157,9 +198,14 @@ export class TaskService {
     });
     const tasks = await projectTasksQueryBuilder.getMany();
 
-    return tasks.map((task: TaskApiDto) => this.getTaskWithRelationIds(task));
+    return tasks.map((task: TaskApiDto) => this.getRequiredFormatTask(task));
   }
 
+  /**
+   * A method that fetches tasks of owner
+   * @param userId An userId from JWT
+   * @param ownerId An ownerId from URI Parameters
+   */
   async fetchUserTasks(userId: string, ownerId: string): Promise<TaskApiDto[]> {
     this.idsMatching(ownerId, userId);
     const userTasksQueryBuilder = this.getTasksQueryBuilder().andWhere('project.owner_id = :id', {
@@ -167,9 +213,14 @@ export class TaskService {
     });
     const tasks = await userTasksQueryBuilder.getMany();
 
-    return tasks.map((task: TaskApiDto) => this.getTaskWithRelationIds(task));
+    return tasks.map((task: TaskApiDto) => this.getRequiredFormatTask(task));
   }
 
+  /**
+   * A method that fetches tasks of assigned to user
+   * @param userId An userId from JWT
+   * @param ownerId An ownerId from URI Parameters
+   */
   async fetchAssignedTasks(userId: string, ownerId: string): Promise<TaskApiDto[]> {
     this.idsMatching(ownerId, userId);
     const assignedTasksQueryBuilder = this.getTasksQueryBuilder().andWhere('performer.id = :id', {
@@ -177,9 +228,14 @@ export class TaskService {
     });
     const tasks = await assignedTasksQueryBuilder.getMany();
 
-    return tasks.map((task: TaskApiDto) => this.getTaskWithRelationIds(task));
+    return tasks.map((task: TaskApiDto) => this.getRequiredFormatTask(task));
   }
 
+  /**
+   * A method that fetches tasks of member
+   * @param userId An userId from JWT
+   * @param ownerId An ownerId from URI Parameters
+   */
   async fetchParticipateInTasks(userId: string, ownerId: string): Promise<TaskApiDto[]> {
     this.idsMatching(ownerId, userId);
     const participateInTasks = await this.taskRepository
@@ -192,22 +248,35 @@ export class TaskService {
       participateInTasks,
     );
 
-    return tasksWithAttachmentRelation.map((task: TaskApiDto) => this.getTaskWithRelationIds(task));
+    return tasksWithAttachmentRelation.map((task: TaskApiDto) => this.getRequiredFormatTask(task));
   }
 
+  /**
+   * A method that returns tasks with required relations: ['attachments.task']
+   */
   async getTasksWithAttachmentRelation(tasks: TaskEntity[]): Promise<TaskEntity[]> {
     const extendedTasks = [];
 
     for (const task of tasks) {
-      const extendedTask = await this.getAnyTaskById(task.id);
+      const extendedTask = await this.fetchTask(task.id);
       extendedTasks.push(extendedTask);
     }
 
     return extendedTasks;
   }
 
-  async getProject(userId: string, projectId: string, assignedTo: string): Promise<ProjectEntity> {
-    if (!assignedTo) {
+  /**
+   * A method that returns required project
+   * @param userId An userId from JWT or request body
+   * @param projectId A projectId of a project. A project with this id should exist in the database
+   * @param assignedToId An assignedToId of a user. An user with this id should exist in the database
+   */
+  async getProject(
+    userId: string,
+    projectId: string,
+    assignedToId: string,
+  ): Promise<ProjectEntity> {
+    if (!assignedToId) {
       const specialOneProject = await this.projectService.fetchProjectByTitle(
         SPECIAL_ONE_PROJECT_NAME,
         userId,
@@ -221,7 +290,11 @@ export class TaskService {
     return project;
   }
 
-  async getPerformerUser(assignedToId: string): Promise<UserEntity> {
+  /**
+   * A method that returns the assigned user or null
+   * @param assignedToId An assignedToId of a user. An user with this id should exist in the database
+   */
+  async getUserPerformer(assignedToId: string): Promise<UserEntity> {
     if (assignedToId) {
       return await this.userService.getById(assignedToId);
     }
@@ -229,6 +302,10 @@ export class TaskService {
     return null;
   }
 
+  /**
+   * A method that returns members
+   * @param membersIds List of users identifiers. An user with this id should exist in the database
+   */
   async getMembersById(membersIds: string[]): Promise<UserEntity[]> {
     if (membersIds) {
       return await this.userService.getMembersInstances(membersIds);
@@ -237,7 +314,11 @@ export class TaskService {
     return null;
   }
 
-  async getAnyTaskById(taskId: string): Promise<TaskEntity> {
+  /**
+   * A method that fetches a task from the database
+   * @param taskId A taskId of a task. A task with this id should exist in the database
+   */
+  async fetchTask(taskId: string): Promise<TaskEntity> {
     const task = await this.taskRepository.findOne({
       where: { id: taskId },
       relations: ['attachments.task'],
@@ -252,9 +333,14 @@ export class TaskService {
     return task;
   }
 
+  /**
+   * A method that checks if the task is available for editing
+   * @param userId An userId from JWT
+   * @param taskId A taskId of a task. A task with this id should exist in the database
+   */
   async getValidTaskForEdit(userId: string, taskId: string): Promise<TaskEntity> {
     try {
-      const task = await this.getAnyTaskById(taskId);
+      const task = await this.fetchTask(taskId);
 
       if (task.project.owner.id !== userId) {
         throw new ForbiddenException(MessageEnum.INVALID_ID_NOT_OWNER);
@@ -269,9 +355,14 @@ export class TaskService {
     }
   }
 
+  /**
+   * A method that checks if the task is available for commenting
+   * @param userId An userId from JWT
+   * @param taskId A taskId of a task. A task with this id should exist in the database
+   */
   async getValidTaskForComment(userId: string, taskId: string): Promise<TaskEntity> {
     try {
-      const task = await this.getAnyTaskById(taskId);
+      const task = await this.fetchTask(taskId);
       const ids = task.members.map((member) => member.id);
 
       if (!ids.includes(userId) && task.project.owner.id !== userId) {
@@ -287,13 +378,21 @@ export class TaskService {
     }
   }
 
+  /**
+   * A method that compares user identifiers from JWT and request body
+   * @param owner_id An owner_id from request body
+   * @param user_id An user_id from JWT
+   */
   idsMatching(owner_id: string, user_id: string): void {
     if (owner_id !== user_id) {
       throw new UnprocessableEntityException(MessageEnum.INVALID_USER_ID);
     }
   }
 
-  getTaskWithRelationIds(task: TaskApiDto): TaskApiDto {
+  /**
+   * A method that adds properties: owner_id, project_id, assigned_to, members, attachments to Task according to the requirements
+   */
+  getRequiredFormatTask(task: TaskApiDto): TaskApiDto {
     task.owner_id = task.project.owner.id;
     task.project_id = task.project.id;
     task.assigned_to = task.performer ? task.performer.id : null;
@@ -304,14 +403,18 @@ export class TaskService {
       : null;
     task.attachments = task.attachments?.length
       ? task.attachments.map((attachment: TaskAttachmentApiDto) =>
-          this.taskAttachmentService.getFullTaskAttachment(attachment),
+          this.taskAttachmentService.getRequiredFormatTaskAttachment(attachment),
         )
       : null;
 
     return task;
   }
 
-  async getTasksStatisticsByOwner(ownerId: string): Promise<TaskStatisticsApiType> {
+  /**
+   * A method that calculates the number of created and completed tasks by owner
+   * @param ownerId An ownerId from URI Parameters
+   */
+  async fetchTasksStatisticsByOwner(ownerId: string): Promise<TaskStatisticsApiType> {
     const ownerTasksQueryBuilder = this.taskRepository
       .createQueryBuilder('tasks')
       .leftJoinAndSelect('tasks.project', 'project')
@@ -329,7 +432,11 @@ export class TaskService {
     return { created_tasks, completed_tasks };
   }
 
-  async getTodoStatisticsByPerformer(ownerId: string): Promise<string> {
+  /**
+   * A method that calculates a percentage of non completed tasks to total tasks by assigned to user
+   * @param ownerId An ownerId from URI Parameters
+   */
+  async fetchTodoStatisticsByPerformer(ownerId: string): Promise<string> {
     const performerTasksQueryBuilder = this.taskRepository
       .createQueryBuilder('tasks')
       .andWhere('tasks.performer_id = :id', { id: ownerId })
