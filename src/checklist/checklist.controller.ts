@@ -83,11 +83,11 @@ export class ChecklistController {
   @ApiOkArrayResponse(ChecklistApiDto)
   @ApiUnprocessableEntityResponse({ description: `"${MessageEnum.INVALID_USER_ID}";` })
   @ApiParam(getApiParam('ownerId', 'user'))
-  async fetchAllUserChecklists(
+  async fetchUserChecklists(
     @User('id') userId: string,
     @Param('ownerId') ownerId: string,
   ): Promise<Data<ChecklistApiDto[]>> {
-    const data = await this.checklistService.fetchAllUserChecklists(userId, ownerId);
+    const data = await this.checklistService.fetchUserChecklists(userId, ownerId);
     return { data };
   }
 
@@ -98,11 +98,11 @@ export class ChecklistController {
   @ApiForbiddenResponse({ description: `"${MessageEnum.INVALID_ID_NOT_OWNER}";` })
   @ApiInternalServerErrorResponse({ description: `"${MessageEnum.ENTITY_NOT_FOUND}";` })
   @ApiParam(getApiParam('listId', 'checklist'))
-  async fetchOneChecklist(
+  async getChecklist(
     @User('id') userId: string,
     @Param('listId') listId: string,
   ): Promise<Data<ChecklistApiDto>> {
-    const data = await this.checklistService.fetchOneChecklist(userId, listId);
+    const data = await this.checklistService.getChecklist(userId, listId);
     return { data };
   }
 

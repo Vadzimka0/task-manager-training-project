@@ -37,7 +37,7 @@ export class NoteService {
 
     const notes = await queryBuilder.getMany();
 
-    return notes.map((note: NoteApiDto) => this.getNoteWithOwnerId(note));
+    return notes.map((note: NoteApiDto) => this.getRequiredFormatNote(note));
   }
 
   /**
@@ -48,7 +48,7 @@ export class NoteService {
   async fetchOneNote(userId: string, noteId: string): Promise<NoteApiDto> {
     const note = await this.fetchNoteForRead(userId, noteId);
 
-    return this.getNoteWithOwnerId(note as NoteApiDto);
+    return this.getRequiredFormatNote(note as NoteApiDto);
   }
 
   /**
@@ -65,7 +65,7 @@ export class NoteService {
     newNote.owner = currentUser;
     const savedNote = await this.noteRepository.save(newNote);
 
-    return this.getNoteWithOwnerId(savedNote as NoteApiDto);
+    return this.getRequiredFormatNote(savedNote as NoteApiDto);
   }
 
   /**
@@ -86,7 +86,7 @@ export class NoteService {
     Object.assign(currentNote, dtoWithoutOwner);
     const savedNote = await this.noteRepository.save(currentNote);
 
-    return this.getNoteWithOwnerId(savedNote as NoteApiDto);
+    return this.getRequiredFormatNote(savedNote as NoteApiDto);
   }
 
   /**
@@ -155,9 +155,9 @@ export class NoteService {
   }
 
   /**
-   * A method that adds the necessary property owner_id into note according to the requirements
+   * A method that adds the owner_id property to Note according to the requirements
    */
-  getNoteWithOwnerId(note: NoteApiDto): NoteApiDto {
+  getRequiredFormatNote(note: NoteApiDto): NoteApiDto {
     note.owner_id = note.owner.id;
 
     return note;
