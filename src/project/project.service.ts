@@ -20,11 +20,20 @@ import { ProjectEntity } from './entities/project.entity';
 
 @Injectable()
 export class ProjectService {
+  /**
+   * @ignore
+   */
   constructor(
     @InjectRepository(ProjectEntity)
     private projectRepository: Repository<ProjectEntity>,
   ) {}
 
+  /**
+   * A method that fetches user projects from the database
+   * @param userId An userId from JWT
+   * @param ownerId An ownerId from URI param
+   * @param search An object with property of query string of a URL
+   */
   async fetchUserProjects(
     userId: string,
     ownerId?: string,
@@ -46,15 +55,25 @@ export class ProjectService {
 
     const projects = await queryBuilder.getMany();
 
-    return projects.map((project: ProjectApiDto) => this.getProjectWithOwnerId(project));
+    return projects.map((project: ProjectApiDto) => this.getRequiredFormatProject(project));
   }
 
-  async fetchOneProject(userId: string, projectId: string): Promise<ProjectApiDto> {
-    const project = await this.findProjectForRead(projectId, userId);
+  /**
+   * A method that returns one project in the required format
+   * @param userId An userId from JWT
+   * @param projectId A projectId of a project. A project with this id should exist in the database
+   */
+  async getProject(userId: string, projectId: string): Promise<ProjectApiDto> {
+    const project = await this.fetchProject(projectId, userId);
 
-    return this.getProjectWithOwnerId(project as ProjectApiDto);
+    return this.getRequiredFormatProject(project as ProjectApiDto);
   }
 
+  /**
+   * A method that calculates the number of tasks for each project by user
+   * @param userId An userId from JWT
+   * @param ownerId An ownerId from URI param
+   */
   async fetchProjectStatistics(userId: string, ownerId: string): Promise<ProjectStatisticApiDto[]> {
     this.idsMatching(userId, ownerId);
 
@@ -81,6 +100,10 @@ export class ProjectService {
     }));
   }
 
+  /**
+   * A method that creates a project in the database
+   * @param currentUser An user from JWT
+   */
   async createProject(
     projectDto: CreateProjectDto,
     currentUser: UserEntity,
@@ -97,9 +120,14 @@ export class ProjectService {
     newProject.owner = currentUser;
     const savedProject = await this.projectRepository.save(newProject);
 
-    return this.getProjectWithOwnerId(savedProject as ProjectApiDto);
+    return this.getRequiredFormatProject(savedProject as ProjectApiDto);
   }
 
+  /**
+   * A method that updates a project in the database
+   * @param userId An userId from JWT
+   * @param projectId A projectId of a project. A project with this id should exist in the database
+   */
   async updateProject(
     projectDto: CreateProjectDto,
     userId: string,
@@ -109,7 +137,7 @@ export class ProjectService {
     const { owner_id, ...dtoWithoutOwner } = projectDto;
     this.idsMatching(owner_id, userId);
 
-    const currentProject = await this.findProjectForEdit(projectId, userId);
+    const currentProject = await this.getValidProject(projectId, userId);
 
     if (currentProject.title !== projectDto.title) {
       await this.checkDuplicateProjectTitle(projectDto.title, userId);
@@ -118,15 +146,20 @@ export class ProjectService {
     Object.assign(currentProject, dtoWithoutOwner);
     const savedProject = await this.projectRepository.save(currentProject);
 
-    return this.getProjectWithOwnerId(savedProject as ProjectApiDto);
+    return this.getRequiredFormatProject(savedProject as ProjectApiDto);
   }
 
+  /**
+   * A method that deletes a project from the database. Files related to this project are also deleted from the storage.
+   * @param userId An userId from JWT
+   * @param projectId A projectId of a project. A project with this id should exist in the database
+   * @returns A promise with the id of deleted project
+   */
   async deleteProject(userId: string, projectId: string): Promise<{ id: string }> {
-    await this.findProjectForEdit(projectId, userId);
-    const projectTasksAttachmentsPaths = await this.getProjectTasksAttachmentsPaths(projectId);
-    const projectTasksCommentsAttachmentsPaths = await this.getProjectTasksCommentsAttachmentsPaths(
-      projectId,
-    );
+    await this.getValidProject(projectId, userId);
+    const projectTasksAttachmentsPaths = await this.fetchProjectTasksAttachmentsPaths(projectId);
+    const projectTasksCommentsAttachmentsPaths =
+      await this.fetchProjectTasksCommentsAttachmentsPaths(projectId);
 
     await this.projectRepository.delete({ id: projectId });
     await removeFilesFromStorage([
@@ -137,7 +170,12 @@ export class ProjectService {
     return { id: projectId };
   }
 
-  async getProjectTasksAttachmentsPaths(projectId: string): Promise<string[]> {
+  /**
+   * A method that fetches tasks attachments from the database that belong to the project
+   * @param projectId A projectId of a project. A project with this id should exist in the database
+   * @returns A promise with the list of attachments paths
+   */
+  async fetchProjectTasksAttachmentsPaths(projectId: string): Promise<string[]> {
     const projectTasksAttachmentsPaths = await this.projectRepository
       .createQueryBuilder('projects')
       .leftJoinAndSelect('projects.tasks', 'tasks')
@@ -149,7 +187,12 @@ export class ProjectService {
     return projectTasksAttachmentsPaths.map((path) => path.attachments_path);
   }
 
-  async getProjectTasksCommentsAttachmentsPaths(projectId: string): Promise<string[]> {
+  /**
+   * A method that fetches comments attachments from the database that belong to the project
+   * @param projectId A projectId of a project. A project with this id should exist in the database
+   * @returns A promise with the list of attachments paths
+   */
+  async fetchProjectTasksCommentsAttachmentsPaths(projectId: string): Promise<string[]> {
     const projectTasksCommentsAttachmentsPaths = await this.projectRepository
       .createQueryBuilder('projects')
       .leftJoinAndSelect('projects.tasks', 'tasks')
@@ -162,7 +205,12 @@ export class ProjectService {
     return projectTasksCommentsAttachmentsPaths.map((path) => path.attachments_path);
   }
 
-  async findProjectForRead(projectId: string, userId: string): Promise<ProjectEntity> {
+  /**
+   * A method that fetches a project from the database
+   * @param projectId A projectId of a project. A project with this id should exist in the database
+   * @param userId An userId from JWT
+   */
+  async fetchProject(projectId: string, userId: string): Promise<ProjectEntity> {
     try {
       const project = await this.projectRepository.findOneBy({ id: projectId });
 
@@ -185,8 +233,13 @@ export class ProjectService {
     }
   }
 
-  async findProjectForEdit(projectId: string, userId: string): Promise<ProjectEntity> {
-    const project = await this.findProjectForRead(projectId, userId);
+  /**
+   * A method that checks if the project is available for editing
+   * @param projectId A projectId of a project. A project with this id should exist in the database
+   * @param userId An userId from JWT
+   */
+  async getValidProject(projectId: string, userId: string): Promise<ProjectEntity> {
+    const project = await this.fetchProject(projectId, userId);
 
     if (project.title === SPECIAL_ONE_PROJECT_NAME) {
       throw new BadRequestException(ProjectMessageEnum.PROJECT_PROTECTED);
@@ -195,6 +248,11 @@ export class ProjectService {
     return project;
   }
 
+  /**
+   * A method that checks for duplicate project titles of the user
+   * @param title A title of a project
+   * @param id An id of a user
+   */
   async checkDuplicateProjectTitle(title: string, id: string): Promise<void> {
     const project = await this.projectRepository
       .createQueryBuilder('projects')
@@ -208,25 +266,41 @@ export class ProjectService {
     }
   }
 
+  /**
+   * A method that validates color
+   */
   validateHexColor(color: string): void {
     if (!/^#(?:[0-9a-fA-F]{3}){1,2}$/i.test(color)) {
       throw new UnprocessableEntityException(MessageEnum.INVALID_COLOR);
     }
   }
 
+  /**
+   * A method that compares user identifiers from JWT and request body
+   * @param owner_id An owner_id from request body
+   * @param user_id An user_id from JWT
+   */
   idsMatching(owner_id: string, user_id: string): void {
     if (owner_id !== user_id) {
       throw new UnprocessableEntityException(MessageEnum.INVALID_USER_ID);
     }
   }
 
-  getProjectWithOwnerId(project: ProjectApiDto): ProjectApiDto {
+  /**
+   * A method that adds the owner_id property to Project according to the requirements
+   */
+  getRequiredFormatProject(project: ProjectApiDto): ProjectApiDto {
     project.owner_id = project.owner.id;
 
     return project;
   }
 
-  async findProjectByTitle(title: string, currentUserId: string): Promise<ProjectEntity> {
+  /**
+   * A method that fetches a project by title from the database
+   * @param title A title of a project
+   * @param currentUserId An id of a user
+   */
+  async fetchProjectByTitle(title: string, currentUserId: string): Promise<ProjectEntity> {
     const project = await this.projectRepository
       .createQueryBuilder('projects')
       .leftJoinAndSelect('projects.owner', 'owner')

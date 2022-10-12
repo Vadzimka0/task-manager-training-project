@@ -73,11 +73,11 @@ export class NoteController {
   @ApiOkObjectResponse(NoteApiDto)
   @ApiUnprocessableEntityResponse({ description: `"${NoteMessageEnum.INVALID_NOTE_ID}"` })
   @ApiParam(getApiParam('id', 'note'))
-  async fetchOneNote(
+  async getNote(
     @User('id') userId: string,
     @Param('id') noteId: string,
   ): Promise<Data<NoteApiDto>> {
-    const data = await this.noteService.fetchOneNote(userId, noteId);
+    const data = await this.noteService.getNote(userId, noteId);
     return { data };
   }
 

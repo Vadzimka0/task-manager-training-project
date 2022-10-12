@@ -36,7 +36,7 @@ export class ChecklistService {
   /**
    * A method that fetches user checklists from the database
    * @param userId An userId from JWT
-   * @param ownerId An ownerId from request body
+   * @param ownerId An ownerId from URI param
    */
   async fetchUserChecklists(userId: string, ownerId: string): Promise<ChecklistApiDto[]> {
     this.idsMatching(ownerId, userId);

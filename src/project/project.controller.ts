@@ -131,11 +131,11 @@ export class ProjectController {
   @ApiForbiddenResponse({ description: `"${MessageEnum.INVALID_ID_NOT_OWNER}";` })
   @ApiInternalServerErrorResponse({ description: `"${MessageEnum.ENTITY_NOT_FOUND}";` })
   @ApiParam(getApiParam('projectId', 'project'))
-  async fetchOneProject(
+  async getProject(
     @User('id') userId: string,
     @Param('projectId') projectId: string,
   ): Promise<Data<ProjectApiDto>> {
-    const data = await this.projectService.fetchOneProject(userId, projectId);
+    const data = await this.projectService.getProject(userId, projectId);
     return { data };
   }
 

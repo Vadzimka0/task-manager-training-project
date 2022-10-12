@@ -151,7 +151,7 @@ export class TaskService {
   }
 
   async fetchProjectTasks(userId: string, projectId: string): Promise<TaskApiDto[]> {
-    await this.projectService.findProjectForRead(projectId, userId);
+    await this.projectService.fetchProject(projectId, userId);
     const projectTasksQueryBuilder = this.getTasksQueryBuilder().andWhere('project.id = :id', {
       id: projectId,
     });
@@ -208,7 +208,7 @@ export class TaskService {
 
   async getProject(userId: string, projectId: string, assignedTo: string): Promise<ProjectEntity> {
     if (!assignedTo) {
-      const specialOneProject = await this.projectService.findProjectByTitle(
+      const specialOneProject = await this.projectService.fetchProjectByTitle(
         SPECIAL_ONE_PROJECT_NAME,
         userId,
       );
@@ -216,7 +216,7 @@ export class TaskService {
       return specialOneProject;
     }
 
-    const project = await this.projectService.findProjectForRead(projectId, userId);
+    const project = await this.projectService.fetchProject(projectId, userId);
 
     return project;
   }

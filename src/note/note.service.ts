@@ -41,11 +41,11 @@ export class NoteService {
   }
 
   /**
-   * A method that fetches one note from the database
+   * A method that returns one note in the required format
    * @param userId An userId from JWT
    * @param noteId A noteId of a note. A note with this id should exist in the database
    */
-  async fetchOneNote(userId: string, noteId: string): Promise<NoteApiDto> {
+  async getNote(userId: string, noteId: string): Promise<NoteApiDto> {
     const note = await this.fetchNoteForRead(userId, noteId);
 
     return this.getRequiredFormatNote(note as NoteApiDto);
