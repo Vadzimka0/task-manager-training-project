@@ -79,7 +79,6 @@ export class AuthService {
 
   /**
    * A method that returns user session info (tokens) in the required format
-   * @param user An user from request
    */
   async getUserSessionInfo(user: UserEntity): Promise<UserSessionApiDto> {
     const access_token = this.getJwtAccessToken(user.email);

@@ -1,5 +1,8 @@
 import { ApiParamOptions } from '@nestjs/swagger';
 
+/**
+ * A method that returns ApiParamOptions for swagger
+ */
 export function getApiParam(idName: string, entityName: string): ApiParamOptions {
   return {
     name: idName,

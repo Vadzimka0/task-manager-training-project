@@ -1,3 +1,6 @@
+/**
+ * A method that compare two arrays where the order of the elements in each array is not important
+ */
 export function haveSameItems(arr1: string[], arr2: string[]): boolean {
   if (!arr1) arr1 = [];
   if (!arr2) arr2 = [];
