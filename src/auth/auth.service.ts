@@ -19,6 +19,10 @@ import { TokenPayload } from './types';
 @Injectable()
 export class AuthService {
   private token_type: string;
+
+  /**
+   * @ignore
+   */
   constructor(
     private readonly userService: UserService,
     private readonly jwtService: JwtService,
@@ -27,6 +31,9 @@ export class AuthService {
     this.token_type = 'Bearer';
   }
 
+  /**
+   * A method that registers the user in the database and also returns tokens in the required format
+   */
   async signUp(signUpDto: SignUpDto): Promise<UserInfoApiDto> {
     const hashedPassword = await bcrypt.hash(signUpDto.password, 10);
     try {
@@ -46,20 +53,34 @@ export class AuthService {
     }
   }
 
+  /**
+   * A method that logins the user and returns tokens in the required format
+   */
   async signIn(user: UserEntity): Promise<UserSessionApiDto> {
     return this.getUserSessionInfo(user);
   }
 
+  /**
+   * A method that updates tokens
+   */
   async refreshToken(user: UserEntity): Promise<UserSessionApiDto> {
     return this.getUserSessionInfo(user);
   }
 
+  /**
+   * A method that logouts the user
+   * @param email An email of user
+   */
   async signOut(email: string): Promise<SuccessApiDto> {
     await this.userService.removeRefreshToken(email);
 
     return { success: true };
   }
 
+  /**
+   * A method that returns user session info (tokens) in the required format
+   * @param user An user from request
+   */
   async getUserSessionInfo(user: UserEntity): Promise<UserSessionApiDto> {
     const access_token = this.getJwtAccessToken(user.email);
     const refresh_token = this.getJwtRefreshToken(user.email);
@@ -71,6 +92,10 @@ export class AuthService {
     return { access_token, refresh_token, token_type: this.token_type, expires_in };
   }
 
+  /**
+   * A method that generates JWT access token
+   * @param email An email of user
+   */
   getJwtAccessToken(email: string) {
     const payload: TokenPayload = { email };
     const token = this.jwtService.sign(payload, {
@@ -81,6 +106,10 @@ export class AuthService {
     return token;
   }
 
+  /**
+   * A method that generates JWT refresh token
+   * @param email An email of user
+   */
   getJwtRefreshToken(email: string) {
     const payload: TokenPayload = { email };
     const refreshToken = this.jwtService.sign(payload, {
@@ -91,6 +120,11 @@ export class AuthService {
     return refreshToken;
   }
 
+  /**
+   * A method that verifies and returns an user
+   * @param email An email of user from the request body
+   * @param base64Password A password of user the request body
+   */
   async getAuthenticatedUser(email: string, base64Password: string) {
     try {
       const user = await this.userService.fetchUserByEmail(email);
@@ -102,6 +136,11 @@ export class AuthService {
     }
   }
 
+  /**
+   * A method that verifies passwords
+   * @param base64Password A password of user the request body
+   * @param hashedPassword A hashedPassword of user from the database
+   */
   private async verifyPassword(base64Password: string, hashedPassword: string) {
     const isPasswordMatching = await bcrypt.compare(base64Password, hashedPassword);
     if (!isPasswordMatching) {

@@ -46,6 +46,7 @@ import { UserEntity } from '../entities/user.entity';
 import { UserAvatarService, UserService } from '../services';
 
 import type { Response } from 'express';
+
 @ApiTags('Users Avatars:')
 @Controller('users-avatar')
 @UseInterceptors(ClassSerializerInterceptor)

@@ -12,6 +12,9 @@ import { UserApiType } from '../types/user-api.type';
 export class UserAvatarService {
   private server_url: string;
 
+  /**
+   * @ignore
+   */
   constructor(
     @InjectRepository(UserEntity)
     private readonly userRepository: Repository<UserEntity>,
@@ -22,7 +25,15 @@ export class UserAvatarService {
     )}/`;
   }
 
-  async addAvatar(user: UserEntity, addAvatarDto: AddAvatarDto, file: any): Promise<UserApiType> {
+  /**
+   * A method that adds an avatar in the database
+   * @param user An user from JWT
+   */
+  async addAvatar(
+    user: UserEntity,
+    addAvatarDto: AddAvatarDto,
+    file: Express.Multer.File,
+  ): Promise<UserApiType> {
     if (user.id !== addAvatarDto.user_id) {
       throw new UnprocessableEntityException(AvatarMessageEnum.AVATAR_COULD_NOT_BE_ATTACHED);
     }
