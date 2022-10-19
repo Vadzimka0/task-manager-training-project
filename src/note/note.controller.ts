@@ -49,8 +49,11 @@ export class NoteController {
     @Body() createNoteDto: CreateNoteDto,
     @User() currentUser: UserEntity,
   ): Promise<Data<NoteApiDto>> {
-    const data = await this.noteService.createNote(createNoteDto, currentUser);
+    const note = await this.noteService.createNote(createNoteDto, currentUser);
+    const data = this.noteService.getRequiredFormatNote(note as NoteApiDto);
     return { data };
+    // const data = await this.noteService.createNote(createNoteDto, currentUser);
+    // return { data };
   }
 
   @Delete('notes/:id')

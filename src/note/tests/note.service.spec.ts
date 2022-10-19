@@ -2,6 +2,7 @@ import { InternalServerErrorException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { v4 as uuidv4 } from 'uuid';
 
 import { NoteEntity } from '../entities/note.entity';
 import { NoteService } from '../note.service';
@@ -11,11 +12,21 @@ export type MockType<T> = {
 };
 export const repositoryMockFactory: () => MockType<Repository<any>> = jest.fn(() => ({
   findOneBy: jest.fn(),
+  save: jest.fn(),
 }));
 
 describe('The NoteService', () => {
   let service: NoteService;
   let repositoryMock: MockType<Repository<NoteEntity>>;
+
+  const expectedNote = {
+    id: uuidv4(),
+    created_at: new Date(),
+    description: 'text',
+    color: '#ffffff',
+    is_completed: false,
+    owner: { id: uuidv4() },
+  };
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -33,41 +44,62 @@ describe('The NoteService', () => {
     expect(service).toBeDefined();
   });
 
+  describe('createNote', () => {
+    it('should create a new note record and return that', async () => {
+      const dto = {
+        description: 'text',
+        color: '#ffffff',
+        owner_id: 'f60c913b-0859-4797-8dea-c07409ffcf0d',
+      };
+      const user = {
+        id: 'f60c913b-0859-4797-8dea-c07409ffcf0d',
+        email: 'f60c913b@gmail.com',
+        username: 'f60c913b',
+        created_at: undefined,
+        password: '',
+        refresh_token: '',
+        notes: [],
+        checklists: [],
+        projects: [],
+        assigned_tasks: [],
+        participate_tasks: [],
+        comments: [],
+        mimetype: '',
+        path: '',
+        filename: '',
+      };
+
+      repositoryMock.save.mockReturnValue(expectedNote);
+
+      const createdNote = await service.createNote(dto, user);
+
+      expect(createdNote).toEqual(expectedNote);
+    });
+  });
+
   describe('fetchNote', () => {
     describe('when user note with ID exists', () => {
       it('should return the note object', async () => {
-        const note = {
-          id: 'af6191b2-46e2-43f1-9f09-c9593f5b09c0',
-          created_at: new Date(),
-          description: 'buy book',
-          color: '#ffffff',
-          is_completed: true,
-          owner: { id: 'f60c913b-0859-4797-8dea-c07409ffcf0d' },
-        };
+        repositoryMock.findOneBy.mockReturnValue(expectedNote);
 
-        repositoryMock.findOneBy.mockReturnValue(note);
+        const fetchedNote = await service.fetchNoteForEdit(expectedNote.owner.id, expectedNote.id);
 
-        const fetchedNote = await service.fetchNoteForEdit(note.owner.id, note.id);
-
-        expect(fetchedNote).toEqual(note);
-        expect(repositoryMock.findOneBy).toHaveBeenCalledWith({ id: note.id });
+        expect(fetchedNote).toEqual(expectedNote);
+        expect(repositoryMock.findOneBy).toHaveBeenCalledWith({ id: expectedNote.id });
       });
     });
 
     describe('otherwise', () => {
       it('should throw the "InternalServerErrorException"', async () => {
-        const note = {
-          id: 'af6191b2-46e2-43f1-9f09-c9593f5b09c0',
-          owner: { id: 'f60c913b-0859-4797-8dea-c07409ffcf0d' },
-        };
-
         repositoryMock.findOneBy.mockReturnValue(undefined);
 
         try {
-          await service.fetchNoteForEdit(note.owner.id, note.id);
+          await service.fetchNoteForEdit(expectedNote.owner.id, expectedNote.id);
         } catch (err) {
           expect(err).toBeInstanceOf(InternalServerErrorException);
-          expect(err.message).toEqual(`Entity NoteModel, id=${note.id} not found in the database`);
+          expect(err.message).toEqual(
+            `Entity NoteModel, id=${expectedNote.id} not found in the database`,
+          );
         }
       });
     });

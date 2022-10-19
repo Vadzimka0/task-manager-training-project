@@ -55,7 +55,8 @@ export class NoteService {
    * A method that creates a note in the database
    * @param currentUser An user from JWT
    */
-  async createNote(createNoteDto: CreateNoteDto, currentUser: UserEntity): Promise<NoteApiDto> {
+  async createNote(createNoteDto: CreateNoteDto, currentUser: UserEntity): Promise<NoteEntity> {
+    // async createNote(createNoteDto: CreateNoteDto, currentUser: UserEntity): Promise<NoteApiDto> {
     this.validateHexColor(createNoteDto.color);
     const { owner_id, ...dtoWithoutOwner } = createNoteDto;
     this.idsMatching(owner_id, currentUser.id);
@@ -63,9 +64,10 @@ export class NoteService {
     const newNote = new NoteEntity();
     Object.assign(newNote, dtoWithoutOwner);
     newNote.owner = currentUser;
-    const savedNote = await this.noteRepository.save(newNote);
 
-    return this.getRequiredFormatNote(savedNote as NoteApiDto);
+    return await this.noteRepository.save(newNote);
+    // const savedNote = await this.noteRepository.save(newNote);
+    // return this.getRequiredFormatNote(savedNote as NoteApiDto);
   }
 
   /**
