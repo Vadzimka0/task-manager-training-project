@@ -19,13 +19,30 @@ describe('The NoteService', () => {
   let service: NoteService;
   let repositoryMock: MockType<Repository<NoteEntity>>;
 
+  const user = {
+    id: 'f60c913b-0859-4797-8dea-c07409ffcf0d',
+    email: 'f60c913b@gmail.com',
+    username: 'f60c913b',
+    created_at: undefined,
+    password: '',
+    refresh_token: '',
+    notes: [],
+    checklists: [],
+    projects: [],
+    assigned_tasks: [],
+    participate_tasks: [],
+    comments: [],
+    mimetype: '',
+    path: '',
+    filename: '',
+  };
   const expectedNote = {
     id: uuidv4(),
     created_at: new Date(),
     description: 'text',
     color: '#ffffff',
     is_completed: false,
-    owner: { id: uuidv4() },
+    owner: user,
   };
 
   beforeEach(async () => {
@@ -50,23 +67,6 @@ describe('The NoteService', () => {
         description: 'text',
         color: '#ffffff',
         owner_id: 'f60c913b-0859-4797-8dea-c07409ffcf0d',
-      };
-      const user = {
-        id: 'f60c913b-0859-4797-8dea-c07409ffcf0d',
-        email: 'f60c913b@gmail.com',
-        username: 'f60c913b',
-        created_at: undefined,
-        password: '',
-        refresh_token: '',
-        notes: [],
-        checklists: [],
-        projects: [],
-        assigned_tasks: [],
-        participate_tasks: [],
-        comments: [],
-        mimetype: '',
-        path: '',
-        filename: '',
       };
 
       repositoryMock.save.mockReturnValue(expectedNote);

@@ -52,8 +52,6 @@ export class NoteController {
     const note = await this.noteService.createNote(createNoteDto, currentUser);
     const data = this.noteService.getRequiredFormatNote(note as NoteApiDto);
     return { data };
-    // const data = await this.noteService.createNote(createNoteDto, currentUser);
-    // return { data };
   }
 
   @Delete('notes/:id')
@@ -76,11 +74,12 @@ export class NoteController {
   @ApiOkObjectResponse(NoteApiDto)
   @ApiUnprocessableEntityResponse({ description: `"${NoteMessageEnum.INVALID_NOTE_ID}"` })
   @ApiParam(getApiParam('id', 'note'))
-  async getNote(
+  async fetchOneNote(
     @User('id') userId: string,
     @Param('id') noteId: string,
   ): Promise<Data<NoteApiDto>> {
-    const data = await this.noteService.getNote(userId, noteId);
+    const note = await this.noteService.fetchOneNote(userId, noteId);
+    const data = this.noteService.getRequiredFormatNote(note as NoteApiDto);
     return { data };
   }
 
@@ -94,7 +93,8 @@ export class NoteController {
     @User('id') userId: string,
     @Param('ownerId') ownerId: string,
   ): Promise<Data<NoteApiDto[]>> {
-    const data = await this.noteService.fetchUserNotes(userId, ownerId);
+    const notes = await this.noteService.fetchUserNotes(userId, ownerId);
+    const data = notes.map((note: NoteApiDto) => this.noteService.getRequiredFormatNote(note));
     return { data };
   }
 
@@ -112,7 +112,8 @@ export class NoteController {
     @User('id') userId: string,
     @Param('id') noteId: string,
   ): Promise<Data<NoteApiDto>> {
-    const data = await this.noteService.updateNote(updateNoteDto, userId, noteId);
+    const note = await this.noteService.updateNote(updateNoteDto, userId, noteId);
+    const data = this.noteService.getRequiredFormatNote(note as NoteApiDto);
     return { data };
   }
 }

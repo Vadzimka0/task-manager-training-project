@@ -73,6 +73,8 @@ describe('NoteController', () => {
       },
     };
 
-    expect(await controller.createNote(dto, user)).toEqual(expectedNoteResponse);
+    const createdNote = await controller.createNote(dto, user);
+
+    expect(createdNote).toEqual(expectedNoteResponse);
   });
 });

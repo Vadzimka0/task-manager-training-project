@@ -22,41 +22,10 @@ export class NoteService {
   ) {}
 
   /**
-   * A method that fetches user notes from the database
-   * @param userId An userId from JWT
-   * @param ownerId An ownerId from request body
-   */
-  async fetchUserNotes(userId: string, ownerId: string): Promise<NoteApiDto[]> {
-    this.idsMatching(ownerId, userId);
-
-    const queryBuilder = this.noteRepository
-      .createQueryBuilder('notes')
-      .leftJoinAndSelect('notes.owner', 'owner')
-      .andWhere('notes.owner_id = :id', { id: userId })
-      .orderBy('notes.created_at', 'ASC');
-
-    const notes = await queryBuilder.getMany();
-
-    return notes.map((note: NoteApiDto) => this.getRequiredFormatNote(note));
-  }
-
-  /**
-   * A method that returns one note in the required format
-   * @param userId An userId from JWT
-   * @param noteId A noteId of a note. A note with this id should exist in the database
-   */
-  async getNote(userId: string, noteId: string): Promise<NoteApiDto> {
-    const note = await this.fetchNoteForRead(userId, noteId);
-
-    return this.getRequiredFormatNote(note as NoteApiDto);
-  }
-
-  /**
    * A method that creates a note in the database
    * @param currentUser An user from JWT
    */
   async createNote(createNoteDto: CreateNoteDto, currentUser: UserEntity): Promise<NoteEntity> {
-    // async createNote(createNoteDto: CreateNoteDto, currentUser: UserEntity): Promise<NoteApiDto> {
     this.validateHexColor(createNoteDto.color);
     const { owner_id, ...dtoWithoutOwner } = createNoteDto;
     this.idsMatching(owner_id, currentUser.id);
@@ -66,29 +35,6 @@ export class NoteService {
     newNote.owner = currentUser;
 
     return await this.noteRepository.save(newNote);
-    // const savedNote = await this.noteRepository.save(newNote);
-    // return this.getRequiredFormatNote(savedNote as NoteApiDto);
-  }
-
-  /**
-   * A method that updates a note in the database
-   * @param userId An userId from JWT
-   * @param noteId A noteId of a note. A note with this id should exist in the database
-   */
-  async updateNote(
-    updateNoteDto: UpdateNoteDto,
-    userId: string,
-    noteId: string,
-  ): Promise<NoteApiDto> {
-    this.validateHexColor(updateNoteDto.color);
-    const { owner_id, ...dtoWithoutOwner } = updateNoteDto;
-    this.idsMatching(owner_id, userId);
-
-    const currentNote = await this.fetchNoteForEdit(userId, noteId);
-    Object.assign(currentNote, dtoWithoutOwner);
-    const savedNote = await this.noteRepository.save(currentNote);
-
-    return this.getRequiredFormatNote(savedNote as NoteApiDto);
   }
 
   /**
@@ -105,11 +51,48 @@ export class NoteService {
   }
 
   /**
+   * A method that updates a note in the database
+   * @param userId An userId from JWT
+   * @param noteId A noteId of a note. A note with this id should exist in the database
+   */
+  async updateNote(
+    updateNoteDto: UpdateNoteDto,
+    userId: string,
+    noteId: string,
+  ): Promise<NoteEntity> {
+    this.validateHexColor(updateNoteDto.color);
+    const { owner_id, ...dtoWithoutOwner } = updateNoteDto;
+    this.idsMatching(owner_id, userId);
+
+    const currentNote = await this.fetchNoteForEdit(userId, noteId);
+    Object.assign(currentNote, dtoWithoutOwner);
+
+    return await this.noteRepository.save(currentNote);
+  }
+
+  /**
+   * A method that fetches user notes from the database
+   * @param userId An userId from JWT
+   * @param ownerId An ownerId from request body
+   */
+  async fetchUserNotes(userId: string, ownerId: string): Promise<NoteEntity[]> {
+    this.idsMatching(ownerId, userId);
+
+    const queryBuilder = this.noteRepository
+      .createQueryBuilder('notes')
+      .leftJoinAndSelect('notes.owner', 'owner')
+      .andWhere('notes.owner_id = :id', { id: userId })
+      .orderBy('notes.created_at', 'ASC');
+
+    return await queryBuilder.getMany();
+  }
+
+  /**
    * A method that fetches a note from the database for GET requests. If the note does not exist, the 422 error will be thrown according to the requirements
    * @param userId An userId from JWT
    * @param noteId A noteId of a note. A note with this id should exist in the database
    */
-  async fetchNoteForRead(userId: string, noteId: string): Promise<NoteEntity> {
+  async fetchOneNote(userId: string, noteId: string): Promise<NoteEntity> {
     const note = await this.noteRepository.findOneBy({ id: noteId });
 
     if (!note || note.owner.id !== userId) {
