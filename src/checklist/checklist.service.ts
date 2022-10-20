@@ -38,7 +38,7 @@ export class ChecklistService {
    * @param userId An userId from JWT
    * @param ownerId An ownerId from URI Parameters
    */
-  async fetchUserChecklists(userId: string, ownerId: string): Promise<ChecklistApiDto[]> {
+  async fetchUserChecklists(userId: string, ownerId: string): Promise<ChecklistEntity[]> {
     this.idsMatching(ownerId, userId);
 
     const queryBuilder = this.checklistRepository
@@ -48,25 +48,7 @@ export class ChecklistService {
       .andWhere('checklists.owner_id = :id', { id: userId })
       .orderBy('checklists.created_at', 'DESC');
 
-    const checklists = await queryBuilder.getMany();
-
-    return checklists.map((checklist: ChecklistApiDto) => {
-      checklist.owner_id = userId;
-      checklist.items = this.getRequiredFormatChecklistItems(checklist);
-      return checklist;
-    });
-  }
-
-  /**
-   * A method that returns one checklist in the required format
-   * @param userId An userId from JWT
-   * @param listId A listId of a checklist. A checklist with this id should exist in the database
-   */
-  async getChecklist(userId: string, listId: string): Promise<ChecklistApiDto> {
-    const checklist = await this.fetchChecklist(listId, userId);
-    checklist.items = this.getRequiredFormatChecklistItems(checklist);
-
-    return this.getRequiredFormatChecklist(checklist as ChecklistApiDto);
+    return await queryBuilder.getMany();
   }
 
   /**
@@ -76,7 +58,7 @@ export class ChecklistService {
   async createChecklist(
     createChecklistDto: CreateChecklistDto,
     currentUser: UserEntity,
-  ): Promise<ChecklistApiDto> {
+  ): Promise<ChecklistEntity> {
     this.validateHexColor(createChecklistDto.color);
     const { items, owner_id, ...dtoWithoutItemsAndOwner } = createChecklistDto;
     this.idsMatching(owner_id, currentUser.id);
@@ -85,10 +67,8 @@ export class ChecklistService {
     Object.assign(newChecklist, dtoWithoutItemsAndOwner);
     newChecklist.items = await this.createChecklistItems(items);
     newChecklist.owner = currentUser;
-    const savedChecklist = await this.checklistRepository.save(newChecklist);
-    savedChecklist.items = this.getRequiredFormatChecklistItems(savedChecklist);
 
-    return this.getRequiredFormatChecklist(savedChecklist as ChecklistApiDto);
+    return await this.checklistRepository.save(newChecklist);
   }
 
   /**
@@ -100,18 +80,16 @@ export class ChecklistService {
     updateChecklistDto: UpdateChecklistDto,
     userId: string,
     listId: string,
-  ): Promise<ChecklistApiDto> {
+  ): Promise<ChecklistEntity> {
     this.validateHexColor(updateChecklistDto.color);
     const { items, owner_id, ...dtoWithoutItemsAndOwner } = updateChecklistDto;
     this.idsMatching(owner_id, userId);
 
-    const currentChecklist = await this.fetchChecklist(listId, userId);
+    const currentChecklist = await this.fetchChecklist(userId, listId);
     Object.assign(currentChecklist, dtoWithoutItemsAndOwner);
     currentChecklist.items = await this.updateChecklistItems(items, listId);
-    const savedChecklist = await this.checklistRepository.save(currentChecklist);
-    savedChecklist.items = this.getRequiredFormatChecklistItems(savedChecklist);
 
-    return this.getRequiredFormatChecklist(savedChecklist as ChecklistApiDto);
+    return await this.checklistRepository.save(currentChecklist);
   }
 
   /**
@@ -121,7 +99,7 @@ export class ChecklistService {
    * @returns A promise with the id of deleted checklist
    */
   async deleteChecklist(userId: string, listId: string): Promise<{ id: string }> {
-    await this.fetchChecklist(listId, userId);
+    await this.fetchChecklist(userId, listId);
     await this.checklistRepository.delete({ id: listId });
 
     return { id: listId };
@@ -219,7 +197,7 @@ export class ChecklistService {
    * @param listId A listId of a checklist. A checklist with this id should exist in the database
    * @param userId An userId from JWT
    */
-  async fetchChecklist(listId: string, userId: string): Promise<ChecklistEntity> {
+  async fetchChecklist(userId: string, listId: string): Promise<ChecklistEntity> {
     try {
       const checklist = await this.checklistRepository.findOneBy({ id: listId });
 

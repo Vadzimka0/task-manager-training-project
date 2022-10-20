@@ -52,7 +52,8 @@ export class ChecklistController {
     @Body() createChecklistDto: CreateChecklistDto,
     @User() currentUser: UserEntity,
   ): Promise<Data<ChecklistApiDto>> {
-    const data = await this.checklistService.createChecklist(createChecklistDto, currentUser);
+    const checklist = await this.checklistService.createChecklist(createChecklistDto, currentUser);
+    const data = this.checklistService.getRequiredFormatChecklist(checklist as ChecklistApiDto);
     return { data };
   }
 
@@ -73,7 +74,12 @@ export class ChecklistController {
     @User('id') userId: string,
     @Param('listId') listId: string,
   ): Promise<Data<ChecklistApiDto>> {
-    const data = await this.checklistService.updateChecklist(updateChecklistDto, userId, listId);
+    const checklist = await this.checklistService.updateChecklist(
+      updateChecklistDto,
+      userId,
+      listId,
+    );
+    const data = this.checklistService.getRequiredFormatChecklist(checklist as ChecklistApiDto);
     return { data };
   }
 
@@ -87,7 +93,11 @@ export class ChecklistController {
     @User('id') userId: string,
     @Param('ownerId') ownerId: string,
   ): Promise<Data<ChecklistApiDto[]>> {
-    const data = await this.checklistService.fetchUserChecklists(userId, ownerId);
+    const checklists = await this.checklistService.fetchUserChecklists(userId, ownerId);
+    const data = checklists.map((checklist: ChecklistApiDto) => {
+      checklist.items = this.checklistService.getRequiredFormatChecklistItems(checklist);
+      return this.checklistService.getRequiredFormatChecklist(checklist as ChecklistApiDto);
+    });
     return { data };
   }
 
@@ -98,11 +108,13 @@ export class ChecklistController {
   @ApiForbiddenResponse({ description: `"${MessageEnum.INVALID_ID_NOT_OWNER}";` })
   @ApiInternalServerErrorResponse({ description: `"${MessageEnum.ENTITY_NOT_FOUND}";` })
   @ApiParam(getApiParam('listId', 'checklist'))
-  async getChecklist(
+  async fetchChecklist(
     @User('id') userId: string,
     @Param('listId') listId: string,
   ): Promise<Data<ChecklistApiDto>> {
-    const data = await this.checklistService.getChecklist(userId, listId);
+    const checklist = await this.checklistService.fetchChecklist(userId, listId);
+    checklist.items = this.checklistService.getRequiredFormatChecklistItems(checklist);
+    const data = this.checklistService.getRequiredFormatChecklist(checklist as ChecklistApiDto);
     return { data };
   }
 
