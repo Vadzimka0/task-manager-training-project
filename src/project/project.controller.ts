@@ -55,7 +55,8 @@ export class ProjectController {
     @Body() projectDto: CreateProjectDto,
     @User() currentUser: UserEntity,
   ): Promise<Data<ProjectApiDto>> {
-    const data = await this.projectService.createProject(projectDto, currentUser);
+    const project = await this.projectService.createProject(projectDto, currentUser);
+    const data = this.projectService.getRequiredFormatProject(project as ProjectApiDto);
     return { data };
   }
 
@@ -77,7 +78,8 @@ export class ProjectController {
     @User('id') userId: string,
     @Param('id') projectId: string,
   ): Promise<Data<ProjectApiDto>> {
-    const data = await this.projectService.updateProject(projectDto, userId, projectId);
+    const project = await this.projectService.updateProject(projectDto, userId, projectId);
+    const data = this.projectService.getRequiredFormatProject(project as ProjectApiDto);
     return { data };
   }
 
@@ -107,7 +109,10 @@ export class ProjectController {
     @User('id') userId: string,
     @Param('ownerId') ownerId: string,
   ): Promise<Data<ProjectApiDto[]>> {
-    const data = await this.projectService.fetchUserProjects(userId, ownerId);
+    const projects = await this.projectService.fetchUserProjects(userId, ownerId);
+    const data = projects.map((project: ProjectApiDto) =>
+      this.projectService.getRequiredFormatProject(project),
+    );
     return { data };
   }
 
@@ -120,7 +125,10 @@ export class ProjectController {
     @User('id') userId: string,
     @Query() querySearch: { query: string },
   ): Promise<Data<ProjectApiDto[]>> {
-    const data = await this.projectService.fetchUserProjects(userId, undefined, querySearch);
+    const projects = await this.projectService.fetchUserProjects(userId, undefined, querySearch);
+    const data = projects.map((project: ProjectApiDto) =>
+      this.projectService.getRequiredFormatProject(project),
+    );
     return { data };
   }
 
@@ -131,11 +139,12 @@ export class ProjectController {
   @ApiForbiddenResponse({ description: `"${MessageEnum.INVALID_ID_NOT_OWNER}";` })
   @ApiInternalServerErrorResponse({ description: `"${MessageEnum.ENTITY_NOT_FOUND}";` })
   @ApiParam(getApiParam('projectId', 'project'))
-  async getProject(
+  async fetchProject(
     @User('id') userId: string,
     @Param('projectId') projectId: string,
   ): Promise<Data<ProjectApiDto>> {
-    const data = await this.projectService.getProject(userId, projectId);
+    const project = await this.projectService.fetchProject(userId, projectId);
+    const data = this.projectService.getRequiredFormatProject(project as ProjectApiDto);
     return { data };
   }
 

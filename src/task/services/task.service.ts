@@ -192,7 +192,7 @@ export class TaskService {
    * @param projectId A projectId of a project. A project with this id should exist in the database
    */
   async fetchProjectTasks(userId: string, projectId: string): Promise<TaskApiDto[]> {
-    await this.projectService.fetchProject(projectId, userId);
+    await this.projectService.fetchProject(userId, projectId);
     const projectTasksQueryBuilder = this.getTasksQueryBuilder().andWhere('project.id = :id', {
       id: projectId,
     });
@@ -285,7 +285,7 @@ export class TaskService {
       return specialOneProject;
     }
 
-    const project = await this.projectService.fetchProject(projectId, userId);
+    const project = await this.projectService.fetchProject(userId, projectId);
 
     return project;
   }

@@ -38,7 +38,7 @@ export class ProjectService {
     userId: string,
     ownerId?: string,
     search?: { query: string },
-  ): Promise<ProjectApiDto[]> {
+  ): Promise<ProjectEntity[]> {
     if (ownerId) this.idsMatching(ownerId, userId);
 
     const queryBuilder = this.projectRepository
@@ -53,20 +53,7 @@ export class ProjectService {
       });
     }
 
-    const projects = await queryBuilder.getMany();
-
-    return projects.map((project: ProjectApiDto) => this.getRequiredFormatProject(project));
-  }
-
-  /**
-   * A method that returns one project in the required format
-   * @param userId An userId from JWT
-   * @param projectId A projectId of a project. A project with this id should exist in the database
-   */
-  async getProject(userId: string, projectId: string): Promise<ProjectApiDto> {
-    const project = await this.fetchProject(projectId, userId);
-
-    return this.getRequiredFormatProject(project as ProjectApiDto);
+    return await queryBuilder.getMany();
   }
 
   /**
@@ -107,20 +94,17 @@ export class ProjectService {
   async createProject(
     projectDto: CreateProjectDto,
     currentUser: UserEntity,
-  ): Promise<ProjectApiDto> {
+  ): Promise<ProjectEntity> {
     this.validateHexColor(projectDto.color);
-
     const { owner_id, ...dtoWithoutOwner } = projectDto;
-
     this.idsMatching(owner_id, currentUser.id);
     await this.checkDuplicateProjectTitle(projectDto.title, currentUser.id);
 
     const newProject = new ProjectEntity();
     Object.assign(newProject, dtoWithoutOwner);
     newProject.owner = currentUser;
-    const savedProject = await this.projectRepository.save(newProject);
 
-    return this.getRequiredFormatProject(savedProject as ProjectApiDto);
+    return await this.projectRepository.save(newProject);
   }
 
   /**
@@ -132,7 +116,7 @@ export class ProjectService {
     projectDto: CreateProjectDto,
     userId: string,
     projectId: string,
-  ): Promise<ProjectApiDto> {
+  ): Promise<ProjectEntity> {
     this.validateHexColor(projectDto.color);
     const { owner_id, ...dtoWithoutOwner } = projectDto;
     this.idsMatching(owner_id, userId);
@@ -144,9 +128,8 @@ export class ProjectService {
     }
 
     Object.assign(currentProject, dtoWithoutOwner);
-    const savedProject = await this.projectRepository.save(currentProject);
 
-    return this.getRequiredFormatProject(savedProject as ProjectApiDto);
+    return await this.projectRepository.save(currentProject);
   }
 
   /**
@@ -210,7 +193,7 @@ export class ProjectService {
    * @param projectId A projectId of a project. A project with this id should exist in the database
    * @param userId An userId from JWT
    */
-  async fetchProject(projectId: string, userId: string): Promise<ProjectEntity> {
+  async fetchProject(userId: string, projectId: string): Promise<ProjectEntity> {
     try {
       const project = await this.projectRepository.findOneBy({ id: projectId });
 
@@ -239,7 +222,7 @@ export class ProjectService {
    * @param userId An userId from JWT
    */
   async getValidProject(projectId: string, userId: string): Promise<ProjectEntity> {
-    const project = await this.fetchProject(projectId, userId);
+    const project = await this.fetchProject(userId, projectId);
 
     if (project.title === SPECIAL_ONE_PROJECT_NAME) {
       throw new BadRequestException(ProjectMessageEnum.PROJECT_PROTECTED);
