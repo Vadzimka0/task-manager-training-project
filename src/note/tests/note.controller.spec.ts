@@ -1,6 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { v4 as uuidv4 } from 'uuid';
 
+import { UserEntity } from '../../user/entities/user.entity';
+import { CreateNoteDto } from '../dto/create-note.dto';
 import { NoteController } from '../note.controller';
 import { NoteService } from '../note.service';
 
@@ -41,12 +43,12 @@ describe('NoteController', () => {
   });
 
   it('should create a note', async () => {
-    const dto = {
+    const dto: CreateNoteDto = {
       description: 'text',
       color: '#ffffff',
       owner_id: 'f60c913b-0859-4797-8dea-c07409ffcf0d',
     };
-    const user = {
+    const user: UserEntity = {
       id: 'f60c913b-0859-4797-8dea-c07409ffcf0d',
       email: 'f60c913b@gmail.com',
       username: 'f60c913b',

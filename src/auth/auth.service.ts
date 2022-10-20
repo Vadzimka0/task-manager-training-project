@@ -81,6 +81,7 @@ export class AuthService {
    * A method that returns user session info (tokens) in the required format
    */
   async getUserSessionInfo(user: UserEntity): Promise<UserSessionApiDto> {
+    const user_id = user.id;
     const access_token = this.getJwtAccessToken(user.email);
     const refresh_token = this.getJwtRefreshToken(user.email);
     await this.userService.setCurrentRefreshToken(refresh_token, user.id);
@@ -88,7 +89,7 @@ export class AuthService {
     const expiresInMS = this.configService.get('JWT_ACCESS_TOKEN_EXPIRATION_TIME') * 1000;
     const expires_in = new Date(new Date().getTime() + expiresInMS).getTime();
 
-    return { access_token, refresh_token, token_type: this.token_type, expires_in };
+    return { user_id, access_token, refresh_token, token_type: this.token_type, expires_in };
   }
 
   /**

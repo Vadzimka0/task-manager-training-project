@@ -96,10 +96,9 @@ export class UserAvatarController {
     }
 
     const stream = createReadStream(join(process.cwd(), user.path));
-
     res.set({
       'Content-Type': user.mimetype,
-      'Content-Disposition': `attachment; filename="${user.filename}"`,
+      'Content-Disposition': `inline; filename="${user.filename}"`, //attachment
     });
 
     return new StreamableFile(stream);

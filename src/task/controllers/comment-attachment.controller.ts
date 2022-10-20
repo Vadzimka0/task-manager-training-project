@@ -85,18 +85,18 @@ export class CommentAttachmentController {
     @Res({ passthrough: true }) res: Response,
   ): Promise<StreamableFile> {
     const file = await this.commentAttachmentService.fetchFileById(id);
-
     const isFileExists = await isExists(file.path);
+
     if (!isFileExists) {
       throw new NotFoundException(AttachmentMessageEnum.FILE_NOT_FOUND);
     }
 
     const stream = createReadStream(join(process.cwd(), file.path));
-
     res.set({
       'Content-Type': file.mimetype,
-      'Content-Disposition': `attachment; filename="${file.filename}"`,
+      'Content-Disposition': `inline; filename="${file.filename}"`, //attachment
     });
+
     return new StreamableFile(stream);
   }
 }

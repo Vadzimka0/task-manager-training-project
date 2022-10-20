@@ -1,6 +1,9 @@
 import { ApiProperty } from '@nestjs/swagger';
 
 export class UserSessionApiDto {
+  @ApiProperty({ example: 'f60c913b-0859-4797-8dea-c07409ffcf0d' })
+  user_id: string;
+
   @ApiProperty({
     example:
       'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImFzZGFzZEBnbWFpbC5jb20iLCJpYXQiOjE2NjUxMzY2MDMsImV4cCI6MTY2NTMwOTQwM30.W8tmb_3wffspHDL2nE3oHxBBiT744_kCkal7PtYevag',

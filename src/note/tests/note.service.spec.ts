@@ -4,6 +4,8 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { v4 as uuidv4 } from 'uuid';
 
+import { UserEntity } from '../../user/entities/user.entity';
+import { CreateNoteDto } from '../dto/create-note.dto';
 import { NoteEntity } from '../entities/note.entity';
 import { NoteService } from '../note.service';
 
@@ -19,7 +21,7 @@ describe('The NoteService', () => {
   let service: NoteService;
   let repositoryMock: MockType<Repository<NoteEntity>>;
 
-  const user = {
+  const user: UserEntity = {
     id: 'f60c913b-0859-4797-8dea-c07409ffcf0d',
     email: 'f60c913b@gmail.com',
     username: 'f60c913b',
@@ -36,7 +38,7 @@ describe('The NoteService', () => {
     path: '',
     filename: '',
   };
-  const expectedNote = {
+  const expectedNote: Partial<NoteEntity> = {
     id: uuidv4(),
     created_at: new Date(),
     description: 'text',
@@ -63,7 +65,7 @@ describe('The NoteService', () => {
 
   describe('createNote', () => {
     it('should create a new note record and return that', async () => {
-      const dto = {
+      const dto: CreateNoteDto = {
         description: 'text',
         color: '#ffffff',
         owner_id: 'f60c913b-0859-4797-8dea-c07409ffcf0d',
