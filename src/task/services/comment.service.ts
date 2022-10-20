@@ -40,7 +40,7 @@ export class CommentService {
   async createComment(
     commentDto: CreateCommentDto,
     currentUser: UserEntity,
-  ): Promise<CommentApiDto> {
+  ): Promise<CommentEntity> {
     const { owner_id, task_id, ...dtoWithoutRelationItems } = commentDto;
     this.taskService.idsMatching(owner_id, currentUser.id);
 
@@ -52,16 +52,14 @@ export class CommentService {
     const currentTask = await this.taskService.getValidTaskForComment(currentUser.id, task_id);
     newComment.task = currentTask;
 
-    const savedComment = await this.commentRepository.save(newComment);
-
-    return this.getRequiredFormatComment(savedComment as CommentApiDto);
+    return await this.commentRepository.save(newComment);
   }
 
   /**
    * A method that fetches task comments from the database
    * @param taskId A taskId of a task. A task with this id should exist in the database
    */
-  async fetchTaskComments(taskId: string): Promise<CommentApiDto[]> {
+  async fetchTaskComments(taskId: string): Promise<CommentEntity[]> {
     await this.taskService.fetchTask(taskId);
 
     const queryBuilder = this.commentRepository
@@ -73,9 +71,7 @@ export class CommentService {
       .andWhere('task.id = :id', { id: taskId })
       .orderBy('comments.created_at', 'ASC');
 
-    const comments = await queryBuilder.getMany();
-
-    return comments.map((comment: CommentApiDto) => this.getRequiredFormatComment(comment));
+    return await queryBuilder.getMany();
   }
 
   /**

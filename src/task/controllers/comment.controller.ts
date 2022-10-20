@@ -51,7 +51,8 @@ export class CommentController {
     @Body() commentDto: CreateCommentDto,
     @User() currentUser: UserEntity,
   ): Promise<Data<CommentApiDto>> {
-    const data = await this.commentService.createComment(commentDto, currentUser);
+    const comment = await this.commentService.createComment(commentDto, currentUser);
+    const data = this.commentService.getRequiredFormatComment(comment as CommentApiDto);
     return { data };
   }
 
@@ -62,7 +63,10 @@ export class CommentController {
   @ApiInternalServerErrorResponse({ description: `"${MessageEnum.ENTITY_NOT_FOUND}";` })
   @ApiParam(getApiParam('taskId', 'task'))
   async fetchTaskComments(@Param('taskId') taskId: string): Promise<Data<CommentApiDto[]>> {
-    const data = await this.commentService.fetchTaskComments(taskId);
+    const comments = await this.commentService.fetchTaskComments(taskId);
+    const data = comments.map((comment: CommentApiDto) =>
+      this.commentService.getRequiredFormatComment(comment),
+    );
     return { data };
   }
 
