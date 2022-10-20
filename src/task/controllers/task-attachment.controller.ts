@@ -65,10 +65,13 @@ export class TaskAttachmentController {
     @UploadedFile() file: Express.Multer.File,
     @Body() addTaskAttachmentDto: AddTaskAttachmentDto,
   ): Promise<Data<TaskAttachmentApiDto>> {
-    const data = await this.taskAttachmentService.addTaskAttachment(
+    const attachment = await this.taskAttachmentService.addTaskAttachment(
       userId,
       addTaskAttachmentDto,
       file,
+    );
+    const data = this.taskAttachmentService.getRequiredFormatTaskAttachment(
+      attachment as TaskAttachmentApiDto,
     );
     return { data };
   }

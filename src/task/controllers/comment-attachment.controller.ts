@@ -38,8 +38,8 @@ import { getApiParam, isExists } from '../../utils';
 import { commentAttachmentOptions } from '../../utils/multer/comment-attachment-options';
 import { AddCommentAttachmentDto } from '../dto';
 import { CommentFileUploadDto } from '../dto/add-comment-attachment.dto';
-import { CommentAttachmentService } from '../services';
 import { CommentAttachmentApiDto } from '../dto/api-dto/comment-attachment-api.dto';
+import { CommentAttachmentService } from '../services';
 
 import type { Response } from 'express';
 
@@ -65,10 +65,13 @@ export class CommentAttachmentController {
     @UploadedFile() file: Express.Multer.File,
     @Body() addCommentAttachmentDto: AddCommentAttachmentDto,
   ): Promise<Data<CommentAttachmentApiDto>> {
-    const data = await this.commentAttachmentService.addCommentAttachment(
+    const attachment = await this.commentAttachmentService.addCommentAttachment(
       userId,
       addCommentAttachmentDto,
       file,
+    );
+    const data = this.commentAttachmentService.getRequiredFormatCommentAttachment(
+      attachment as CommentAttachmentApiDto,
     );
     return { data };
   }

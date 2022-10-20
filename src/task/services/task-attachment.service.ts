@@ -35,7 +35,7 @@ export class TaskAttachmentService {
     userId: string,
     addTaskAttachmentDto: AddTaskAttachmentDto,
     file: Express.Multer.File,
-  ): Promise<TaskAttachmentApiDto> {
+  ): Promise<TaskAttachmentEntity> {
     const currentTask = await this.taskService.getValidTaskForEdit(
       userId,
       addTaskAttachmentDto.task_id,
@@ -52,9 +52,8 @@ export class TaskAttachmentService {
     const newTaskAttachment = new TaskAttachmentEntity();
     Object.assign(newTaskAttachment, filedata);
     newTaskAttachment.task = currentTask;
-    const savedAttachment = await this.taskAttachmentRepository.save(newTaskAttachment);
 
-    return this.getRequiredFormatTaskAttachment(savedAttachment as TaskAttachmentApiDto);
+    return this.taskAttachmentRepository.save(newTaskAttachment);
   }
 
   /**

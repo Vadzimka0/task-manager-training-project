@@ -48,7 +48,7 @@ export class TaskService {
    * A method that creates a task in the database
    * @param currentUser An user from JWT
    */
-  async createTask(taskDto: CreateTaskDto, currentUser: UserEntity): Promise<TaskApiDto> {
+  async createTask(taskDto: CreateTaskDto, currentUser: UserEntity): Promise<TaskEntity> {
     const { owner_id, project_id, assigned_to, members, attachments, ...dtoWithoutRelationItems } =
       taskDto;
 
@@ -68,9 +68,7 @@ export class TaskService {
     const currentMembers = await this.getMembersById(members);
     newTask.members = currentMembers;
 
-    const savedTask = await this.taskRepository.save(newTask);
-
-    return this.getRequiredFormatTask(savedTask as TaskApiDto);
+    return await this.taskRepository.save(newTask);
   }
 
   /**
@@ -82,7 +80,7 @@ export class TaskService {
     taskDto: CreateTaskDto,
     currentUser: UserEntity,
     taskId: string,
-  ): Promise<TaskApiDto> {
+  ): Promise<TaskEntity> {
     const { owner_id, project_id, assigned_to, members, attachments, ...dtoWithoutRelationItems } =
       taskDto;
 
@@ -106,9 +104,7 @@ export class TaskService {
       currentTask.members = updatedMembers;
     }
 
-    const savedTask = await this.taskRepository.save(currentTask);
-
-    return this.getRequiredFormatTask(savedTask as TaskApiDto);
+    return await this.taskRepository.save(currentTask);
   }
 
   /**
@@ -162,16 +158,6 @@ export class TaskService {
   }
 
   /**
-   * A method that returns one task in the required format
-   * @param taskId A taskId of a task. A task with this id should exist in the database
-   */
-  async getTask(taskId: string): Promise<TaskApiDto> {
-    const task = await this.fetchTask(taskId);
-
-    return this.getRequiredFormatTask(task as TaskApiDto);
-  }
-
-  /**
    * A method that creates QueryBuilder for tasks
    */
   getTasksQueryBuilder(): SelectQueryBuilder<TaskEntity> {
@@ -191,14 +177,13 @@ export class TaskService {
    * @param userId An userId from JWT
    * @param projectId A projectId of a project. A project with this id should exist in the database
    */
-  async fetchProjectTasks(userId: string, projectId: string): Promise<TaskApiDto[]> {
+  async fetchProjectTasks(userId: string, projectId: string): Promise<TaskEntity[]> {
     await this.projectService.fetchProject(userId, projectId);
     const projectTasksQueryBuilder = this.getTasksQueryBuilder().andWhere('project.id = :id', {
       id: projectId,
     });
-    const tasks = await projectTasksQueryBuilder.getMany();
 
-    return tasks.map((task: TaskApiDto) => this.getRequiredFormatTask(task));
+    return await projectTasksQueryBuilder.getMany();
   }
 
   /**
@@ -206,14 +191,13 @@ export class TaskService {
    * @param userId An userId from JWT
    * @param ownerId An ownerId from URI Parameters
    */
-  async fetchUserTasks(userId: string, ownerId: string): Promise<TaskApiDto[]> {
+  async fetchUserTasks(userId: string, ownerId: string): Promise<TaskEntity[]> {
     this.idsMatching(ownerId, userId);
     const userTasksQueryBuilder = this.getTasksQueryBuilder().andWhere('project.owner_id = :id', {
       id: userId,
     });
-    const tasks = await userTasksQueryBuilder.getMany();
 
-    return tasks.map((task: TaskApiDto) => this.getRequiredFormatTask(task));
+    return await userTasksQueryBuilder.getMany();
   }
 
   /**
@@ -221,14 +205,13 @@ export class TaskService {
    * @param userId An userId from JWT
    * @param ownerId An ownerId from URI Parameters
    */
-  async fetchAssignedTasks(userId: string, ownerId: string): Promise<TaskApiDto[]> {
+  async fetchAssignedTasks(userId: string, ownerId: string): Promise<TaskEntity[]> {
     this.idsMatching(ownerId, userId);
     const assignedTasksQueryBuilder = this.getTasksQueryBuilder().andWhere('performer.id = :id', {
       id: ownerId,
     });
-    const tasks = await assignedTasksQueryBuilder.getMany();
 
-    return tasks.map((task: TaskApiDto) => this.getRequiredFormatTask(task));
+    return await assignedTasksQueryBuilder.getMany();
   }
 
   /**
@@ -236,7 +219,7 @@ export class TaskService {
    * @param userId An userId from JWT
    * @param ownerId An ownerId from URI Parameters
    */
-  async fetchParticipateInTasks(userId: string, ownerId: string): Promise<TaskApiDto[]> {
+  async fetchParticipateInTasks(userId: string, ownerId: string): Promise<TaskEntity[]> {
     this.idsMatching(ownerId, userId);
     const participateInTasks = await this.taskRepository
       .createQueryBuilder()
@@ -244,11 +227,7 @@ export class TaskService {
       .of(ownerId)
       .loadMany();
 
-    const tasksWithAttachmentRelation = await this.getTasksWithAttachmentRelation(
-      participateInTasks,
-    );
-
-    return tasksWithAttachmentRelation.map((task: TaskApiDto) => this.getRequiredFormatTask(task));
+    return await this.getTasksWithAttachmentRelation(participateInTasks);
   }
 
   /**

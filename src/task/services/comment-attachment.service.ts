@@ -35,7 +35,7 @@ export class CommentAttachmentService {
     userId: string,
     addCommentAttachmentDto: AddCommentAttachmentDto,
     file: Express.Multer.File,
-  ): Promise<CommentAttachmentApiDto> {
+  ): Promise<CommentAttachmentEntity> {
     const currentComment = await this.commentService.fetchComment(
       userId,
       addCommentAttachmentDto.comment_id,
@@ -53,8 +53,7 @@ export class CommentAttachmentService {
     Object.assign(newCommentAttachment, filedata);
     newCommentAttachment.comment = currentComment;
 
-    const savedAttachment = await this.commentAttachmentRepository.save(newCommentAttachment);
-    return this.getRequiredFormatCommentAttachment(savedAttachment as CommentAttachmentApiDto);
+    return await this.commentAttachmentRepository.save(newCommentAttachment);
   }
 
   /**

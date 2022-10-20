@@ -54,7 +54,8 @@ export class TaskController {
     @Body() taskDto: CreateTaskDto,
     @User() currentUser: UserEntity,
   ): Promise<Data<TaskApiDto>> {
-    const data = await this.taskService.createTask(taskDto, currentUser);
+    const task = await this.taskService.createTask(taskDto, currentUser);
+    const data = this.taskService.getRequiredFormatTask(task as TaskApiDto);
     return { data };
   }
 
@@ -72,7 +73,8 @@ export class TaskController {
     @User() currentUser: UserEntity,
     @Param('id') taskId: string,
   ): Promise<Data<TaskApiDto>> {
-    const data = await this.taskService.updateTask(taskDto, currentUser, taskId);
+    const task = await this.taskService.updateTask(taskDto, currentUser, taskId);
+    const data = this.taskService.getRequiredFormatTask(task as TaskApiDto);
     return { data };
   }
 
@@ -97,8 +99,9 @@ export class TaskController {
   @ApiOkObjectResponse(TaskApiDto)
   @ApiInternalServerErrorResponse({ description: `"${MessageEnum.ENTITY_NOT_FOUND}";` })
   @ApiParam(getApiParam('id', 'task'))
-  async getTask(@Param('id') id: string): Promise<Data<TaskApiDto>> {
-    const data = await this.taskService.getTask(id);
+  async fetchTask(@Param('id') id: string): Promise<Data<TaskApiDto>> {
+    const task = await this.taskService.fetchTask(id);
+    const data = this.taskService.getRequiredFormatTask(task as TaskApiDto);
     return { data };
   }
 
@@ -113,7 +116,8 @@ export class TaskController {
     @User('id') userId: string,
     @Param('projectId') projectId: string,
   ): Promise<Data<TaskApiDto[]>> {
-    const data = await this.taskService.fetchProjectTasks(userId, projectId);
+    const tasks = await this.taskService.fetchProjectTasks(userId, projectId);
+    const data = tasks.map((task: TaskApiDto) => this.taskService.getRequiredFormatTask(task));
     return { data };
   }
 
@@ -127,7 +131,8 @@ export class TaskController {
     @User('id') userId: string,
     @Param('ownerId') ownerId: string,
   ): Promise<Data<TaskApiDto[]>> {
-    const data = await this.taskService.fetchUserTasks(userId, ownerId);
+    const tasks = await this.taskService.fetchUserTasks(userId, ownerId);
+    const data = tasks.map((task: TaskApiDto) => this.taskService.getRequiredFormatTask(task));
     return { data };
   }
 
@@ -141,7 +146,8 @@ export class TaskController {
     @User('id') userId: string,
     @Param('ownerId') ownerId: string,
   ): Promise<Data<TaskApiDto[]>> {
-    const data = await this.taskService.fetchAssignedTasks(userId, ownerId);
+    const tasks = await this.taskService.fetchAssignedTasks(userId, ownerId);
+    const data = tasks.map((task: TaskApiDto) => this.taskService.getRequiredFormatTask(task));
     return { data };
   }
 
@@ -155,7 +161,8 @@ export class TaskController {
     @User('id') userId: string,
     @Param('ownerId') ownerId: string,
   ): Promise<Data<TaskApiDto[]>> {
-    const data = await this.taskService.fetchParticipateInTasks(userId, ownerId);
+    const tasks = await this.taskService.fetchParticipateInTasks(userId, ownerId);
+    const data = tasks.map((task: TaskApiDto) => this.taskService.getRequiredFormatTask(task));
     return { data };
   }
 }
