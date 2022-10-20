@@ -44,11 +44,13 @@ import { AddAvatarDto, AvatarUploadDto } from '../dto/add-avatar.dto';
 import { UserApiDto } from '../dto/user-api.dto';
 import { UserEntity } from '../entities/user.entity';
 import { UserAvatarService, UserService } from '../services';
+import { UserApiType } from '../types';
 
 import type { Response } from 'express';
 
 @ApiTags('Users Avatars:')
 @Controller('users-avatar')
+@UseGuards(JwtAuthGuard)
 @UseInterceptors(ClassSerializerInterceptor)
 export class UserAvatarController {
   constructor(
@@ -58,7 +60,6 @@ export class UserAvatarController {
 
   @Post()
   @HttpCode(200)
-  @UseGuards(JwtAuthGuard)
   @UseInterceptors(FileInterceptor('file', avatarOptions))
   @ApiOperation({ summary: 'Add Avatar' })
   @ApiBearerAuth('access-token')
@@ -73,7 +74,8 @@ export class UserAvatarController {
     @UploadedFile() file: Express.Multer.File,
     @Body() addAvatarDto: AddAvatarDto,
   ): Promise<Data<UserApiDto>> {
-    const data = await this.userAvatarService.addAvatar(user, addAvatarDto, file);
+    const owner = await this.userAvatarService.addAvatar(user, addAvatarDto, file);
+    const data = this.userAvatarService.getRequiredFormatUser(owner as UserApiType);
     return { data };
   }
 

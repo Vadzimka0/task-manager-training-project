@@ -2,8 +2,8 @@ import { Injectable, UnprocessableEntityException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { AvatarMessageEnum } from '../../common/enums/messages.enum';
 
+import { AvatarMessageEnum } from '../../common/enums/messages.enum';
 import { AddAvatarDto } from '../dto/add-avatar.dto';
 import { UserEntity } from '../entities/user.entity';
 import { UserApiType } from '../types/user-api.type';
@@ -33,7 +33,7 @@ export class UserAvatarService {
     user: UserEntity,
     addAvatarDto: AddAvatarDto,
     file: Express.Multer.File,
-  ): Promise<UserApiType> {
+  ): Promise<UserEntity> {
     if (user.id !== addAvatarDto.user_id) {
       throw new UnprocessableEntityException(AvatarMessageEnum.AVATAR_COULD_NOT_BE_ATTACHED);
     }
@@ -45,9 +45,8 @@ export class UserAvatarService {
     };
 
     Object.assign(user, filedata);
-    const savedUser = await this.userRepository.save(user);
 
-    return this.getRequiredFormatUser(savedUser as UserApiType);
+    return await this.userRepository.save(user);
   }
 
   /**

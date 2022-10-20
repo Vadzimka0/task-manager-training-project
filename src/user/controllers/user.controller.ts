@@ -26,14 +26,18 @@ import { getApiParam } from '../../utils';
 import { UserApiDto } from '../dto/user-api.dto';
 import { UserStatisticsApiDto } from '../dto/user-statistics-api.dto';
 import { UserEntity } from '../entities/user.entity';
-import { UserService } from '../services';
+import { UserAvatarService, UserService } from '../services';
+import { UserApiType } from '../types';
 
 @ApiTags('Users:')
 @Controller()
 @UseGuards(JwtAuthGuard)
 @UseInterceptors(ClassSerializerInterceptor)
 export class UserController {
-  constructor(private readonly userService: UserService) {}
+  constructor(
+    private readonly userService: UserService,
+    private readonly userAvatarService: UserAvatarService,
+  ) {}
 
   @Get('users/:id')
   @ApiOperation({ summary: 'Fetch User' })
@@ -41,8 +45,9 @@ export class UserController {
   @ApiOkObjectResponse(UserApiDto)
   @ApiInternalServerErrorResponse({ description: `"${MessageEnum.ENTITY_NOT_FOUND}";` })
   @ApiParam(getApiParam('id', 'user'))
-  async getUser(@Param('id') id: string): Promise<Data<UserApiDto>> {
-    const data = await this.userService.getUser(id);
+  async fetchUser(@Param('id') id: string): Promise<Data<UserApiDto>> {
+    const user = await this.userService.fetchUserById(id);
+    const data = this.userAvatarService.getRequiredFormatUser(user as UserApiType);
     return { data };
   }
 
@@ -52,7 +57,10 @@ export class UserController {
   @ApiOkArrayResponse(UserApiDto)
   @ApiQuery({ name: 'query', example: 'afa' })
   async fetchMembersBySearch(@Query() querySearch: { query: string }): Promise<Data<UserEntity[]>> {
-    const data = await this.userService.fetchMembersBySearch(querySearch);
+    const users = await this.userService.fetchMembersBySearch(querySearch);
+    const data = users.map((user) =>
+      this.userAvatarService.getRequiredFormatUser(user as UserApiType),
+    );
     return { data };
   }
 

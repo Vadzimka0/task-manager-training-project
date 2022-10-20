@@ -2,8 +2,8 @@ import {
   forwardRef,
   Inject,
   Injectable,
-  UnprocessableEntityException,
   InternalServerErrorException,
+  UnprocessableEntityException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcrypt';
@@ -39,20 +39,10 @@ export class UserService {
   ) {}
 
   /**
-   * A method that returns one user in the required format
-   * @param id An id of user
-   */
-  async getUser(id: string): Promise<UserApiType> {
-    const user = await this.fetchUserById(id);
-
-    return this.userAvatarService.getRequiredFormatUser(user as UserApiType);
-  }
-
-  /**
    * A method that fetches users from the database (search by username)
    * @param search An object with property of query string of a URL
    */
-  async fetchMembersBySearch(search: { query: string }): Promise<UserApiType[]> {
+  async fetchMembersBySearch(search: { query: string }): Promise<UserEntity[]> {
     const queryBuilder = this.userRepository
       .createQueryBuilder('users')
       .andWhere('users.username LIKE :query', {
@@ -60,9 +50,7 @@ export class UserService {
       })
       .orderBy('users.created_at', 'DESC');
 
-    const members = await queryBuilder.getMany();
-
-    return members.map((user) => this.userAvatarService.getRequiredFormatUser(user as UserApiType));
+    return await queryBuilder.getMany();
   }
 
   /**
