@@ -1,8 +1,9 @@
-import { InternalServerErrorException } from '@nestjs/common';
+import { InternalServerErrorException, UnprocessableEntityException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { v4 as uuidv4 } from 'uuid';
+import { MessageEnum } from '../../common/enums/messages.enum';
 
 import { UserEntity } from '../../user/entities/user.entity';
 import { CreateNoteDto } from '../dto/create-note.dto';
@@ -76,6 +77,23 @@ describe('The NoteService', () => {
       const createdNote = await service.createNote(dto, user);
 
       expect(createdNote).toEqual(expectedNote);
+    });
+
+    it('should throw the "UnprocessableEntityException" if color is not invalid', async () => {
+      const dtoInvalid: CreateNoteDto = {
+        description: 'text',
+        color: '#abcde',
+        owner_id: 'f60c913b-0859-4797-8dea-c07409ffcf0d',
+      };
+
+      repositoryMock.save.mockReturnValue(undefined);
+
+      try {
+        await service.createNote(dtoInvalid, user);
+      } catch (err) {
+        expect(err).toBeInstanceOf(UnprocessableEntityException);
+        expect(err.message).toEqual(MessageEnum.INVALID_COLOR);
+      }
     });
   });
 
