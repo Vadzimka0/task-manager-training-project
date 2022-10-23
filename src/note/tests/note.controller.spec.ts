@@ -1,30 +1,13 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { v4 as uuidv4 } from 'uuid';
 
-import { UserEntity } from '../../user/entities/user.entity';
-import { CreateNoteDto } from '../dto/create-note.dto';
+import { createNoteDto, noteApiDto } from './note.test-data';
+import { mockedUser } from '../../../test/user.test-data';
+import { mockedNoteService } from '../../utils/mocks/mock.note.service';
 import { NoteController } from '../note.controller';
 import { NoteService } from '../note.service';
 
 describe('NoteController', () => {
   let controller: NoteController;
-
-  const mockNoteService = {
-    createNote: jest.fn((createNoteDto, user) => {
-      return {
-        ...createNoteDto,
-        id: uuidv4(),
-        created_at: new Date(),
-        is_completed: false,
-      };
-    }),
-    getRequiredFormatNote: jest.fn((note) => {
-      return {
-        ...note,
-        owner_id: 'f60c913b-0859-4797-8dea-c07409ffcf0d',
-      };
-    }),
-  };
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -32,7 +15,7 @@ describe('NoteController', () => {
       providers: [NoteService],
     })
       .overrideProvider(NoteService)
-      .useValue(mockNoteService)
+      .useValue(mockedNoteService)
       .compile();
 
     controller = module.get<NoteController>(NoteController);
@@ -43,40 +26,8 @@ describe('NoteController', () => {
   });
 
   it('should create a note', async () => {
-    const dto: CreateNoteDto = {
-      description: 'text',
-      color: '#ffffff',
-      owner_id: 'f60c913b-0859-4797-8dea-c07409ffcf0d',
-    };
-    const user: UserEntity = {
-      id: 'f60c913b-0859-4797-8dea-c07409ffcf0d',
-      email: 'f60c913b@gmail.com',
-      username: 'f60c913b',
-      created_at: undefined,
-      password: '',
-      refresh_token: '',
-      notes: [],
-      checklists: [],
-      projects: [],
-      assigned_tasks: [],
-      participate_tasks: [],
-      comments: [],
-      mimetype: '',
-      path: '',
-      filename: '',
-    };
+    const createdNote = await controller.createNote(createNoteDto, mockedUser);
 
-    const expectedNoteResponse = {
-      data: {
-        id: expect.any(String),
-        created_at: expect.any(Date),
-        is_completed: false,
-        ...dto,
-      },
-    };
-
-    const createdNote = await controller.createNote(dto, user);
-
-    expect(createdNote).toEqual(expectedNoteResponse);
+    expect(createdNote).toEqual({ data: noteApiDto });
   });
 });

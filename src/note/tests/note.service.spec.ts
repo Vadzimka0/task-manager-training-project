@@ -2,11 +2,15 @@ import { InternalServerErrorException, UnprocessableEntityException } from '@nes
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { v4 as uuidv4 } from 'uuid';
-import { MessageEnum } from '../../common/enums/messages.enum';
 
-import { UserEntity } from '../../user/entities/user.entity';
-import { CreateNoteDto } from '../dto/create-note.dto';
+import {
+  createNoteDto,
+  mockNoteId,
+  noteEntities,
+  noteEntity,
+  updateNoteDto,
+} from './note.test-data';
+import { mockedUser } from '../../../test/user.test-data';
 import { NoteEntity } from '../entities/note.entity';
 import { NoteService } from '../note.service';
 
@@ -16,36 +20,24 @@ export type MockType<T> = {
 export const repositoryMockFactory: () => MockType<Repository<any>> = jest.fn(() => ({
   findOneBy: jest.fn(),
   save: jest.fn(),
+  delete: jest.fn(),
+  createQueryBuilder: jest.fn(() => ({
+    leftJoinAndSelect: jest.fn().mockReturnThis(),
+    andWhere: jest.fn().mockReturnThis(),
+    orderBy: jest.fn().mockReturnThis(),
+    getMany: jest.fn().mockResolvedValue(noteEntities),
+  })),
 }));
 
 describe('The NoteService', () => {
   let service: NoteService;
   let repositoryMock: MockType<Repository<NoteEntity>>;
 
-  const user: UserEntity = {
-    id: 'f60c913b-0859-4797-8dea-c07409ffcf0d',
-    email: 'f60c913b@gmail.com',
-    username: 'f60c913b',
-    created_at: undefined,
-    password: '',
-    refresh_token: '',
-    notes: [],
-    checklists: [],
-    projects: [],
-    assigned_tasks: [],
-    participate_tasks: [],
-    comments: [],
-    mimetype: '',
-    path: '',
-    filename: '',
-  };
-  const expectedNote: Partial<NoteEntity> = {
-    id: uuidv4(),
-    created_at: new Date(),
-    description: 'text',
-    color: '#ffffff',
-    is_completed: false,
-    owner: user,
+  const entityNotExists = () => {
+    repositoryMock.findOneBy.mockResolvedValue(null);
+    expect(service.fetchNoteForEdit(mockedUser.id, mockNoteId)).rejects.toThrow(
+      InternalServerErrorException,
+    );
   };
 
   beforeEach(async () => {
@@ -57,71 +49,68 @@ describe('The NoteService', () => {
     }).compile();
 
     service = module.get<NoteService>(NoteService);
-    repositoryMock = module.get(getRepositoryToken(NoteEntity));
-  });
-
-  it('should be defined', () => {
-    expect(service).toBeDefined();
+    repositoryMock = await module.get(getRepositoryToken(NoteEntity));
   });
 
   describe('createNote', () => {
     it('should create a new note record and return that', async () => {
-      const dto: CreateNoteDto = {
-        description: 'text',
-        color: '#ffffff',
-        owner_id: 'f60c913b-0859-4797-8dea-c07409ffcf0d',
-      };
-
-      repositoryMock.save.mockReturnValue(expectedNote);
-
-      const createdNote = await service.createNote(dto, user);
-
-      expect(createdNote).toEqual(expectedNote);
+      repositoryMock.save.mockResolvedValue(noteEntity);
+      const createdNote = await service.createNote(createNoteDto, mockedUser);
+      expect(createdNote).toEqual(noteEntity);
     });
 
-    it('should throw the "UnprocessableEntityException" if color is not invalid', async () => {
-      const dtoInvalid: CreateNoteDto = {
-        description: 'text',
-        color: '#abcde',
-        owner_id: 'f60c913b-0859-4797-8dea-c07409ffcf0d',
-      };
-
-      repositoryMock.save.mockReturnValue(undefined);
-
-      try {
-        await service.createNote(dtoInvalid, user);
-      } catch (err) {
-        expect(err).toBeInstanceOf(UnprocessableEntityException);
-        expect(err.message).toEqual(MessageEnum.INVALID_COLOR);
-      }
+    it('should throw the "UnprocessableEntityException" if color is not valid', async () => {
+      const createNoteInvalidDto = { ...createNoteDto, color: 'black' };
+      expect(service.createNote(createNoteInvalidDto, mockedUser)).rejects.toThrow(
+        UnprocessableEntityException,
+      );
     });
   });
 
-  describe('fetchNote', () => {
-    describe('when user note with ID exists', () => {
-      it('should return the note object', async () => {
-        repositoryMock.findOneBy.mockReturnValue(expectedNote);
-
-        const fetchedNote = await service.fetchNoteForEdit(expectedNote.owner.id, expectedNote.id);
-
-        expect(fetchedNote).toEqual(expectedNote);
-        expect(repositoryMock.findOneBy).toHaveBeenCalledWith({ id: expectedNote.id });
-      });
+  describe('updateNote', () => {
+    it('should update the note if ID exists and return updated note', async () => {
+      repositoryMock.findOneBy.mockResolvedValue(noteEntity);
+      repositoryMock.save.mockResolvedValue(noteEntity);
+      const updatedNote = await service.updateNote(updateNoteDto, mockedUser.id, mockNoteId);
+      expect(updatedNote).toEqual(noteEntity);
     });
 
-    describe('otherwise', () => {
-      it('should throw the "InternalServerErrorException"', async () => {
-        repositoryMock.findOneBy.mockReturnValue(undefined);
+    it('should throw the "InternalServerErrorException" otherwise', entityNotExists);
+  });
 
-        try {
-          await service.fetchNoteForEdit(expectedNote.owner.id, expectedNote.id);
-        } catch (err) {
-          expect(err).toBeInstanceOf(InternalServerErrorException);
-          expect(err.message).toEqual(
-            `Entity NoteModel, id=${expectedNote.id} not found in the database`,
-          );
-        }
-      });
+  describe('deleteNote', () => {
+    it('should return the noteId if ID exists', async () => {
+      repositoryMock.findOneBy.mockResolvedValue(noteEntity);
+      const deletedNote = await service.deleteNote(mockedUser.id, mockNoteId);
+      expect(deletedNote).toEqual({ id: mockNoteId });
+      expect(repositoryMock.findOneBy).toHaveBeenCalledWith({ id: mockNoteId });
+    });
+
+    it('should throw the "InternalServerErrorException" otherwise', entityNotExists);
+  });
+
+  describe('fetchOneNote', () => {
+    it('should return the note if ID exists', async () => {
+      repositoryMock.findOneBy.mockResolvedValue(noteEntity);
+      const fetchedNote = await service.fetchOneNote(mockedUser.id, mockNoteId);
+      expect(fetchedNote).toEqual(noteEntity);
+      expect(repositoryMock.findOneBy).toHaveBeenCalledWith({ id: mockNoteId });
+    });
+
+    it('should throw the "UnprocessableEntityException" otherwise', async () => {
+      repositoryMock.findOneBy.mockResolvedValue(null);
+      expect(service.fetchOneNote(mockedUser.id, mockNoteId)).rejects.toThrow(
+        UnprocessableEntityException,
+      );
+    });
+  });
+
+  describe('fetchUserNotes', () => {
+    it('should return the user notes ', async () => {
+      repositoryMock.createQueryBuilder().leftJoinAndSelect().andWhere().orderBy().getMany();
+      const fetchedNotes = await service.fetchUserNotes(mockedUser.id, mockedUser.id);
+      expect(fetchedNotes).toEqual(noteEntities);
+      expect(repositoryMock.createQueryBuilder).toHaveBeenCalled();
     });
   });
 });

@@ -9,8 +9,8 @@ import { TaskService } from '../../task/services/task.service';
 import { UserEntity } from '../../user/entities/user.entity';
 import { UserAvatarService } from '../../user/services/user-avatar.service';
 import { UserService } from '../../user/services/user.service';
-import mockedConfigService from '../../utils/mocks/config.service';
-import mockedJwtService from '../../utils/mocks/jwt.service';
+import mockedConfigService from '../../utils/mocks/mock.config.service';
+import mockedJwtService from '../../utils/mocks/mock.jwt.service';
 import { AuthService } from '../auth.service';
 
 describe('The AuthService', () => {
