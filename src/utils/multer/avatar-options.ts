@@ -1,11 +1,11 @@
-import { HttpException, HttpStatus } from '@nestjs/common';
+import { UnprocessableEntityException } from '@nestjs/common';
 import { MulterOptions } from '@nestjs/platform-express/multer/interfaces/multer-options.interface';
 import { Request } from 'express';
 import { existsSync, mkdirSync } from 'fs';
 import { diskStorage } from 'multer';
-import { extname } from 'path';
 
 import { ExpressRequestType } from '../../auth/types';
+import { AttachmentMessageEnum } from '../../common/enums/messages.enum';
 
 export const avatarOptions: MulterOptions = {
   fileFilter(
@@ -16,13 +16,7 @@ export const avatarOptions: MulterOptions = {
     if (file.mimetype.match(/\/(jpg|jpeg|png)$/)) {
       done(null, true);
     } else {
-      done(
-        new HttpException(
-          `Unsupported file type ${extname(file.originalname)}`,
-          HttpStatus.BAD_REQUEST,
-        ),
-        false,
-      );
+      done(new UnprocessableEntityException(AttachmentMessageEnum.FORMAT_NOT_SUPPORTED), false);
     }
   },
   storage: diskStorage({

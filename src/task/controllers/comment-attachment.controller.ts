@@ -25,6 +25,7 @@ import {
   ApiOperation,
   ApiParam,
   ApiTags,
+  ApiUnprocessableEntityResponse,
 } from '@nestjs/swagger';
 import { createReadStream } from 'fs';
 import { join } from 'path';
@@ -59,6 +60,9 @@ export class CommentAttachmentController {
   @ApiBody({ type: CommentFileUploadDto })
   @ApiOkObjectResponse(CommentAttachmentApiDto)
   @ApiForbiddenResponse({ description: `"${MessageEnum.INVALID_ID_NOT_OWNER}"` })
+  @ApiUnprocessableEntityResponse({
+    description: `"${AttachmentMessageEnum.FORMAT_NOT_SUPPORTED}"`,
+  })
   @ApiInternalServerErrorResponse({ description: `"${MessageEnum.ENTITY_NOT_FOUND}";` })
   async addCommentAttachment(
     @User('id') userId: string,

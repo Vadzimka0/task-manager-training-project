@@ -67,9 +67,9 @@ export class UserAvatarController {
   @ApiBody({ type: AvatarUploadDto })
   @ApiOkObjectResponse(UserApiDto)
   @ApiUnprocessableEntityResponse({
-    description: `"${AvatarMessageEnum.AVATAR_COULD_NOT_BE_ATTACHED}"`,
+    description: `Possible reasons: "${AvatarMessageEnum.AVATAR_COULD_NOT_BE_ATTACHED}"; "${AttachmentMessageEnum.FORMAT_NOT_SUPPORTED}"`,
   })
-  async addTaskAttachment(
+  async addAvatar(
     @User() user: UserEntity,
     @UploadedFile() file: Express.Multer.File,
     @Body() addAvatarDto: AddAvatarDto,
