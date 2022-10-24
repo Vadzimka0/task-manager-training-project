@@ -1,6 +1,13 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { IsNotEmpty, IsOptional, IsUUID, MaxLength, ValidateNested } from 'class-validator';
+import {
+  IsDefined,
+  IsNotEmpty,
+  IsUUID,
+  MaxLength,
+  ValidateIf,
+  ValidateNested,
+} from 'class-validator';
 
 import { CreateChecklistItemDto } from './create-checklist-item.dto';
 
@@ -29,9 +36,10 @@ export class ChecklistDto {
 }
 
 export class CreateChecklistDto extends ChecklistDto {
-  @ApiPropertyOptional()
+  @ApiProperty()
   @ValidateNested({ each: true })
   @Type(() => CreateChecklistItemDto)
-  @IsOptional()
+  @IsDefined({ message: "Field 'items' is required, but it was missing" })
+  @ValidateIf((_, value) => value !== null)
   readonly items: CreateChecklistItemDto[] | null;
 }
