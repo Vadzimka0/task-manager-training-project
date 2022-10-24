@@ -46,7 +46,7 @@ export const noteEntity: Partial<NoteEntity> = {
   owner: mockedUser,
 };
 
-export const noteEntities = [
+export const noteEntities: Partial<NoteEntity>[] = [
   {
     id: expect.any(String),
     created_at: expect.any(String),

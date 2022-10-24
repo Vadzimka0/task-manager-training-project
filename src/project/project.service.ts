@@ -194,26 +194,19 @@ export class ProjectService {
    * @param userId An userId from JWT
    */
   async fetchProject(userId: string, projectId: string): Promise<ProjectEntity> {
-    try {
-      const project = await this.projectRepository.findOneBy({ id: projectId });
+    const project = await this.projectRepository.findOneBy({ id: projectId });
 
-      if (!project) {
-        throw new InternalServerErrorException(
-          `Entity ProjectModel, id=${projectId} not found in the database`,
-        );
-      }
-
-      if (project.owner.id !== userId) {
-        throw new ForbiddenException(MessageEnum.INVALID_ID_NOT_OWNER);
-      }
-
-      return project;
-    } catch (err) {
-      throw new HttpException(
-        err.message,
-        err.status ? err.status : HttpStatus.INTERNAL_SERVER_ERROR,
+    if (!project) {
+      throw new InternalServerErrorException(
+        `Entity ProjectModel, id=${projectId} not found in the database`,
       );
     }
+
+    if (project.owner.id !== userId) {
+      throw new ForbiddenException(MessageEnum.INVALID_ID_NOT_OWNER);
+    }
+
+    return project;
   }
 
   /**

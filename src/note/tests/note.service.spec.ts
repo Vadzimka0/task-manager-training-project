@@ -3,6 +3,10 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
+import { mockedUser } from '../../../test/user.test-data';
+import { MockType } from '../../utils/mocks/mock.type';
+import { NoteEntity } from '../entities/note.entity';
+import { NoteService } from '../note.service';
 import {
   createNoteDto,
   mockNoteId,
@@ -10,14 +14,8 @@ import {
   noteEntity,
   updateNoteDto,
 } from './note.test-data';
-import { mockedUser } from '../../../test/user.test-data';
-import { NoteEntity } from '../entities/note.entity';
-import { NoteService } from '../note.service';
 
-export type MockType<T> = {
-  [P in keyof T]?: jest.Mock;
-};
-export const repositoryMockFactory: () => MockType<Repository<any>> = jest.fn(() => ({
+const repositoryMockFactory: () => MockType<Repository<any>> = jest.fn(() => ({
   findOneBy: jest.fn(),
   save: jest.fn(),
   delete: jest.fn(),
