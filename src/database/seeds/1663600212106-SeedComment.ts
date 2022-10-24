@@ -9,7 +9,7 @@ export class SeedComment1663600212106 implements MigrationInterface {
         id,
         content,
         task_id,
-        owner_id
+        commentator_id
       ) 
       VALUES (
         '3b07d1d1-e855-48fe-9e7d-d76266d066ee',
@@ -23,7 +23,7 @@ export class SeedComment1663600212106 implements MigrationInterface {
         id,
         content,
         task_id,
-        owner_id
+        commentator_id
       ) 
       VALUES (
         '614561a4-88ce-4a70-aacc-f315ed2e8640',
@@ -37,7 +37,7 @@ export class SeedComment1663600212106 implements MigrationInterface {
         id,
         content,
         task_id,
-        owner_id
+        commentator_id
       ) 
       VALUES (
         'c02d58fe-7a70-464e-8611-daed4b508eba',
@@ -51,7 +51,7 @@ export class SeedComment1663600212106 implements MigrationInterface {
         id,
         content,
         task_id,
-        owner_id
+        commentator_id
       ) 
       VALUES (
         'a323b5fe-f460-43e9-86ea-869d919fc77a',

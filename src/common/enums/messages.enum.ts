@@ -15,6 +15,7 @@ export enum AvatarMessageEnum {
 
 export enum AttachmentMessageEnum {
   FILE_NOT_FOUND = 'File not found',
+  FORMAT_NOT_SUPPORTED = 'The image format is not supported. Only .png, .jpeg and .jpg is allowed.',
 }
 
 export enum NoteMessageEnum {

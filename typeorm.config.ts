@@ -15,6 +15,17 @@ export default new DataSource({
   password: configService.get('POSTGRES_PASSWORD'),
   database: configService.get('POSTGRES_DB'),
   entities: [__dirname + '/**/entities/*.entity{.js,.ts}'],
+  // entities: [
+  //   UserEntity,
+  //   NoteEntity,
+  //   ChecklistEntity,
+  //   ChecklistItemEntity,
+  //   ProjectEntity,
+  //   TaskEntity,
+  //   TaskAttachmentEntity,
+  //   CommentEntity,
+  //   CommentAttachmentEntity,
+  // ],
   migrations: [__dirname + '/src/database/migrations/**/*{.js,.ts}'],
   namingStrategy: new SnakeNamingStrategy(),
 });

@@ -20,9 +20,8 @@ export class CommentEntity extends AbstractEntity {
   task: TaskEntity;
 
   @ApiHideProperty()
-  @Exclude()
   @ManyToOne(() => UserEntity, (owner) => owner.comments, { eager: true })
-  owner: UserEntity;
+  commentator: UserEntity;
 
   @ApiProperty({ type: () => [CommentAttachmentApiDto], nullable: true })
   @OneToMany(() => CommentAttachmentEntity, (attachment) => attachment.comment)

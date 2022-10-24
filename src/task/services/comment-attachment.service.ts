@@ -1,4 +1,10 @@
-import { forwardRef, Inject, Injectable, InternalServerErrorException } from '@nestjs/common';
+import {
+  forwardRef,
+  Inject,
+  Injectable,
+  InternalServerErrorException,
+  UnprocessableEntityException,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -7,6 +13,8 @@ import { AddCommentAttachmentDto } from '../dto';
 import { CommentAttachmentApiDto } from '../dto/api-dto/comment-attachment-api.dto';
 import { CommentAttachmentEntity } from '../entities/comment-attachment.entity';
 import { CommentService } from './comment.service';
+import { SUPPORTED_IMAGES_FORMATS } from '../../common/constants/default-constants';
+import { AttachmentMessageEnum } from '../../common/enums/messages.enum';
 
 @Injectable()
 export class CommentAttachmentService {
@@ -36,6 +44,12 @@ export class CommentAttachmentService {
     addCommentAttachmentDto: AddCommentAttachmentDto,
     file: Express.Multer.File,
   ): Promise<CommentAttachmentEntity> {
+    const dtoType = addCommentAttachmentDto.type;
+
+    if (dtoType === 'image' && dtoType !== file.mimetype.split('/')[0]) {
+      throw new UnprocessableEntityException(AttachmentMessageEnum.FORMAT_NOT_SUPPORTED);
+    }
+
     const currentComment = await this.commentService.fetchComment(
       userId,
       addCommentAttachmentDto.comment_id,

@@ -12,6 +12,8 @@ import { Repository } from 'typeorm';
 
 import { MessageEnum } from '../../common/enums/messages.enum';
 import { UserEntity } from '../../user/entities/user.entity';
+import { UserAvatarService } from '../../user/services/user-avatar.service';
+import { UserApiType } from '../../user/types/user-api.type';
 import { removeFilesFromStorage } from '../../utils';
 import { CommentApiDto } from '../dto/api-dto/comment-api.dto';
 import { CommentAttachmentApiDto } from '../dto/api-dto/comment-attachment-api.dto';
@@ -29,6 +31,7 @@ export class CommentService {
     @InjectRepository(CommentEntity)
     private readonly commentRepository: Repository<CommentEntity>,
     private readonly taskService: TaskService,
+    private readonly userAvatarService: UserAvatarService,
     @Inject(forwardRef(() => CommentAttachmentService))
     private readonly commentAttachmentService: CommentAttachmentService,
   ) {}
@@ -47,7 +50,7 @@ export class CommentService {
     const newComment = new CommentEntity();
     Object.assign(newComment, dtoWithoutRelationItems);
 
-    newComment.owner = currentUser;
+    newComment.commentator = currentUser;
 
     const currentTask = await this.taskService.getValidTaskForComment(currentUser.id, task_id);
     newComment.task = currentTask;
@@ -65,7 +68,7 @@ export class CommentService {
     const queryBuilder = this.commentRepository
       .createQueryBuilder('comments')
       .leftJoinAndSelect('comments.task', 'task')
-      .leftJoinAndSelect('comments.owner', 'owner')
+      .leftJoinAndSelect('comments.commentator', 'commentator')
       .leftJoinAndSelect('comments.attachments', 'attachments')
       .leftJoinAndSelect('attachments.comment', 'comment')
       .andWhere('task.id = :id', { id: taskId })
@@ -121,7 +124,7 @@ export class CommentService {
         );
       }
 
-      if (comment.owner.id !== userId) {
+      if (comment.commentator.id !== userId) {
         throw new ForbiddenException(MessageEnum.INVALID_ID_NOT_OWNER);
       }
 
@@ -138,13 +141,16 @@ export class CommentService {
    * A method that adds properties: owner_id, task_id, attachments to Comment according to the requirements
    */
   getRequiredFormatComment(comment: CommentApiDto): CommentApiDto {
-    comment.owner_id = comment.owner.id;
+    comment.owner_id = comment.commentator.id;
     comment.task_id = comment.task.id;
     comment.attachments = comment.attachments?.length
       ? comment.attachments.map((attachment: CommentAttachmentApiDto) =>
           this.commentAttachmentService.getRequiredFormatCommentAttachment(attachment),
         )
       : null;
+    comment.commentator = this.userAvatarService.getRequiredFormatUser(
+      comment.commentator as UserApiType,
+    );
 
     return comment;
   }

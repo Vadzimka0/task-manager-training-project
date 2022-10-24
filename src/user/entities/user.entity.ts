@@ -51,7 +51,7 @@ export class UserEntity {
   @ManyToMany(() => TaskEntity, (task) => task.members)
   participate_tasks: TaskEntity[];
 
-  @OneToMany(() => CommentEntity, (comment) => comment.owner)
+  @OneToMany(() => CommentEntity, (comment) => comment.commentator)
   comments: CommentEntity[];
 
   @Exclude()
