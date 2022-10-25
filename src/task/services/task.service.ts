@@ -1,8 +1,6 @@
 import {
   ForbiddenException,
   forwardRef,
-  HttpException,
-  HttpStatus,
   Inject,
   Injectable,
   InternalServerErrorException,
@@ -97,7 +95,7 @@ export class TaskService {
     const updatedPerformer = await this.getUserPerformer(assigned_to);
     currentTask.performer = updatedPerformer;
 
-    const currentMembersIds = currentTask.members.map((member) => member.id);
+    const currentMembersIds = currentTask.members?.map((member) => member.id);
 
     if (!haveSameItems(members, currentMembersIds)) {
       const updatedMembers = await this.getMembersById(members);
@@ -318,20 +316,13 @@ export class TaskService {
    * @param taskId A taskId of a task. A task with this id should exist in the database
    */
   async getValidTaskForEdit(userId: string, taskId: string): Promise<TaskEntity> {
-    try {
-      const task = await this.fetchTask(taskId);
+    const task = await this.fetchTask(taskId);
 
-      if (task.project.owner.id !== userId) {
-        throw new ForbiddenException(MessageEnum.INVALID_ID_NOT_OWNER);
-      }
-
-      return task;
-    } catch (err) {
-      throw new HttpException(
-        err.message,
-        err.status ? err.status : HttpStatus.INTERNAL_SERVER_ERROR,
-      );
+    if (task.project.owner.id !== userId) {
+      throw new ForbiddenException(MessageEnum.INVALID_ID_NOT_OWNER);
     }
+
+    return task;
   }
 
   /**
@@ -340,21 +331,14 @@ export class TaskService {
    * @param taskId A taskId of a task. A task with this id should exist in the database
    */
   async getValidTaskForComment(userId: string, taskId: string): Promise<TaskEntity> {
-    try {
-      const task = await this.fetchTask(taskId);
-      const ids = task.members.map((member) => member.id);
+    const task = await this.fetchTask(taskId);
+    const ids = task.members.map((member) => member.id);
 
-      if (!ids.includes(userId) && task.project.owner.id !== userId) {
-        throw new ForbiddenException(CommentMessageEnum.INVALID_ID_NOT_OWNER_OR_MEMBER);
-      }
-
-      return task;
-    } catch (err) {
-      throw new HttpException(
-        err.message,
-        err.status ? err.status : HttpStatus.INTERNAL_SERVER_ERROR,
-      );
+    if (!ids.includes(userId) && task.project.owner.id !== userId) {
+      throw new ForbiddenException(CommentMessageEnum.INVALID_ID_NOT_OWNER_OR_MEMBER);
     }
+
+    return task;
   }
 
   /**

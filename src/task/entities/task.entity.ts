@@ -38,7 +38,6 @@ export class TaskEntity extends AbstractEntity {
   @ManyToOne(() => UserEntity, (user) => user.assigned_tasks, { eager: true, nullable: true })
   performer: UserEntity;
 
-  // @ApiProperty({ type: () => [UserEntity], nullable: true })
   @ApiProperty({ type: () => [UserApiDto], nullable: true })
   @ManyToMany(() => UserEntity, (user) => user.participate_tasks, { eager: true })
   @JoinTable()

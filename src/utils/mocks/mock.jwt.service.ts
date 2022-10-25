@@ -1,5 +1,3 @@
-const mockedJwtService = {
+export const mockedJwtService = {
   sign: () => '',
 };
-
-export default mockedJwtService;

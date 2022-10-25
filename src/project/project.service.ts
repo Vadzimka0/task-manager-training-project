@@ -1,8 +1,5 @@
 import {
-  BadRequestException,
   ForbiddenException,
-  HttpException,
-  HttpStatus,
   Injectable,
   InternalServerErrorException,
   NotFoundException,
@@ -218,7 +215,7 @@ export class ProjectService {
     const project = await this.fetchProject(userId, projectId);
 
     if (project.title === SPECIAL_ONE_PROJECT_NAME) {
-      throw new BadRequestException(ProjectMessageEnum.PROJECT_PROTECTED);
+      throw new UnprocessableEntityException(ProjectMessageEnum.PROJECT_PROTECTED);
     }
 
     return project;
@@ -238,7 +235,7 @@ export class ProjectService {
       .getOne();
 
     if (project) {
-      throw new BadRequestException(ProjectMessageEnum.PROJECT_DUPLICATE);
+      throw new UnprocessableEntityException(ProjectMessageEnum.PROJECT_DUPLICATE);
     }
   }
 

@@ -1,4 +1,6 @@
 import { UserEntity } from '../src/user/entities/user.entity';
+import { ProjectEntity } from '../src/project/entities/project.entity';
+import { SaveOptions, RemoveOptions } from 'typeorm';
 
 export const mockedUserId = 'f60c913b-0859-4797-8dea-c07409ffcf0d';
 

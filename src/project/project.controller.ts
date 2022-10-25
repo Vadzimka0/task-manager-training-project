@@ -13,7 +13,6 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import {
-  ApiBadRequestResponse,
   ApiBearerAuth,
   ApiForbiddenResponse,
   ApiInternalServerErrorResponse,
@@ -47,9 +46,12 @@ export class ProjectController {
   @ApiOperation({ summary: 'Create New Project' })
   @ApiBearerAuth('access-token')
   @ApiOkObjectResponse(ProjectApiDto)
-  @ApiBadRequestResponse({ description: `"${ProjectMessageEnum.PROJECT_DUPLICATE}";` })
   @ApiUnprocessableEntityResponse({
-    description: `Possible reasons: "${MessageEnum.INVALID_COLOR}"; "${MessageEnum.INVALID_USER_ID}"`,
+    description: `Possible reasons: 
+      "${MessageEnum.INVALID_COLOR}"; 
+      "${MessageEnum.INVALID_USER_ID}"; 
+      "${ProjectMessageEnum.PROJECT_DUPLICATE}";
+    `,
   })
   async createProject(
     @Body() projectDto: CreateProjectDto,
@@ -64,12 +66,14 @@ export class ProjectController {
   @ApiOperation({ summary: 'Update Project' })
   @ApiBearerAuth('access-token')
   @ApiOkObjectResponse(ProjectApiDto)
-  @ApiBadRequestResponse({
-    description: `Possible reasons: "${ProjectMessageEnum.PROJECT_PROTECTED}"; "${ProjectMessageEnum.PROJECT_DUPLICATE}";`,
-  })
   @ApiForbiddenResponse({ description: `"${MessageEnum.INVALID_ID_NOT_OWNER}";` })
   @ApiUnprocessableEntityResponse({
-    description: `Possible reasons: "${MessageEnum.INVALID_COLOR}"; "${MessageEnum.INVALID_USER_ID}";`,
+    description: `Possible reasons: 
+      "${MessageEnum.INVALID_COLOR}"; 
+      "${MessageEnum.INVALID_USER_ID}"; 
+      "${ProjectMessageEnum.PROJECT_PROTECTED}"; 
+      "${ProjectMessageEnum.PROJECT_DUPLICATE}";
+    `,
   })
   @ApiInternalServerErrorResponse({ description: `"${MessageEnum.ENTITY_NOT_FOUND}";` })
   @ApiParam(getApiParam('id', 'project'))
@@ -87,8 +91,8 @@ export class ProjectController {
   @ApiOperation({ summary: 'Delete Project' })
   @ApiOkObjectResponse(EntityId)
   @ApiBearerAuth('access-token')
-  @ApiBadRequestResponse({ description: `"${ProjectMessageEnum.PROJECT_PROTECTED}";` })
   @ApiForbiddenResponse({ description: `"${MessageEnum.INVALID_ID_NOT_OWNER}";` })
+  @ApiUnprocessableEntityResponse({ description: `"${ProjectMessageEnum.PROJECT_PROTECTED}";` })
   @ApiInternalServerErrorResponse({ description: `"${MessageEnum.ENTITY_NOT_FOUND}";` })
   @ApiParam(getApiParam('id', 'project'))
   async deleteProject(

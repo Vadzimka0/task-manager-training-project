@@ -1,8 +1,4 @@
-import {
-  BadRequestException,
-  InternalServerErrorException,
-  UnprocessableEntityException,
-} from '@nestjs/common';
+import { InternalServerErrorException, UnprocessableEntityException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -13,10 +9,10 @@ import { ProjectEntity } from '../entities/project.entity';
 import { ProjectService } from '../project.service';
 import {
   createProjectDto,
-  mockProjectId,
-  projectEntities,
-  projectEntity,
-  projectPersonalEntity,
+  mockedPersonalProject,
+  mockedProject,
+  mockedProjectId,
+  mockedProjects,
 } from './project.test-data';
 
 const repositoryMockFactory: () => MockType<Repository<any>> = jest.fn(() => ({
@@ -29,8 +25,8 @@ const repositoryMockFactory: () => MockType<Repository<any>> = jest.fn(() => ({
     andWhere: jest.fn().mockReturnThis(),
     select: jest.fn().mockReturnThis(),
     orderBy: jest.fn().mockReturnThis(),
-    getMany: jest.fn().mockResolvedValue(projectEntities),
-    getRawMany: jest.fn().mockResolvedValue(projectEntities),
+    getMany: jest.fn().mockResolvedValue(mockedProjects),
+    getRawMany: jest.fn().mockResolvedValue(mockedProjects),
     getOne: jest.fn().mockResolvedValue(null),
   })),
 }));
@@ -38,19 +34,6 @@ const repositoryMockFactory: () => MockType<Repository<any>> = jest.fn(() => ({
 describe('The ProjectService', () => {
   let service: ProjectService;
   let repositoryMock: MockType<Repository<ProjectEntity>>;
-
-  const entityNotExists = () => {
-    repositoryMock.findOneBy.mockResolvedValue(null);
-    expect(service.fetchProject(mockedUser.id, mockProjectId)).rejects.toThrow(
-      InternalServerErrorException,
-    );
-  };
-  const entityProtected = () => {
-    repositoryMock.findOneBy.mockResolvedValue(projectPersonalEntity);
-    expect(service.deleteProject(mockedUser.id, mockProjectId)).rejects.toThrow(
-      BadRequestException,
-    );
-  };
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -66,9 +49,9 @@ describe('The ProjectService', () => {
 
   describe('createProject', () => {
     it('should create a new project record and return that', async () => {
-      repositoryMock.save.mockResolvedValue(projectEntity);
+      repositoryMock.save.mockResolvedValue(mockedProject);
       const createdProject = await service.createProject(createProjectDto, mockedUser);
-      expect(createdProject).toEqual(projectEntity);
+      expect(createdProject).toEqual(mockedProject);
     });
 
     it('should throw the "UnprocessableEntityException" if color is not valid', async () => {
@@ -81,48 +64,55 @@ describe('The ProjectService', () => {
 
   describe('updateProject', () => {
     it('should update the project if ID exists and return updated Project', async () => {
-      repositoryMock.findOneBy.mockResolvedValue(projectEntity);
-      repositoryMock.save.mockResolvedValue(projectEntity);
+      repositoryMock.findOneBy.mockResolvedValue(mockedProject);
+      repositoryMock.save.mockResolvedValue(mockedProject);
       const updatedProject = await service.updateProject(
         createProjectDto,
         mockedUser.id,
-        mockProjectId,
+        mockedProjectId,
       );
-      expect(updatedProject).toEqual(projectEntity);
+      expect(updatedProject).toEqual(mockedProject);
+      expect(repositoryMock.findOneBy).toHaveBeenCalledWith({ id: mockedProjectId });
     });
 
-    it('should throw the "InternalServerErrorException" otherwise', entityNotExists);
-    it('should throw the "BadRequestException" if project is protected', entityProtected);
+    it('should throw the "InternalServerErrorException" otherwise', () => {
+      repositoryMock.findOneBy.mockResolvedValue(null);
+      expect(service.fetchProject(mockedUser.id, mockedProjectId)).rejects.toThrow(
+        InternalServerErrorException,
+      );
+    });
+
+    it('should throw the "UnprocessableEntityException" if project is protected', () => {
+      repositoryMock.findOneBy.mockResolvedValue(mockedPersonalProject);
+      expect(service.deleteProject(mockedUser.id, mockedProjectId)).rejects.toThrow(
+        UnprocessableEntityException,
+      );
+    });
   });
 
   describe('deleteProject', () => {
     it('should return the projectId if ID exists', async () => {
-      repositoryMock.findOneBy.mockResolvedValue(projectEntity);
-      const deletedProject = await service.deleteProject(mockedUser.id, mockProjectId);
-      expect(deletedProject).toEqual({ id: mockProjectId });
-      expect(repositoryMock.findOneBy).toHaveBeenCalledWith({ id: mockProjectId });
+      repositoryMock.findOneBy.mockResolvedValue(mockedProject);
+      const deletedProject = await service.deleteProject(mockedUser.id, mockedProjectId);
+      expect(deletedProject).toEqual({ id: mockedProjectId });
+      expect(repositoryMock.findOneBy).toHaveBeenCalledWith({ id: mockedProjectId });
     });
-
-    it('should throw the "InternalServerErrorException" otherwise', entityNotExists);
-    it('should throw the "BadRequestException" if project is protected', entityProtected);
   });
 
   describe('fetchProject', () => {
     it('should return the project if ID exists', async () => {
-      repositoryMock.findOneBy.mockResolvedValue(projectEntity);
-      const fetchedProject = await service.fetchProject(mockedUser.id, mockProjectId);
-      expect(fetchedProject).toEqual(projectEntity);
-      expect(repositoryMock.findOneBy).toHaveBeenCalledWith({ id: mockProjectId });
+      repositoryMock.findOneBy.mockResolvedValue(mockedProject);
+      const fetchedProject = await service.fetchProject(mockedUser.id, mockedProjectId);
+      expect(fetchedProject).toEqual(mockedProject);
+      expect(repositoryMock.findOneBy).toHaveBeenCalledWith({ id: mockedProjectId });
     });
-
-    it('should throw the "InternalServerErrorException" otherwise', entityNotExists);
   });
 
   describe('fetchUserProjects', () => {
     it('should return the user projects ', async () => {
       repositoryMock.createQueryBuilder().leftJoinAndSelect().andWhere().orderBy().getMany();
       const fetchedProjects = await service.fetchUserProjects(mockedUser.id, mockedUser.id);
-      expect(fetchedProjects).toEqual(projectEntities);
+      expect(fetchedProjects).toEqual(mockedProjects);
       expect(repositoryMock.createQueryBuilder).toHaveBeenCalled();
     });
   });

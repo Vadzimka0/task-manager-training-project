@@ -28,8 +28,8 @@ export enum ChecklistMessageEnum {
 
 export enum ProjectMessageEnum {
   PROJECT_NOT_EXIST = 'Project does not exist',
-  PROJECT_DUPLICATE = 'Project with that name already exists',
-  PROJECT_PROTECTED = 'This project cannot be edited or deleted',
+  PROJECT_DUPLICATE = 'Title is not valid. Project with that name already exists',
+  PROJECT_PROTECTED = 'The Personal project could not be edited.',
 }
 
 export enum CommentMessageEnum {

@@ -1,4 +1,4 @@
-const mockedConfigService = {
+export const mockedConfigService = {
   get(key: string) {
     switch (key) {
       case 'JWT_ACCESS_TOKEN_SECRET':
@@ -8,5 +8,3 @@ const mockedConfigService = {
     }
   },
 };
-
-export default mockedConfigService;

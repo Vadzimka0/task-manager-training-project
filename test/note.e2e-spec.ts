@@ -1,9 +1,10 @@
-import { INestApplication, ValidationPipe } from '@nestjs/common';
+import { INestApplication } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import * as request from 'supertest';
 
 import JwtAuthGuard from '../src/auth/guards/jwt-auth.guard';
+import { ValidationPipe422 } from '../src/common/validation-pipe/validation-pipe422';
 import { NoteEntity } from '../src/note/entities/note.entity';
 import { NoteModule } from '../src/note/note.module';
 import { NoteService } from '../src/note/note.service';
@@ -33,12 +34,12 @@ describe('NoteController (e2e):', () => {
       .compile();
 
     app = moduleFixture.createNestApplication();
-    app.useGlobalPipes(new ValidationPipe());
+    app.useGlobalPipes(new ValidationPipe422());
     await app.init();
   });
 
   describe('POST /notes', () => {
-    it('should return 200 if note is created', async () => {
+    it('should return 200 if the note is created', async () => {
       const response = await request(app.getHttpServer())
         .post('/notes')
         .send(createNoteDto)
@@ -47,17 +48,17 @@ describe('NoteController (e2e):', () => {
       expect(response.body).toEqual({ data: noteApiDto });
     });
 
-    it('should return 400 if description is longer than 512 characters.', async () => {
+    it('should return 422 if the description is longer than 512 characters.', async () => {
       return request(app.getHttpServer())
         .post('/notes')
         .send(createNoteDto2)
         .expect('Content-Type', /json/)
-        .expect(400);
+        .expect(422);
     });
   });
 
   describe('PUT /notes/:id', () => {
-    it('should return 200 if note is updated', async () => {
+    it('should return 200 if the note is updated', async () => {
       const response = await request(app.getHttpServer())
         .put('/notes/:id')
         .send(updateNoteDto)
@@ -66,12 +67,12 @@ describe('NoteController (e2e):', () => {
       expect(response.body).toEqual({ data: updatedNoteApiDto });
     });
 
-    it('should return 400 if any of the required fields is missing', async () => {
+    it('should return 422 if any of the required fields is missing', async () => {
       return request(app.getHttpServer())
         .put('/notes/:id')
         .send(updateNoteDto2)
         .expect('Content-Type', /json/)
-        .expect(400);
+        .expect(422);
     });
   });
 
