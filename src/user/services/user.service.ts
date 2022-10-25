@@ -3,6 +3,7 @@ import {
   Inject,
   Injectable,
   InternalServerErrorException,
+  UnauthorizedException,
   UnprocessableEntityException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -150,10 +151,11 @@ export class UserService {
     const user = await this.fetchUserByEmail(email);
     const isRefreshTokenMatching = await bcrypt.compare(refreshToken, user.refresh_token);
 
-    if (isRefreshTokenMatching) {
-      return user;
+    if (!isRefreshTokenMatching) {
+      throw new UnauthorizedException(MessageEnum.INVALID_REFRESH_TOKEN);
     }
-    // else: handle error in jwt-refresh.guard.ts
+
+    return user;
   }
 
   /**

@@ -2,7 +2,6 @@ import {
   Body,
   ClassSerializerInterceptor,
   Controller,
-  Get,
   HttpCode,
   Post,
   UseGuards,
@@ -53,7 +52,8 @@ export class AuthController {
     return { data };
   }
 
-  @Get('refresh-token')
+  @Post('refresh-token')
+  @HttpCode(200)
   @UseGuards(JwtRefreshGuard)
   @ApiOperation({ summary: 'Update Tokens' })
   @ApiBody({ type: RefreshTokenDto })
