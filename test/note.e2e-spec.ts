@@ -3,7 +3,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import * as request from 'supertest';
 
-import JwtAuthGuard from '../src/auth/guards/jwt-auth.guard';
+import { JwtAuthGuard } from '../src/auth/guards';
 import { ValidationPipe422 } from '../src/common/validation-pipe/validation-pipe422';
 import { NoteEntity } from '../src/note/entities/note.entity';
 import { NoteModule } from '../src/note/note.module';

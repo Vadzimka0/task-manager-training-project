@@ -1,3 +1,5 @@
+import { v4 as uuidv4 } from 'uuid';
+
 import { mockedUser, mockedUserId } from '../../../test/user.test-data';
 import { ProjectEntity } from '../../project/entities/project.entity';
 import { mockedProject, mockedProjectId } from '../../project/tests/project.test-data';
@@ -27,8 +29,8 @@ export const createTaskDto: CreateTaskDto = {
 // };
 
 export const mockedTask: Partial<TaskEntity> = {
-  id: expect.any(String),
-  created_at: expect.any(String),
+  id: uuidv4(),
+  created_at: new Date(),
   title: 'title',
   description: 'description',
   due_date: new Date(),
