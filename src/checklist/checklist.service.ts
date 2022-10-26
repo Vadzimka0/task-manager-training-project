@@ -198,26 +198,19 @@ export class ChecklistService {
    * @param userId An userId from JWT
    */
   async fetchChecklist(userId: string, listId: string): Promise<ChecklistEntity> {
-    try {
-      const checklist = await this.checklistRepository.findOneBy({ id: listId });
+    const checklist = await this.checklistRepository.findOneBy({ id: listId });
 
-      if (!checklist) {
-        throw new InternalServerErrorException(
-          `Entity ChecklistModel, id=${listId} not found in the database`,
-        );
-      }
-
-      if (checklist.owner.id !== userId) {
-        throw new ForbiddenException(MessageEnum.INVALID_ID_NOT_OWNER);
-      }
-
-      return checklist;
-    } catch (err) {
-      throw new HttpException(
-        err.message,
-        err.status ? err.status : HttpStatus.INTERNAL_SERVER_ERROR,
+    if (!checklist) {
+      throw new InternalServerErrorException(
+        `Entity ChecklistModel, id=${listId} not found in the database`,
       );
     }
+
+    if (checklist.owner.id !== userId) {
+      throw new ForbiddenException(MessageEnum.INVALID_ID_NOT_OWNER);
+    }
+
+    return checklist;
   }
 
   /**
@@ -231,33 +224,26 @@ export class ChecklistService {
     userId?: string,
     listId?: string,
   ): Promise<ChecklistItemEntity> {
-    try {
-      const checklistItem = await this.checklistItemRepository.findOne({
-        where: { id: itemId },
-        relations: ['checklist'],
-      });
+    const checklistItem = await this.checklistItemRepository.findOne({
+      where: { id: itemId },
+      relations: ['checklist'],
+    });
 
-      if (!checklistItem) {
-        throw new InternalServerErrorException(
-          `Entity ChecklistItemModel, id=${itemId} not found in the database`,
-        );
-      }
-
-      if (userId && checklistItem.checklist.owner.id !== userId) {
-        throw new ForbiddenException(MessageEnum.INVALID_ID_NOT_OWNER);
-      }
-
-      if (listId && checklistItem.checklist.id !== listId) {
-        throw new ForbiddenException(ChecklistMessageEnum.ITEM_NOT_BELONG_TO_CHECKLIST);
-      }
-
-      return checklistItem;
-    } catch (err) {
-      throw new HttpException(
-        err.message,
-        err.status ? err.status : HttpStatus.INTERNAL_SERVER_ERROR,
+    if (!checklistItem) {
+      throw new InternalServerErrorException(
+        `Entity ChecklistItemModel, id=${itemId} not found in the database`,
       );
     }
+
+    if (userId && checklistItem.checklist.owner.id !== userId) {
+      throw new ForbiddenException(MessageEnum.INVALID_ID_NOT_OWNER);
+    }
+
+    if (listId && checklistItem.checklist.id !== listId) {
+      throw new ForbiddenException(ChecklistMessageEnum.ITEM_NOT_BELONG_TO_CHECKLIST);
+    }
+
+    return checklistItem;
   }
 
   /**

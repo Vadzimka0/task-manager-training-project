@@ -1,8 +1,6 @@
 import {
   ForbiddenException,
   forwardRef,
-  HttpException,
-  HttpStatus,
   Inject,
   Injectable,
   InternalServerErrorException,
@@ -115,26 +113,19 @@ export class CommentService {
    * @param commentId A commentId of a comment. A comment with this id should exist in the database
    */
   async fetchComment(userId: string, commentId: string): Promise<CommentEntity> {
-    try {
-      const comment = await this.commentRepository.findOneBy({ id: commentId });
+    const comment = await this.commentRepository.findOneBy({ id: commentId });
 
-      if (!comment) {
-        throw new InternalServerErrorException(
-          `Entity CommentModel, id=${commentId} not found in the database`,
-        );
-      }
-
-      if (comment.commentator.id !== userId) {
-        throw new ForbiddenException(MessageEnum.INVALID_ID_NOT_OWNER);
-      }
-
-      return comment;
-    } catch (err) {
-      throw new HttpException(
-        err.message,
-        err.status ? err.status : HttpStatus.INTERNAL_SERVER_ERROR,
+    if (!comment) {
+      throw new InternalServerErrorException(
+        `Entity CommentModel, id=${commentId} not found in the database`,
       );
     }
+
+    if (comment.commentator.id !== userId) {
+      throw new ForbiddenException(MessageEnum.INVALID_ID_NOT_OWNER);
+    }
+
+    return comment;
   }
 
   /**

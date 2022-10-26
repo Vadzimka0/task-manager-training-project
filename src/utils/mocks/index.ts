@@ -1,3 +1,4 @@
+import { mockedCommentService } from './mock.comment.service';
 import { mockedConfigService } from './mock.config.service';
 import { mockedJwtService } from './mock.jwt.service';
 import { mockedNoteService } from './mock.note.service';
@@ -14,4 +15,5 @@ export {
   mockedUserService,
   mockedNoteService,
   mockedTaskService,
+  mockedCommentService,
 };
