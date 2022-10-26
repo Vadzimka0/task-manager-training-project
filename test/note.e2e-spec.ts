@@ -10,11 +10,11 @@ import { NoteModule } from '../src/note/note.module';
 import { NoteService } from '../src/note/note.service';
 import {
   createNoteDto,
-  createNoteDto2,
+  createNoteInvalidDto,
   noteApiDto,
   updatedNoteApiDto,
   updateNoteDto,
-  updateNoteDto2,
+  updateNoteMissingFieldDto,
 } from '../src/note/tests/note.test-data';
 import { mockedNoteService } from '../src/utils/mocks/mock.note.service';
 
@@ -38,6 +38,16 @@ describe('NoteController (e2e):', () => {
     await app.init();
   });
 
+  describe('GET /notes/:id', () => {
+    it('should return 200 if the note is fetched', async () => {
+      const response = await request(app.getHttpServer())
+        .get('/notes/:id')
+        .expect('Content-Type', /json/)
+        .expect(200);
+      expect(response.body).toEqual({ data: noteApiDto });
+    });
+  });
+
   describe('POST /notes', () => {
     it('should return 200 if the note is created', async () => {
       const response = await request(app.getHttpServer())
@@ -51,7 +61,7 @@ describe('NoteController (e2e):', () => {
     it('should return 422 if the description is longer than 512 characters.', async () => {
       return request(app.getHttpServer())
         .post('/notes')
-        .send(createNoteDto2)
+        .send(createNoteInvalidDto)
         .expect('Content-Type', /json/)
         .expect(422);
     });
@@ -70,9 +80,19 @@ describe('NoteController (e2e):', () => {
     it('should return 422 if any of the required fields is missing', async () => {
       return request(app.getHttpServer())
         .put('/notes/:id')
-        .send(updateNoteDto2)
+        .send(updateNoteMissingFieldDto)
         .expect('Content-Type', /json/)
         .expect(422);
+    });
+  });
+
+  describe('DELETE /notes/:id', () => {
+    it('should return 200 if the note is deleted', async () => {
+      const response = await request(app.getHttpServer())
+        .delete('/notes/:id')
+        .expect('Content-Type', /json/)
+        .expect(200);
+      expect(response.body).toEqual({ data: { id: expect.any(String) } });
     });
   });
 

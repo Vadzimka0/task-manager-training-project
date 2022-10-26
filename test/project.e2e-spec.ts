@@ -10,11 +10,11 @@ import { ProjectModule } from '../src/project/project.module';
 import { ProjectService } from '../src/project/project.service';
 import {
   createProjectDto,
-  createProjectDto2,
+  createProjectInvalidDto,
   projectApiDto,
   updatedProjectApiDto,
   updateProjectDto,
-  updateProjectDto2,
+  updateProjectMissingFieldDto,
 } from '../src/project/tests/project.test-data';
 import { mockedProjectService } from '../src/utils/mocks';
 
@@ -61,7 +61,7 @@ describe('ProjectController (e2e):', () => {
     it('should return 422 if the title is longer than 32 characters.', async () => {
       return request(app.getHttpServer())
         .post('/projects')
-        .send(createProjectDto2)
+        .send(createProjectInvalidDto)
         .expect('Content-Type', /json/)
         .expect(422);
     });
@@ -80,7 +80,7 @@ describe('ProjectController (e2e):', () => {
     it('should return 422 if any of the required fields is missing', async () => {
       return request(app.getHttpServer())
         .put('/projects/:id')
-        .send(updateProjectDto2)
+        .send(updateProjectMissingFieldDto)
         .expect('Content-Type', /json/)
         .expect(422);
     });

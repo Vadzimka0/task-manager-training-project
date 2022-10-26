@@ -10,9 +10,10 @@ import { NoteService } from '../note.service';
 import {
   createNoteDto,
   mockNoteId,
-  noteEntities,
-  noteEntity,
+  mockedNotes,
+  mockedNote,
   updateNoteDto,
+  mockedUpdatedNote,
 } from './note.test-data';
 
 const repositoryMockFactory: () => MockType<Repository<any>> = jest.fn(() => ({
@@ -23,7 +24,7 @@ const repositoryMockFactory: () => MockType<Repository<any>> = jest.fn(() => ({
     leftJoinAndSelect: jest.fn().mockReturnThis(),
     andWhere: jest.fn().mockReturnThis(),
     orderBy: jest.fn().mockReturnThis(),
-    getMany: jest.fn().mockResolvedValue(noteEntities),
+    getMany: jest.fn().mockResolvedValue(mockedNotes),
   })),
 }));
 
@@ -52,9 +53,9 @@ describe('The NoteService', () => {
 
   describe('createNote', () => {
     it('should create a new note record and return that', async () => {
-      repositoryMock.save.mockResolvedValue(noteEntity);
+      repositoryMock.save.mockResolvedValue(mockedNote);
       const createdNote = await service.createNote(createNoteDto, mockedUser);
-      expect(createdNote).toEqual(noteEntity);
+      expect(createdNote).toEqual(mockedNote);
     });
 
     it('should throw the "UnprocessableEntityException" if color is not valid', async () => {
@@ -67,10 +68,10 @@ describe('The NoteService', () => {
 
   describe('updateNote', () => {
     it('should update the note if ID exists and return updated note', async () => {
-      repositoryMock.findOneBy.mockResolvedValue(noteEntity);
-      repositoryMock.save.mockResolvedValue(noteEntity);
+      repositoryMock.findOneBy.mockResolvedValue(mockedUpdatedNote);
+      repositoryMock.save.mockResolvedValue(mockedUpdatedNote);
       const updatedNote = await service.updateNote(updateNoteDto, mockedUser.id, mockNoteId);
-      expect(updatedNote).toEqual(noteEntity);
+      expect(updatedNote).toEqual(mockedUpdatedNote);
     });
 
     it('should throw the "InternalServerErrorException" otherwise', entityNotExists);
@@ -78,7 +79,7 @@ describe('The NoteService', () => {
 
   describe('deleteNote', () => {
     it('should return the noteId if ID exists', async () => {
-      repositoryMock.findOneBy.mockResolvedValue(noteEntity);
+      repositoryMock.findOneBy.mockResolvedValue(mockedNote);
       const deletedNote = await service.deleteNote(mockedUser.id, mockNoteId);
       expect(deletedNote).toEqual({ id: mockNoteId });
       expect(repositoryMock.findOneBy).toHaveBeenCalledWith({ id: mockNoteId });
@@ -89,9 +90,9 @@ describe('The NoteService', () => {
 
   describe('fetchOneNote', () => {
     it('should return the note if ID exists', async () => {
-      repositoryMock.findOneBy.mockResolvedValue(noteEntity);
+      repositoryMock.findOneBy.mockResolvedValue(mockedNote);
       const fetchedNote = await service.fetchOneNote(mockedUser.id, mockNoteId);
-      expect(fetchedNote).toEqual(noteEntity);
+      expect(fetchedNote).toEqual(mockedNote);
       expect(repositoryMock.findOneBy).toHaveBeenCalledWith({ id: mockNoteId });
     });
 
@@ -107,7 +108,7 @@ describe('The NoteService', () => {
     it('should return the user notes ', async () => {
       repositoryMock.createQueryBuilder().leftJoinAndSelect().andWhere().orderBy().getMany();
       const fetchedNotes = await service.fetchUserNotes(mockedUser.id, mockedUser.id);
-      expect(fetchedNotes).toEqual(noteEntities);
+      expect(fetchedNotes).toEqual(mockedNotes);
       expect(repositoryMock.createQueryBuilder).toHaveBeenCalled();
     });
   });

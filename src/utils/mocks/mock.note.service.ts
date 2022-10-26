@@ -1,27 +1,21 @@
-import { v4 as uuidv4 } from 'uuid';
+import { mockedUserId } from '../../../test/user.test-data';
+import { mockedNote, mockedUpdatedNote } from '../../note/tests/note.test-data';
 
 export const mockedNoteService = {
-  createNote: jest.fn((dto, _) => {
-    return {
-      ...dto,
-      id: uuidv4(),
-      created_at: new Date().toDateString(),
-      is_completed: false,
-    };
-  }),
+  fetchOneNote: jest.fn((userId, noteId) => mockedNote),
 
-  updateNote: jest.fn((dto, _, noteId) => {
-    return {
-      ...dto,
-      id: noteId,
-      created_at: new Date(),
-    };
-  }),
+  createNote: jest.fn((dto, user) => mockedNote),
+
+  updateNote: jest.fn((dto, userId, noteId) => mockedUpdatedNote),
+
+  deleteNote: jest.fn((userId, noteId) => ({ id: noteId })),
 
   getRequiredFormatNote: jest.fn((note) => {
+    delete note.owner;
+
     return {
       ...note,
-      owner_id: 'f60c913b-0859-4797-8dea-c07409ffcf0d',
+      owner_id: mockedUserId,
     };
   }),
 };

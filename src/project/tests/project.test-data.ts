@@ -1,28 +1,33 @@
+import { v4 as uuidv4 } from 'uuid';
+
 import { mockedUser, mockedUserId } from '../../../test/user.test-data';
 import { CreateProjectDto, ProjectApiDto } from '../dto';
 import { ProjectEntity } from '../entities/project.entity';
-import { v4 as uuidv4 } from 'uuid';
 
-export const mockedProjectId = '3b4e9041-22d2-49eb-828a-b84919c7eff8';
+export const mockedProjectId = '533a6c9a-faa4-4436-8361-bb71ad2b9e8b';
+const mockedProjectTitle = 'title';
+export const mockedProjectUpdatedTitle = 'updated title';
+const mockedProjectInvalidTitle = 'Lorem ipsum dolor sit amet augue.';
+const mockedProjectColor = '#ffffff';
 
 export const createProjectDto: CreateProjectDto = {
-  title: 'title',
-  color: '#ffffff',
+  title: mockedProjectTitle,
+  color: mockedProjectColor,
   owner_id: mockedUserId,
 };
 
-export const createProjectDto2: CreateProjectDto = {
+export const createProjectInvalidDto: CreateProjectDto = {
   ...createProjectDto,
-  title: 'Lorem ipsum dolor sit amet augue.',
+  title: mockedProjectInvalidTitle,
 };
 
 export const updateProjectDto: CreateProjectDto = {
   ...createProjectDto,
-  title: 'updated title',
+  title: mockedProjectUpdatedTitle,
 };
 
-export const updateProjectDto2 = {
-  title: 'updated title',
+export const updateProjectMissingFieldDto = {
+  title: mockedProjectTitle,
   owner_id: mockedUserId,
 };
 
@@ -33,17 +38,21 @@ export const projectApiDto: Partial<ProjectApiDto> = {
 };
 
 export const updatedProjectApiDto: Partial<ProjectApiDto> = {
-  ...updateProjectDto,
-  id: expect.any(String),
-  created_at: expect.any(String),
+  ...projectApiDto,
+  title: mockedProjectUpdatedTitle,
 };
 
 export const mockedProject: Partial<ProjectEntity> = {
   id: uuidv4(),
   created_at: new Date(),
-  title: 'title',
-  color: '#ffffff',
+  title: mockedProjectTitle,
+  color: mockedProjectColor,
   owner: mockedUser,
+};
+
+export const mockedUpdatedProject: Partial<ProjectEntity> = {
+  ...mockedProject,
+  title: mockedProjectUpdatedTitle,
 };
 
 export const mockedPersonalProject: Partial<ProjectEntity> = {

@@ -1,28 +1,12 @@
-import { v4 as uuidv4 } from 'uuid';
-
-import { mockedProject } from '../../project/tests/project.test-data';
 import { mockedUserId } from '../../../test/user.test-data';
+import { mockedProject, mockedUpdatedProject } from '../../project/tests/project.test-data';
 
 export const mockedProjectService = {
-  fetchProject: jest.fn((userId, projectId) => {
-    return mockedProject;
-  }),
+  fetchProject: jest.fn((userId, projectId) => mockedProject),
 
-  createProject: jest.fn((dto, user) => {
-    return {
-      ...dto,
-      id: uuidv4(),
-      created_at: new Date().toDateString(),
-    };
-  }),
+  createProject: jest.fn((dto, user) => mockedProject),
 
-  updateProject: jest.fn((dto, userId, projectId) => {
-    return {
-      ...dto,
-      id: projectId,
-      created_at: new Date(),
-    };
-  }),
+  updateProject: jest.fn((dto, userId, projectId) => mockedUpdatedProject),
 
   deleteProject: jest.fn((userId, projectId) => ({ id: projectId })),
 

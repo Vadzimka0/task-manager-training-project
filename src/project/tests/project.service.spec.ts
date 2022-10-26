@@ -13,6 +13,8 @@ import {
   mockedProject,
   mockedProjectId,
   mockedProjects,
+  mockedUpdatedProject,
+  updateProjectDto,
 } from './project.test-data';
 
 const repositoryMockFactory: () => MockType<Repository<any>> = jest.fn(() => ({
@@ -64,14 +66,14 @@ describe('The ProjectService', () => {
 
   describe('updateProject', () => {
     it('should update the project if ID exists and return updated Project', async () => {
-      repositoryMock.findOneBy.mockResolvedValue(mockedProject);
-      repositoryMock.save.mockResolvedValue(mockedProject);
+      repositoryMock.findOneBy.mockResolvedValue(mockedUpdatedProject);
+      repositoryMock.save.mockResolvedValue(mockedUpdatedProject);
       const updatedProject = await service.updateProject(
-        createProjectDto,
+        updateProjectDto,
         mockedUser.id,
         mockedProjectId,
       );
-      expect(updatedProject).toEqual(mockedProject);
+      expect(updatedProject).toEqual(mockedUpdatedProject);
       expect(repositoryMock.findOneBy).toHaveBeenCalledWith({ id: mockedProjectId });
     });
 

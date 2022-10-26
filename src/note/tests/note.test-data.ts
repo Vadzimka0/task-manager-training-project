@@ -1,19 +1,24 @@
+import { v4 as uuidv4 } from 'uuid';
+
+import { mockedUser, mockedUserId } from '../../../test/user.test-data';
 import { CreateNoteDto, NoteApiDto, UpdateNoteDto } from '../dto';
 import { NoteEntity } from '../entities/note.entity';
-import { mockedUser, mockedUserId } from '../../../test/user.test-data';
 
 export const mockNoteId = '3b4e9041-22d2-49eb-828a-b84919c7eff8';
+const mockedNoteDescription = 'text';
+const mockedNoteInvalidDescription =
+  'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aliquam non rutrum libero, non fringilla ligula. Aliquam finibus dapibus metus non faucibus. Morbi id vehicula mauris. Maecenas at iaculis quam, at lobortis diam. Mauris placerat finibus bibendum. Donec ornare condimentum dolor, ac cursus erat volutpat ut. Aenean luctus vitae nibh eget fringilla. Orci varius natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Curabitur ullamcorper efficitur finibus. Nullam varius consequat fusce.';
+const mockedNoteColor = '#ffffff';
 
 export const createNoteDto: CreateNoteDto = {
-  description: 'text',
-  color: '#ffffff',
+  description: mockedNoteDescription,
+  color: mockedNoteColor,
   owner_id: mockedUserId,
 };
 
-export const createNoteDto2: CreateNoteDto = {
+export const createNoteInvalidDto: CreateNoteDto = {
   ...createNoteDto,
-  description:
-    'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aliquam non rutrum libero, non fringilla ligula. Aliquam finibus dapibus metus non faucibus. Morbi id vehicula mauris. Maecenas at iaculis quam, at lobortis diam. Mauris placerat finibus bibendum. Donec ornare condimentum dolor, ac cursus erat volutpat ut. Aenean luctus vitae nibh eget fringilla. Orci varius natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Curabitur ullamcorper efficitur finibus. Nullam varius consequat fusce.',
+  description: mockedNoteInvalidDescription,
 };
 
 export const updateNoteDto: UpdateNoteDto = {
@@ -21,7 +26,7 @@ export const updateNoteDto: UpdateNoteDto = {
   is_completed: true,
 };
 
-export const updateNoteDto2 = {
+export const updateNoteMissingFieldDto = {
   ...createNoteDto,
 };
 
@@ -37,22 +42,18 @@ export const updatedNoteApiDto: Partial<NoteApiDto> = {
   is_completed: true,
 };
 
-export const noteEntity: Partial<NoteEntity> = {
-  id: expect.any(String),
-  created_at: expect.any(String),
+export const mockedNote: Partial<NoteEntity> = {
+  id: uuidv4(),
+  created_at: new Date(),
   is_completed: false,
-  description: 'text',
-  color: '#ffffff',
+  description: mockedNoteDescription,
+  color: mockedNoteColor,
   owner: mockedUser,
 };
 
-export const noteEntities: Partial<NoteEntity>[] = [
-  {
-    id: expect.any(String),
-    created_at: expect.any(String),
-    is_completed: false,
-    description: 'text',
-    color: '#ffffff',
-    owner: mockedUser,
-  },
-];
+export const mockedUpdatedNote: Partial<NoteEntity> = {
+  ...mockedNote,
+  is_completed: true,
+};
+
+export const mockedNotes: Partial<NoteEntity>[] = [mockedNote];
