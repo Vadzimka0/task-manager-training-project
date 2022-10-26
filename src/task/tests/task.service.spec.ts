@@ -11,7 +11,14 @@ import { mockedProjectService, mockedUserService, MockType } from '../../utils/m
 import { TaskEntity } from '../entities/task.entity';
 import { TaskAttachmentService } from '../services/task-attachment.service';
 import { TaskService } from '../services/task.service';
-import { createTaskDto, mockedTask, mockedTaskId, mockedTasks } from './task.test-data';
+import {
+  createTaskDto,
+  mockedTask,
+  mockedTaskId,
+  mockedTasks,
+  mockedUpdatedTask,
+  updateTaskDto,
+} from './task.test-data';
 import { mockedProjectId } from '../../project/tests/project.test-data';
 
 const repositoryMockFactory: () => MockType<Repository<any>> = jest.fn(() => ({
@@ -59,11 +66,11 @@ describe('The TaskService', () => {
   });
 
   describe('updateTask', () => {
-    it('should update the project if ID exists and return updated Task', async () => {
-      repositoryMock.findOne.mockResolvedValue(mockedTask);
-      repositoryMock.save.mockResolvedValue(mockedTask);
-      const updatedTask = await service.updateTask(createTaskDto, mockedUser, mockedTaskId);
-      expect(updatedTask).toEqual(mockedTask);
+    it('should update the task if ID exists and return updated Task', async () => {
+      repositoryMock.findOne.mockResolvedValue(mockedUpdatedTask);
+      repositoryMock.save.mockResolvedValue(mockedUpdatedTask);
+      const updatedTask = await service.updateTask(updateTaskDto, mockedUser, mockedTaskId);
+      expect(updatedTask).toEqual(mockedUpdatedTask);
     });
 
     it('should throw the "InternalServerErrorException" otherwise', () => {
