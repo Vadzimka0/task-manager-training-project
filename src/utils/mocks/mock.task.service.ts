@@ -22,4 +22,8 @@ export const mockedTaskService = {
       assigned_to: mockedAssignedToId,
     };
   }),
+
+  idsMatching: jest.fn(),
+
+  getValidTaskForComment: jest.fn(),
 };
