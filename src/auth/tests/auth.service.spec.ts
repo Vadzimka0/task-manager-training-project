@@ -9,7 +9,8 @@ import { TaskService } from '../../task/services/task.service';
 import { UserEntity } from '../../user/entities/user.entity';
 import { UserAvatarService } from '../../user/services/user-avatar.service';
 import { UserService } from '../../user/services/user.service';
-import { mockedConfigService, mockedJwtService } from '../../utils/mocks';
+import { mockedUser, mockedUserId } from '../../user/tests/user.test-data';
+import { mockedConfigService, mockedJwtService, mockedUserService } from '../../utils/mocks';
 import { AuthService } from '../auth.service';
 
 describe('The AuthService', () => {
@@ -18,8 +19,8 @@ describe('The AuthService', () => {
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
-        UserService,
         AuthService,
+        { provide: UserService, useValue: mockedUserService },
         { provide: ConfigService, useValue: mockedConfigService },
         { provide: JwtService, useValue: mockedJwtService },
         { provide: getRepositoryToken(UserEntity), useValue: {} },
@@ -33,10 +34,23 @@ describe('The AuthService', () => {
     authService = await module.get(AuthService);
   });
 
-  describe('when creating a token', () => {
-    it('should return a string', () => {
+  describe('getJwtAccessToken', () => {
+    it('should return a string when creating a token', () => {
       const email = 'test@example.com';
       expect(typeof authService.getJwtAccessToken(email)).toEqual('string');
+    });
+  });
+
+  describe('getUserSessionInfo', () => {
+    it('should return user_id, tokens, token_type, and expires_in', async () => {
+      const info = await authService.getUserSessionInfo(mockedUser);
+      expect(info).toEqual({
+        user_id: mockedUserId,
+        access_token: expect.any(String),
+        refresh_token: expect.any(String),
+        token_type: 'Bearer',
+        expires_in: expect.any(Number),
+      });
     });
   });
 });
