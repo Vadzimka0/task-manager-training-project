@@ -1,6 +1,6 @@
 import { v4 as uuidv4 } from 'uuid';
 
-import { mockedUser, mockedUserId } from '../../../test/user.test-data';
+import { mockedUser, mockedUserId } from '../../user/tests/user.test-data';
 import { CommentApiDto } from '../dto/api-dto/comment-api.dto';
 import { CreateCommentDto } from '../dto/create-comment.dto';
 import { CommentEntity } from '../entities/comment.entity';

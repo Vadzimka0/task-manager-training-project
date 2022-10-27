@@ -101,7 +101,7 @@ export class CommentAttachmentController {
     const stream = createReadStream(join(process.cwd(), file.path));
     res.set({
       'Content-Type': file.mimetype,
-      'Content-Disposition': `inline; filename="${file.filename}"`, //attachment
+      'Content-Disposition': `attachment; filename="${file.filename}"`,
     });
 
     return new StreamableFile(stream);

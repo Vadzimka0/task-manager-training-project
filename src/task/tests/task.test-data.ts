@@ -1,8 +1,8 @@
 import { v4 as uuidv4 } from 'uuid';
 
-import { mockedUser, mockedUserId } from '../../../test/user.test-data';
 import { ProjectEntity } from '../../project/entities/project.entity';
 import { mockedProject, mockedProjectId } from '../../project/tests/project.test-data';
+import { mockedUser, mockedUserId } from '../../user/tests/user.test-data';
 import { TaskApiDto } from '../dto/api-dto/task-api.dto';
 import { CreateTaskDto } from '../dto/create-task.dto';
 import { TaskEntity } from '../entities/task.entity';

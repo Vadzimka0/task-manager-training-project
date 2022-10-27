@@ -1,6 +1,6 @@
 import { v4 as uuidv4 } from 'uuid';
 
-import { mockedUser, mockedUserId } from '../../../test/user.test-data';
+import { mockedUser, mockedUserId } from '../../user/tests/user.test-data';
 import { CreateProjectDto, ProjectApiDto } from '../dto';
 import { ProjectEntity } from '../entities/project.entity';
 

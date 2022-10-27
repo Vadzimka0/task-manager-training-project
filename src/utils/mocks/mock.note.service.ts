@@ -1,5 +1,5 @@
-import { mockedUserId } from '../../../test/user.test-data';
 import { mockedNote, mockedUpdatedNote } from '../../note/tests/note.test-data';
+import { mockedUserId } from '../../user/tests/user.test-data';
 
 export const mockedNoteService = {
   fetchOneNote: jest.fn((userId, noteId) => mockedNote),

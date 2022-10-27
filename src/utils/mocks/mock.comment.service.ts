@@ -1,6 +1,6 @@
-import { mockedUserId } from '../../../test/user.test-data';
 import { mockedComment, mockedComments } from '../../task/tests/comment.test-data';
 import { mockedTaskId } from '../../task/tests/task.test-data';
+import { mockedUserId } from '../../user/tests/user.test-data';
 
 export const mockedCommentService = {
   fetchTaskComments: jest.fn((taskId) => mockedComments),

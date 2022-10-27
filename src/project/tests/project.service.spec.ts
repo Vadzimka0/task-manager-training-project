@@ -2,8 +2,8 @@ import { InternalServerErrorException, UnprocessableEntityException } from '@nes
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { mockedUser } from '../../user/tests/user.test-data';
 
-import { mockedUser } from '../../../test/user.test-data';
 import { MockType } from '../../utils/mocks/mock.type';
 import { ProjectEntity } from '../entities/project.entity';
 import { ProjectService } from '../project.service';

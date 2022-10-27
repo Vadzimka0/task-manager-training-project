@@ -5,6 +5,7 @@ import { mockedNoteService } from './mock.note.service';
 import { mockedProjectService } from './mock.project.service';
 import { mockedTaskService } from './mock.task.service';
 import { MockType } from './mock.type';
+import { mockedUserAvatarService } from './mock.user-avatar.service';
 import { mockedUserService } from './mock.user.service';
 
 export {
@@ -16,4 +17,5 @@ export {
   mockedNoteService,
   mockedTaskService,
   mockedCommentService,
+  mockedUserAvatarService,
 };

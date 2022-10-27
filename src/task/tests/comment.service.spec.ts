@@ -3,8 +3,8 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
-import { mockedUser } from '../../../test/user.test-data';
 import { UserAvatarService } from '../../user/services';
+import { mockedUser } from '../../user/tests/user.test-data';
 import { mockedTaskService, MockType } from '../../utils/mocks';
 import { CommentEntity } from '../entities/comment.entity';
 import { CommentAttachmentService, CommentService, TaskService } from '../services';

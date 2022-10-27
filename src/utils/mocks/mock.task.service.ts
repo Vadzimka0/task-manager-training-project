@@ -1,6 +1,6 @@
-import { mockedUserId } from '../../../test/user.test-data';
 import { mockedProjectId } from '../../project/tests/project.test-data';
 import { mockedAssignedToId, mockedTask, mockedUpdatedTask } from '../../task/tests/task.test-data';
+import { mockedUserId } from '../../user/tests/user.test-data';
 
 export const mockedTaskService = {
   fetchTask: jest.fn((taskId) => mockedTask),

@@ -3,7 +3,6 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
-import { mockedUser } from '../../../test/user.test-data';
 import { ProjectService } from '../../project/project.service';
 import { UserAvatarService } from '../../user/services';
 import { UserService } from '../../user/services/user.service';
@@ -20,6 +19,7 @@ import {
   updateTaskDto,
 } from './task.test-data';
 import { mockedProjectId } from '../../project/tests/project.test-data';
+import { mockedUser } from '../../user/tests/user.test-data';
 
 const repositoryMockFactory: () => MockType<Repository<any>> = jest.fn(() => ({
   findOne: jest.fn(),

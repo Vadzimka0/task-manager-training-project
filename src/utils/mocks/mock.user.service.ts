@@ -1,7 +1,5 @@
-import { mockedUser } from '../../../test/user.test-data';
+import { mockedUser } from '../../user/tests/user.test-data';
 
 export const mockedUserService = {
-  fetchUserById: jest.fn((id) => {
-    return mockedUser;
-  }),
+  fetchUserById: jest.fn((id) => mockedUser),
 };
