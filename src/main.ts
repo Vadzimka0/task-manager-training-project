@@ -30,5 +30,8 @@ async function bootstrap() {
 
   await app.listen(3000);
   console.log(`Application is running on: ${process.env.URL_HOST}/${process.env.URL_PREFIX_PATH}`);
+  console.log(
+    `Swagger is running on: ${process.env.URL_HOST}/${process.env.URL_PREFIX_PATH}/swagger`,
+  );
 }
 bootstrap();
