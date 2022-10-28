@@ -1,6 +1,5 @@
 import {
   Body,
-  ClassSerializerInterceptor,
   Controller,
   Get,
   HttpCode,
@@ -47,7 +46,6 @@ import type { Response } from 'express';
 @ApiTags('Comments Attachments:')
 @Controller('comments-attachments')
 @UseGuards(JwtAuthGuard)
-@UseInterceptors(ClassSerializerInterceptor)
 export class CommentAttachmentController {
   constructor(private readonly commentAttachmentService: CommentAttachmentService) {}
 

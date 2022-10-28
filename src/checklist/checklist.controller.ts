@@ -1,6 +1,5 @@
 import {
   Body,
-  ClassSerializerInterceptor,
   Controller,
   Delete,
   Get,
@@ -9,7 +8,6 @@ import {
   Post,
   Put,
   UseGuards,
-  UseInterceptors,
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
@@ -36,7 +34,6 @@ import { ChecklistApiDto } from './dto/api-dto/checklist-api.dto';
 @ApiTags('Checklists:')
 @Controller()
 @UseGuards(JwtAuthGuard)
-@UseInterceptors(ClassSerializerInterceptor)
 export class ChecklistController {
   constructor(private readonly checklistService: ChecklistService) {}
 

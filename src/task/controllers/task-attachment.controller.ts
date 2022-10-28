@@ -1,6 +1,5 @@
 import {
   Body,
-  ClassSerializerInterceptor,
   Controller,
   Get,
   HttpCode,
@@ -46,7 +45,6 @@ import type { Response } from 'express';
 @ApiTags('Tasks Attachments:')
 @Controller('tasks-attachments')
 @UseGuards(JwtAuthGuard)
-@UseInterceptors(ClassSerializerInterceptor)
 export class TaskAttachmentController {
   constructor(private readonly taskAttachmentService: TaskAttachmentService) {}
 

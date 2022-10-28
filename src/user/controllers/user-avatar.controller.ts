@@ -1,6 +1,5 @@
 import {
   Body,
-  ClassSerializerInterceptor,
   Controller,
   Get,
   HttpCode,
@@ -51,7 +50,6 @@ import type { Response } from 'express';
 @ApiTags('Users Avatars:')
 @Controller('users-avatar')
 @UseGuards(JwtAuthGuard)
-@UseInterceptors(ClassSerializerInterceptor)
 export class UserAvatarController {
   constructor(
     private readonly userAvatarService: UserAvatarService,
