@@ -34,6 +34,10 @@ export class UserAvatarService {
     addAvatarDto: AddAvatarDto,
     file: Express.Multer.File,
   ): Promise<UserEntity> {
+    if (!file) {
+      throw new UnprocessableEntityException(AvatarMessageEnum.AVATAR_FILE_NOT_FOUND);
+    }
+
     if (user.id !== addAvatarDto.user_id) {
       throw new UnprocessableEntityException(AvatarMessageEnum.AVATAR_COULD_NOT_BE_ATTACHED);
     }

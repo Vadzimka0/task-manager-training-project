@@ -4,7 +4,6 @@ import { IsNotEmpty, IsUUID } from 'class-validator';
 export class AddAvatarDto {
   @ApiProperty({ example: 'fb4cad39-9add-4633-8050-b933ad1d7458' })
   @IsNotEmpty()
-  @IsUUID()
   readonly user_id: string;
 }
 

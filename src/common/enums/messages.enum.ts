@@ -11,6 +11,7 @@ export enum MessageEnum {
 
 export enum AvatarMessageEnum {
   AVATAR_COULD_NOT_BE_ATTACHED = 'The avatar could not be attached to user. The user is not found.',
+  AVATAR_FILE_NOT_FOUND = 'The avatar could not be attached to user. The file is not found.',
 }
 
 export enum AttachmentMessageEnum {

@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsUUID, MaxLength } from 'class-validator';
+import { IsNotEmpty, MaxLength } from 'class-validator';
 
 export class CreateProjectDto {
   @ApiProperty({
@@ -21,6 +21,6 @@ export class CreateProjectDto {
     description: 'Has to match a uuid',
     example: 'f60c913b-0859-4797-8dea-c07409ffcf0d',
   })
-  @IsUUID()
+  @IsNotEmpty()
   readonly owner_id: string;
 }
