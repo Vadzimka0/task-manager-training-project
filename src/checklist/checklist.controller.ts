@@ -50,6 +50,7 @@ export class ChecklistController {
     @User() currentUser: UserEntity,
   ): Promise<Data<ChecklistApiDto>> {
     const checklist = await this.checklistService.createChecklist(createChecklistDto, currentUser);
+    checklist.items = this.checklistService.getRequiredFormatChecklistItems(checklist);
     const data = this.checklistService.getRequiredFormatChecklist(checklist as ChecklistApiDto);
     return { data };
   }
@@ -77,6 +78,7 @@ export class ChecklistController {
       listId,
     );
     const data = this.checklistService.getRequiredFormatChecklist(checklist as ChecklistApiDto);
+    checklist.items = this.checklistService.getRequiredFormatChecklistItems(checklist);
     return { data };
   }
 
