@@ -253,14 +253,14 @@ export class TaskService {
     projectId: string,
     assignedToId: string,
   ): Promise<ProjectEntity> {
-    if (!assignedToId) {
-      const specialOneProject = await this.projectService.fetchProjectByTitle(
-        SPECIAL_ONE_PROJECT_NAME,
-        userId,
-      );
+    // if (!assignedToId) {
+    //   const specialOneProject = await this.projectService.fetchProjectByTitle(
+    //     SPECIAL_ONE_PROJECT_NAME,
+    //     userId,
+    //   );
 
-      return specialOneProject;
-    }
+    //   return specialOneProject;
+    // }
 
     const project = await this.projectService.fetchProject(userId, projectId);
 
