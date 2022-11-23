@@ -45,9 +45,9 @@ export class TaskAttachmentService {
   ): Promise<TaskAttachmentEntity> {
     const dtoType = addTaskAttachmentDto.type.toLocaleLowerCase();
 
-    if (dtoType === 'image' && dtoType !== file.mimetype.split('/')[0]) {
-      throw new UnprocessableEntityException(AttachmentMessageEnum.FORMAT_NOT_SUPPORTED);
-    }
+    // if (dtoType === 'image' && dtoType !== file.mimetype.split('/')[0]) {
+    //   throw new UnprocessableEntityException(AttachmentMessageEnum.FORMAT_NOT_SUPPORTED);
+    // }
 
     const currentTask = await this.taskService.getValidTaskForEdit(
       userId,
