@@ -1,19 +1,13 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { IsBoolean, IsNotEmpty, MaxLength } from 'class-validator';
+import { ApiPropertyOptional } from '@nestjs/swagger';
+import { IsOptional } from 'class-validator';
 
-export class CreateChecklistItemDto {
-  @ApiProperty({
-    description: 'Has to be no more than 512 characters',
-    example: 'visit car dealerships',
-  })
-  @IsNotEmpty()
-  @MaxLength(512)
-  readonly content: string;
+import { ChecklistItemDto } from './checklist-item.dto';
 
-  @ApiProperty({
-    description: 'Has to match a boolean value',
-    example: false,
+export class CreateChecklistItemDto extends ChecklistItemDto {
+  @ApiPropertyOptional({
+    description: 'Has to match null',
+    example: 'null',
   })
-  @IsBoolean()
-  readonly is_completed: boolean;
+  @IsOptional()
+  readonly id: null;
 }

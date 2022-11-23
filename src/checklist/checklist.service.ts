@@ -151,7 +151,8 @@ export class ChecklistService {
 
     for (const item of items) {
       const newItem = new ChecklistItemEntity();
-      Object.assign(newItem, item);
+      const { id, ...itemWithoutId } = item;
+      Object.assign(newItem, itemWithoutId);
       await this.checklistItemRepository.save(newItem);
       listItems.push(newItem);
     }
