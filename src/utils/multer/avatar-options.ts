@@ -14,7 +14,7 @@ export const avatarOptions: MulterOptions = {
     done: (error: Error, acceptFile: boolean) => void,
   ) {
     console.log(file.mimetype);
-    if (file.mimetype.match(/\/(jpg|jpeg|png)$/)) {
+    if (file.mimetype.match(/\/(jpg|jpeg|png|octet-stream)$/)) {
       done(null, true);
     } else {
       done(new UnprocessableEntityException(AttachmentMessageEnum.FORMAT_NOT_SUPPORTED), false);
