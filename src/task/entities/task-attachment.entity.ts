@@ -28,8 +28,7 @@ export class TaskAttachmentEntity {
   @Column()
   path: string;
 
-  @ApiHideProperty()
-  @Exclude()
+  @ApiProperty()
   @Column()
   filename: string;
 
@@ -40,6 +39,6 @@ export class TaskAttachmentEntity {
 
   @BeforeInsert()
   setTypeToUpperCase() {
-    this.type = this.type.toUpperCase();
+    this.type = this.type ? this.type.toUpperCase() : 'UNKNOWN';
   }
 }

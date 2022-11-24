@@ -43,7 +43,7 @@ export class CommentAttachmentService {
     addCommentAttachmentDto: AddCommentAttachmentDto,
     file: Express.Multer.File,
   ): Promise<CommentAttachmentEntity> {
-    const dtoType = addCommentAttachmentDto.type.toLocaleLowerCase();
+    // const dtoType = addCommentAttachmentDto.type?.toLocaleLowerCase();
 
     // if (dtoType === 'image' && dtoType !== file.mimetype.split('/')[0]) {
     //   throw new UnprocessableEntityException(AttachmentMessageEnum.FORMAT_NOT_SUPPORTED);
