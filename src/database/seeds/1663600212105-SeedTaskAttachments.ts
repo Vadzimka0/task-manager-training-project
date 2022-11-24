@@ -10,7 +10,7 @@ export class SeedTaskAttachments1663600212105 implements MigrationInterface {
         type,
         mimetype,
         path,
-        filename,
+        name,
         task_id
       ) 
       VALUES (
@@ -28,7 +28,7 @@ export class SeedTaskAttachments1663600212105 implements MigrationInterface {
         type,
         mimetype,
         path,
-        filename,
+        name,
         task_id
       ) 
       VALUES (

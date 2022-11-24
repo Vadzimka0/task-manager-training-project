@@ -10,7 +10,7 @@ export class SeedCommentAttachments1663600212107 implements MigrationInterface {
         type,
         mimetype,
         path,
-        filename,
+        name,
         comment_id
       ) 
       VALUES (
@@ -28,7 +28,7 @@ export class SeedCommentAttachments1663600212107 implements MigrationInterface {
         type,
         mimetype,
         path,
-        filename,
+        name,
         comment_id
       ) 
       VALUES (

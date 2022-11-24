@@ -11,7 +11,7 @@ export class CreateCommentAttachment1663601365488 implements MigrationInterface 
           "type" character varying NOT NULL, 
           "mimetype" character varying NOT NULL, 
           "path" character varying NOT NULL, 
-          "filename" character varying NOT NULL, 
+          "name" character varying NOT NULL, 
           "comment_id" uuid, 
           CONSTRAINT "PK_c70c6a3fd16b1591da5756f01f7" PRIMARY KEY ("id")
         )`,

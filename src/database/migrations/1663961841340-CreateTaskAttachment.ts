@@ -11,7 +11,7 @@ export class CreateTaskAttachment1663961841340 implements MigrationInterface {
           "type" character varying NOT NULL, 
           "mimetype" character varying NOT NULL, 
           "path" character varying NOT NULL, 
-          "filename" character varying NOT NULL, 
+          "name" character varying NOT NULL, 
           "task_id" uuid, 
           CONSTRAINT "PK_34eb9e5133310a488eaba0be28a" PRIMARY KEY ("id")
         )`,

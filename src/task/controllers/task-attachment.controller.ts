@@ -95,7 +95,7 @@ export class TaskAttachmentController {
     const stream = createReadStream(join(process.cwd(), file.path));
     res.set({
       'Content-Type': file.mimetype,
-      'Content-Disposition': `attachment; filename="${file.filename}"`,
+      'Content-Disposition': `attachment; filename="${file.name}"`,
     });
 
     return new StreamableFile(stream);

@@ -30,7 +30,8 @@ export class CommentAttachmentEntity {
 
   @ApiProperty()
   @Column()
-  filename: string;
+  name: string;
+  // filename: string;
 
   @ApiHideProperty()
   @Exclude()

@@ -58,7 +58,8 @@ export class CommentAttachmentService {
       id: file.filename,
       path: file.path,
       mimetype: file.mimetype,
-      filename: file.originalname,
+      name: file.originalname,
+      // filename: file.originalname,
       type: addCommentAttachmentDto.type,
     };
 

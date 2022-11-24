@@ -30,7 +30,8 @@ export class TaskAttachmentEntity {
 
   @ApiProperty()
   @Column()
-  filename: string;
+  name: string;
+  // filename: string;
 
   @ApiHideProperty()
   @Exclude()
