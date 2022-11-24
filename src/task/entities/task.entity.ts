@@ -1,6 +1,6 @@
 import { ApiHideProperty, ApiProperty } from '@nestjs/swagger';
 import { Exclude } from 'class-transformer';
-import { Column, Entity, JoinTable, ManyToMany, ManyToOne, OneToMany } from 'typeorm';
+import { BeforeInsert, Column, Entity, JoinTable, ManyToMany, ManyToOne, OneToMany } from 'typeorm';
 
 import { AbstractEntity } from '../../common/classes';
 import { ProjectEntity } from '../../project/entities/project.entity';
@@ -22,7 +22,8 @@ export class TaskEntity extends AbstractEntity {
 
   @ApiProperty({ example: '2024-01-25T11:00:00' })
   @Column()
-  due_date: Date;
+  due_date: string;
+  // due_date: Date;
 
   @ApiProperty({ example: false })
   @Column()
@@ -52,4 +53,9 @@ export class TaskEntity extends AbstractEntity {
     eager: true,
   })
   attachments: TaskAttachmentEntity[];
+
+  @BeforeInsert()
+  setDueDate() {
+    this.due_date = this.due_date.slice(0, 16);
+  }
 }
