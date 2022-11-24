@@ -13,7 +13,6 @@ export const avatarOptions: MulterOptions = {
     file: Express.Multer.File,
     done: (error: Error, acceptFile: boolean) => void,
   ) {
-    console.log(file.mimetype);
     if (file.mimetype.match(/\/(jpg|jpeg|png|octet-stream)$/)) {
       done(null, true);
     } else {

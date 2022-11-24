@@ -2,7 +2,7 @@ import { MigrationInterface, QueryRunner } from 'typeorm';
 
 export class CreateTask1663600855087 implements MigrationInterface {
   name = 'CreateTask1663600855087';
-
+  // "due_date" TIMESTAMP NOT NULL,
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(
       `CREATE TABLE "tasks" (
@@ -10,7 +10,7 @@ export class CreateTask1663600855087 implements MigrationInterface {
           "created_at" TIMESTAMP NOT NULL DEFAULT now(), 
           "title" character varying(256) NOT NULL, 
           "description" character varying NOT NULL, 
-          "due_date" TIMESTAMP NOT NULL, 
+          "due_date" character varying NOT NULL, 
           "is_completed" boolean NOT NULL, 
           "project_id" uuid, 
           "performer_id" uuid, 
