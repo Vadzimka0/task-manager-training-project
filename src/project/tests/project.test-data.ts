@@ -44,8 +44,8 @@ export const updatedProjectApiDto: Partial<ProjectApiDto> = {
 
 export const mockedProject: Partial<ProjectEntity> = {
   id: uuidv4(),
-  created_at: new Date().toISOString(),
-  // created_at: new Date(),
+  // created_at: new Date().toISOString(),
+  created_at: new Date(),
   title: mockedProjectTitle,
   color: mockedProjectColor,
   owner: mockedUser,

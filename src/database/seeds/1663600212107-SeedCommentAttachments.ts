@@ -7,6 +7,7 @@ export class SeedCommentAttachments1663600212107 implements MigrationInterface {
     await queryRunner.query(
       `INSERT INTO comment_attachments (
         id,
+        created_at,
         type,
         mimetype,
         path,
@@ -15,6 +16,7 @@ export class SeedCommentAttachments1663600212107 implements MigrationInterface {
       ) 
       VALUES (
         'd0423523-88a5-4988-bf2a-458e1e7bfaed',
+        '2022-11-25T17:00:00.000',
         'IMAGE',
         'image/jpeg',
         'uploads/comments-attachments/d0423523-88a5-4988-bf2a-458e1e7bfaed',
@@ -25,6 +27,7 @@ export class SeedCommentAttachments1663600212107 implements MigrationInterface {
     await queryRunner.query(
       `INSERT INTO comment_attachments (
         id,
+        created_at,
         type,
         mimetype,
         path,
@@ -33,6 +36,7 @@ export class SeedCommentAttachments1663600212107 implements MigrationInterface {
       ) 
       VALUES (
         'e640ea67-a833-47b9-b672-ef98f5e87181',
+        '2022-11-25T17:00:00.000',
         'IMAGE',
         'image/jpeg',
         'uploads/comments-attachments/e640ea67-a833-47b9-b672-ef98f5e87181',

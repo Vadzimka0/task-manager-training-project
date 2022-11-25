@@ -7,7 +7,7 @@ export class CreateTaskAttachment1663961841340 implements MigrationInterface {
     await queryRunner.query(
       `CREATE TABLE "task_attachments" (
           "id" character varying NOT NULL, 
-          "created_at" TIMESTAMP NOT NULL DEFAULT now(), 
+          "created_at" character varying NOT NULL, 
           "type" character varying NOT NULL, 
           "mimetype" character varying NOT NULL, 
           "path" character varying NOT NULL, 

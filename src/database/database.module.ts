@@ -18,7 +18,7 @@ import { SnakeNamingStrategy } from 'typeorm-naming-strategies';
         entities: [],
         namingStrategy: new SnakeNamingStrategy(),
         autoLoadEntities: true,
-        synchronize: true,
+        // synchronize: true,
       }),
     }),
   ],

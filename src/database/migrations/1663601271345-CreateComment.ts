@@ -7,7 +7,7 @@ export class CrateComment1663601271345 implements MigrationInterface {
     await queryRunner.query(
       `CREATE TABLE "comments" (
         "id" uuid NOT NULL DEFAULT uuid_generate_v4(), 
-        "created_at" TIMESTAMP NOT NULL DEFAULT now(), 
+        "created_at" character varying NOT NULL, 
         "content" character varying(1024) NOT NULL, 
         "task_id" uuid, 
         "commentator_id" uuid, 

@@ -4,7 +4,7 @@ export class SeedUser1663600212101 implements MigrationInterface {
   name = 'SeedUser1663600212101';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
-    // password is 'dGVzdDFwYXNz'
+    // password is 'test1pass' // 'dGVzdDFwYXNz'
     await queryRunner.query(
       `INSERT INTO users (
         id,
