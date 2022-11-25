@@ -8,6 +8,5 @@ export abstract class AbstractEntity extends BaseEntity {
 
   @ApiProperty()
   @CreateDateColumn()
-  created_at: string;
-  // created_at: Date;
+  created_at: Date;
 }

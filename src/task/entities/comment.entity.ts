@@ -1,6 +1,6 @@
 import { ApiHideProperty, ApiProperty } from '@nestjs/swagger';
 import { Exclude } from 'class-transformer';
-import { Column, Entity, ManyToOne, OneToMany } from 'typeorm';
+import { Column, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 
 import { AbstractEntity } from '../../common/classes';
 import { UserEntity } from '../../user/entities/user.entity';
@@ -9,7 +9,16 @@ import { CommentAttachmentEntity } from './comment-attachment.entity';
 import { TaskEntity } from './task.entity';
 
 @Entity({ name: 'comments' })
-export class CommentEntity extends AbstractEntity {
+// export class CommentEntity extends AbstractEntity {
+export class CommentEntity {
+  @ApiProperty({ example: '235781f7-1919-4441-b809-2ccc7618f943' })
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
+
+  @ApiProperty()
+  @Column()
+  created_at: string;
+
   @ApiProperty({ example: 'first comment' })
   @Column({ length: 1024 })
   content: string;
