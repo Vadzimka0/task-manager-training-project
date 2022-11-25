@@ -1,6 +1,13 @@
 import { ApiHideProperty, ApiProperty } from '@nestjs/swagger';
 import { Exclude } from 'class-transformer';
-import { Column, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  BeforeInsert,
+  Column,
+  Entity,
+  ManyToOne,
+  OneToMany,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 
 import { AbstractEntity } from '../../common/classes';
 import { UserEntity } from '../../user/entities/user.entity';
@@ -35,4 +42,9 @@ export class CommentEntity {
   @ApiProperty({ type: () => [CommentAttachmentApiDto], nullable: true })
   @OneToMany(() => CommentAttachmentEntity, (attachment) => attachment.comment)
   attachments: CommentAttachmentEntity[];
+
+  @BeforeInsert()
+  setCreatedAtDate() {
+    this.created_at = new Date().toISOString().slice(0, 23);
+  }
 }
