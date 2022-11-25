@@ -11,8 +11,10 @@ export class TaskAttachmentEntity {
   id: string;
 
   @ApiProperty()
-  @CreateDateColumn()
-  created_at: Date;
+  // @CreateDateColumn()
+  @Column()
+  created_at: string;
+  // created_at: Date;
 
   @ApiProperty({ enum: ['IMAGE', 'FILE'] })
   @Column()
@@ -41,5 +43,10 @@ export class TaskAttachmentEntity {
   @BeforeInsert()
   setTypeToUpperCase() {
     this.type = this.type ? this.type.toUpperCase() : 'UNKNOWN';
+  }
+
+  @BeforeInsert()
+  setCreatedAtDate() {
+    this.created_at = new Date().toISOString().slice(0, 23);
   }
 }

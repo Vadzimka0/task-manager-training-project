@@ -44,7 +44,8 @@ export const updatedNoteApiDto: Partial<NoteApiDto> = {
 
 export const mockedNote: Partial<NoteEntity> = {
   id: uuidv4(),
-  created_at: new Date(),
+  // created_at: new Date(),
+  created_at: new Date().toISOString(),
   is_completed: false,
   description: mockedNoteDescription,
   color: mockedNoteColor,

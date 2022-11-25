@@ -58,7 +58,8 @@ export const updatedTaskApiDto: Partial<TaskApiDto> = {
 
 export const mockedTask: Partial<TaskEntity> = {
   id: uuidv4(),
-  created_at: new Date(),
+  // created_at: new Date(),
+  created_at: new Date().toISOString(),
   title: mockedTaskTitle,
   description: mockedTaskDescription,
   // due_date: new Date(),

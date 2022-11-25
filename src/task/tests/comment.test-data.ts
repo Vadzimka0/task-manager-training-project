@@ -32,7 +32,8 @@ export const commentApiDto: Partial<CommentApiDto> = {
 
 export const mockedComment: Partial<CommentEntity> = {
   id: uuidv4(),
-  created_at: new Date(),
+  // created_at: new Date(),
+  created_at: new Date().toISOString(),
   content: mockedCommentContent,
   attachments: null,
   commentator: mockedUser,
