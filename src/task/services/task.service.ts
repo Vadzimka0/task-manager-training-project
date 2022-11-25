@@ -9,7 +9,6 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, SelectQueryBuilder } from 'typeorm';
 
-import { SPECIAL_ONE_PROJECT_NAME } from '../../common/constants/default-constants';
 import { CommentMessageEnum, MessageEnum } from '../../common/enums/messages.enum';
 import { ProjectEntity } from '../../project/entities/project.entity';
 import { ProjectService } from '../../project/project.service';
@@ -57,7 +56,7 @@ export class TaskService {
     const newTask = new TaskEntity();
     Object.assign(newTask, dtoWithoutRelationItems);
 
-    const currentProject = await this.getProject(currentUser.id, project_id, assigned_to);
+    const currentProject = await this.getProject(currentUser.id, project_id);
     newTask.project = currentProject;
 
     const assignedToUser = await this.getUserPerformer(assigned_to);
@@ -82,14 +81,13 @@ export class TaskService {
     const { owner_id, project_id, assigned_to, members, attachments, ...dtoWithoutRelationItems } =
       taskDto;
 
-    if (attachments !== null) throw new ForbiddenException('attachments must be null');
+    // if (attachments !== null) throw new ForbiddenException('attachments must be null');
+    // this.idsMatching(owner_id, currentUser.id);
 
-    this.idsMatching(owner_id, currentUser.id);
-
-    const currentTask = await this.getValidTaskForEdit(currentUser.id, taskId);
+    const currentTask = await this.getValidTaskForEdit(taskId);
     Object.assign(currentTask, dtoWithoutRelationItems);
 
-    const updatedProject = await this.getProject(currentUser.id, project_id, assigned_to);
+    const updatedProject = await this.getProject(owner_id, project_id);
     currentTask.project = updatedProject;
 
     const updatedPerformer = await this.getUserPerformer(assigned_to);
@@ -112,7 +110,7 @@ export class TaskService {
    * @returns A promise with the id of deleted task
    */
   async deleteTask(userId: string, taskId: string): Promise<{ id: string }> {
-    await this.getValidTaskForEdit(userId, taskId);
+    await this.getValidTaskForEdit(taskId);
     const taskAttachmentsPaths = await this.fetchTaskAttachmentsPaths(taskId);
     const tasksCommentsAttachmentsPaths = await this.fetchTaskCommentsAttachmentsPaths(taskId);
 
@@ -246,22 +244,8 @@ export class TaskService {
    * A method that returns required project
    * @param userId An userId from JWT or request body
    * @param projectId A projectId of a project. A project with this id should exist in the database
-   * @param assignedToId An assignedToId of a user. An user with this id should exist in the database
    */
-  async getProject(
-    userId: string,
-    projectId: string,
-    assignedToId: string,
-  ): Promise<ProjectEntity> {
-    // if (!assignedToId) {
-    //   const specialOneProject = await this.projectService.fetchProjectByTitle(
-    //     SPECIAL_ONE_PROJECT_NAME,
-    //     userId,
-    //   );
-
-    //   return specialOneProject;
-    // }
-
+  async getProject(userId: string, projectId: string): Promise<ProjectEntity> {
     const project = await this.projectService.fetchProject(userId, projectId);
 
     return project;
@@ -312,15 +296,14 @@ export class TaskService {
 
   /**
    * A method that checks if the task is available for editing
-   * @param userId An userId from JWT
    * @param taskId A taskId of a task. A task with this id should exist in the database
    */
-  async getValidTaskForEdit(userId: string, taskId: string): Promise<TaskEntity> {
+  async getValidTaskForEdit(taskId: string): Promise<TaskEntity> {
     const task = await this.fetchTask(taskId);
 
-    if (task.project.owner.id !== userId) {
-      throw new ForbiddenException(MessageEnum.INVALID_ID_NOT_OWNER);
-    }
+    // if (task.project.owner.id !== userId) {
+    //   throw new ForbiddenException(MessageEnum.INVALID_ID_NOT_OWNER);
+    // }
 
     return task;
   }

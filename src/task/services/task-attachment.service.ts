@@ -1,15 +1,8 @@
-import {
-  forwardRef,
-  Inject,
-  Injectable,
-  InternalServerErrorException,
-  UnprocessableEntityException,
-} from '@nestjs/common';
+import { forwardRef, Inject, Injectable, InternalServerErrorException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
-import { AttachmentMessageEnum } from '../../common/enums/messages.enum';
 import { AddTaskAttachmentDto } from '../dto/add-task-attachment.dto';
 import { TaskAttachmentApiDto } from '../dto/api-dto/task-attachment-api.dto';
 import { TaskAttachmentEntity } from '../entities/task-attachment.entity';
@@ -36,30 +29,18 @@ export class TaskAttachmentService {
 
   /**
    * A method that create a task attachment in the database
-   * @param userId An userId from JWT
    */
   async addTaskAttachment(
-    userId: string,
     addTaskAttachmentDto: AddTaskAttachmentDto,
     file: Express.Multer.File,
   ): Promise<TaskAttachmentEntity> {
-    // const dtoType = addTaskAttachmentDto.type?.toLocaleLowerCase();
-
-    // if (dtoType === 'image' && dtoType !== file.mimetype.split('/')[0]) {
-    //   throw new UnprocessableEntityException(AttachmentMessageEnum.FORMAT_NOT_SUPPORTED);
-    // }
-
-    const currentTask = await this.taskService.getValidTaskForEdit(
-      userId,
-      addTaskAttachmentDto.task_id,
-    );
+    const currentTask = await this.taskService.getValidTaskForEdit(addTaskAttachmentDto.task_id);
 
     const filedata = {
       id: file.filename,
       path: file.path,
       mimetype: file.mimetype,
       name: file.originalname,
-      // filename: file.originalname,
       type: addTaskAttachmentDto.type,
     };
 

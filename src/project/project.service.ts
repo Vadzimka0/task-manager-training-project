@@ -1,5 +1,4 @@
 import {
-  ForbiddenException,
   Injectable,
   InternalServerErrorException,
   NotFoundException,
@@ -199,9 +198,9 @@ export class ProjectService {
       );
     }
 
-    if (project.owner.id !== userId) {
-      throw new ForbiddenException(MessageEnum.INVALID_ID_NOT_OWNER);
-    }
+    // if (project.owner.id !== userId) {
+    //   throw new ForbiddenException(MessageEnum.INVALID_ID_NOT_OWNER);
+    // }
 
     return project;
   }

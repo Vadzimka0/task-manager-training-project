@@ -28,7 +28,6 @@ import {
 import { createReadStream } from 'fs';
 import { join } from 'path';
 
-import { User } from '../../auth/decorators/user.decorator';
 import { JwtAuthGuard } from '../../auth/guards';
 import { Data } from '../../common/classes/response-data';
 import { ApiOkObjectResponse } from '../../common/decorators';
@@ -59,12 +58,10 @@ export class TaskAttachmentController {
   @ApiForbiddenResponse({ description: `"${MessageEnum.INVALID_ID_NOT_OWNER}"` })
   @ApiInternalServerErrorResponse({ description: `"${MessageEnum.ENTITY_NOT_FOUND}";` })
   async addTaskAttachment(
-    @User('id') userId: string,
     @UploadedFile() file: Express.Multer.File,
     @Body() addTaskAttachmentDto: AddTaskAttachmentDto,
   ): Promise<Data<TaskAttachmentApiDto>> {
     const attachment = await this.taskAttachmentService.addTaskAttachment(
-      userId,
       addTaskAttachmentDto,
       file,
     );
