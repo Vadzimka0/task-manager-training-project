@@ -82,10 +82,7 @@ export class TaskService {
     const { owner_id, project_id, assigned_to, members, attachments, ...dtoWithoutRelationItems } =
       taskDto;
 
-    // if (attachments !== null) throw new ForbiddenException('attachments must be null');
-    // this.idsMatching(owner_id, currentUser.id);
-
-    const currentTask = await this.getValidTaskForEdit(taskId);
+    const currentTask = await this.getTaskForEdit(taskId);
     Object.assign(currentTask, dtoWithoutRelationItems);
 
     const updatedProject = await this.getProject(owner_id, project_id);
@@ -111,7 +108,7 @@ export class TaskService {
    * @returns A promise with the id of deleted task
    */
   async deleteTask(userId: string, taskId: string): Promise<{ id: string }> {
-    await this.getValidTaskForEdit(taskId);
+    await this.getTaskForEdit(taskId);
     const taskAttachmentsPaths = await this.fetchTaskAttachmentsPaths(taskId);
     const tasksCommentsAttachmentsPaths = await this.fetchTaskCommentsAttachmentsPaths(taskId);
 
@@ -302,7 +299,7 @@ export class TaskService {
    * A method that checks if the task is available for editing
    * @param taskId A taskId of a task. A task with this id should exist in the database
    */
-  async getValidTaskForEdit(taskId: string): Promise<TaskEntity> {
+  async getTaskForEdit(taskId: string): Promise<TaskEntity> {
     const task = await this.fetchTask(taskId);
 
     // if (task.project.owner.id !== userId) {
@@ -317,7 +314,7 @@ export class TaskService {
    * @param userId An userId from JWT
    * @param taskId A taskId of a task. A task with this id should exist in the database
    */
-  async getValidTaskForComment(userId: string, taskId: string): Promise<TaskEntity> {
+  async getTaskForComment(userId: string, taskId: string): Promise<TaskEntity> {
     const task = await this.fetchTask(taskId);
     const ids = task.members.map((member) => member.id);
 

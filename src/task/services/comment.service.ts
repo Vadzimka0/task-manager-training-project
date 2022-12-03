@@ -51,7 +51,7 @@ export class CommentService {
 
     newComment.commentator = currentUser;
 
-    const currentTask = await this.taskService.getValidTaskForComment(currentUser.id, task_id);
+    const currentTask = await this.taskService.getTaskForComment(currentUser.id, task_id);
     newComment.task = currentTask;
 
     return await this.commentRepository.save(newComment);

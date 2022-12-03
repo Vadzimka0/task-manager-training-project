@@ -34,7 +34,7 @@ export class TaskAttachmentService {
     addTaskAttachmentDto: AddTaskAttachmentDto,
     file: Express.Multer.File,
   ): Promise<TaskAttachmentEntity> {
-    const currentTask = await this.taskService.getValidTaskForEdit(addTaskAttachmentDto.task_id);
+    const currentTask = await this.taskService.getTaskForEdit(addTaskAttachmentDto.task_id);
 
     const filedata = {
       id: file.filename,

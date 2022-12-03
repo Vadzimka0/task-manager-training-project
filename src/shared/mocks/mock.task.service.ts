@@ -25,5 +25,5 @@ export const mockedTaskService = {
 
   idsMatching: jest.fn(),
 
-  getValidTaskForComment: jest.fn(),
+  getTaskForComment: jest.fn(),
 };
