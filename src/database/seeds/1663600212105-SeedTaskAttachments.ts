@@ -16,7 +16,7 @@ export class SeedTaskAttachments1663600212105 implements MigrationInterface {
       ) 
       VALUES (
         'fb855677-1e31-410c-9e2f-4782c143604b',
-        '2022-11-25T17:00:00.000',
+        '2022-12-10T17:00:00.000',
         'IMAGE',
         'image/jpeg',
         'uploads/tasks-attachments/fb855677-1e31-410c-9e2f-4782c143604b',
@@ -36,7 +36,7 @@ export class SeedTaskAttachments1663600212105 implements MigrationInterface {
       ) 
       VALUES (
         '21f705d3-f6e1-4054-8cf5-36eabfef24f6',
-        '2022-11-25T17:00:00.000',
+        '2022-12-10T17:00:00.000',
         'FILE',
         'text/plain',
         'uploads/tasks-attachments/21f705d3-f6e1-4054-8cf5-36eabfef24f6',

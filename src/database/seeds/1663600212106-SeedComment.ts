@@ -14,7 +14,7 @@ export class SeedComment1663600212106 implements MigrationInterface {
       ) 
       VALUES (
         '3b07d1d1-e855-48fe-9e7d-d76266d066ee',
-        '2022-11-25T17:00:00.000',
+        '2022-12-10T17:00:00.000',
         'It will be a good match in a beautiful stadium... with funny cat ;)', 
         'bc50fa05-b625-4d2a-b7e6-41d1a7b331d0',
         'f60c913b-0859-4797-8dea-c07409ffcf0d'
@@ -30,7 +30,7 @@ export class SeedComment1663600212106 implements MigrationInterface {
       ) 
       VALUES (
         '614561a4-88ce-4a70-aacc-f315ed2e8640',
-        '2022-11-25T17:00:00.000',
+        '2022-12-10T17:00:00.000',
         'Great match. You set a record!!', 
         '3244f2a9-1840-4a93-b45c-9e14a5981596', 
         'f60c913b-0859-4797-8dea-c07409ffcf0d'
@@ -46,7 +46,7 @@ export class SeedComment1663600212106 implements MigrationInterface {
       ) 
       VALUES (
         'c02d58fe-7a70-464e-8611-daed4b508eba',
-        '2022-11-25T17:00:00.000',
+        '2022-12-10T17:00:00.000',
         'Thanks for the promotion, Leo!', 
         '3244f2a9-1840-4a93-b45c-9e14a5981596', 
         'fb4cad39-9add-4633-8050-b933ad1d7458'
@@ -62,7 +62,7 @@ export class SeedComment1663600212106 implements MigrationInterface {
       ) 
       VALUES (
         'a323b5fe-f460-43e9-86ea-869d919fc77a',
-        '2022-11-25T17:00:00.000',
+        '2022-12-10T17:00:00.000',
         'I am coming to this big event! With my dog :)', 
         'bc50fa05-b625-4d2a-b7e6-41d1a7b331d0', 
         'fb4cad39-9add-4633-8050-b933ad1d7458'
