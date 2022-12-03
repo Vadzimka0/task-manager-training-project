@@ -9,10 +9,10 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
 import { MessageEnum } from '../../common/enums/messages.enum';
+import { UtilsService } from '../../common/services/utils.service';
 import { UserEntity } from '../../user/entities/user.entity';
 import { UserAvatarService } from '../../user/services/user-avatar.service';
 import { UserApiType } from '../../user/types/user-api.type';
-import { removeFilesFromStorage } from '../../utils';
 import { CommentApiDto } from '../dto/api-dto/comment-api.dto';
 import { CommentAttachmentApiDto } from '../dto/api-dto/comment-attachment-api.dto';
 import { CreateCommentDto } from '../dto/create-comment.dto';
@@ -29,6 +29,7 @@ export class CommentService {
     @InjectRepository(CommentEntity)
     private readonly commentRepository: Repository<CommentEntity>,
     private readonly taskService: TaskService,
+    private readonly utilsService: UtilsService,
     private readonly userAvatarService: UserAvatarService,
     @Inject(forwardRef(() => CommentAttachmentService))
     private readonly commentAttachmentService: CommentAttachmentService,
@@ -86,7 +87,7 @@ export class CommentService {
     const commentAttachmentsPaths = await this.getCommentAttachmentsPaths(commentId);
 
     await this.commentRepository.delete({ id: commentId });
-    await removeFilesFromStorage(commentAttachmentsPaths);
+    await this.utilsService.removeFilesFromStorage(commentAttachmentsPaths);
 
     return { id: commentId };
   }

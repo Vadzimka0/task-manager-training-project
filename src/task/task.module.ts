@@ -2,6 +2,7 @@ import { forwardRef, Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
+import { UtilsService } from '../common/services/utils.service';
 import { ProjectModule } from '../project/project.module';
 import { UserModule } from '../user/user.module';
 import {
@@ -41,7 +42,13 @@ import {
     TaskAttachmentController,
     CommentAttachmentController,
   ],
-  providers: [TaskService, CommentService, TaskAttachmentService, CommentAttachmentService],
+  providers: [
+    TaskService,
+    CommentService,
+    TaskAttachmentService,
+    CommentAttachmentService,
+    UtilsService,
+  ],
   exports: [TaskService],
 })
 export class TaskModule {}

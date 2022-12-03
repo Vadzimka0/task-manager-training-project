@@ -32,7 +32,8 @@ import { JwtAuthGuard } from '../../auth/guards';
 import { Data } from '../../common/classes/response-data';
 import { ApiOkObjectResponse } from '../../common/decorators';
 import { AttachmentMessageEnum, MessageEnum } from '../../common/enums/messages.enum';
-import { getApiParam, isExists } from '../../utils';
+import { UtilsService } from '../../common/services/utils.service';
+import { getApiParam } from '../../utils';
 import { taskAttachmentOptions } from '../../utils/multer/task-attachment-options';
 import { AddTaskAttachmentDto } from '../dto';
 import { FileUploadDto } from '../dto/add-task-attachment.dto';
@@ -40,12 +41,14 @@ import { TaskAttachmentApiDto } from '../dto/api-dto/task-attachment-api.dto';
 import { TaskAttachmentService } from '../services';
 
 import type { Response } from 'express';
-
 @ApiTags('Tasks Attachments:')
 @Controller('tasks-attachments')
 @UseGuards(JwtAuthGuard)
 export class TaskAttachmentController {
-  constructor(private readonly taskAttachmentService: TaskAttachmentService) {}
+  constructor(
+    private readonly taskAttachmentService: TaskAttachmentService,
+    private readonly utilsService: UtilsService,
+  ) {}
 
   @Post()
   @HttpCode(200)
@@ -83,7 +86,7 @@ export class TaskAttachmentController {
     @Res({ passthrough: true }) res: Response,
   ): Promise<StreamableFile> {
     const file = await this.taskAttachmentService.fetchFileById(id);
-    const isFileExists = await isExists(file.path);
+    const isFileExists = await this.utilsService.isExists(file.path);
 
     if (!isFileExists) {
       throw new NotFoundException(AttachmentMessageEnum.FILE_NOT_FOUND);

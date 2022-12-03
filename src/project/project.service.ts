@@ -9,8 +9,8 @@ import { Repository } from 'typeorm';
 
 import { SPECIAL_ONE_PROJECT_NAME } from '../common/constants/default-constants';
 import { MessageEnum, ProjectMessageEnum } from '../common/enums/messages.enum';
+import { UtilsService } from '../common/services/utils.service';
 import { UserEntity } from '../user/entities/user.entity';
-import { removeFilesFromStorage } from '../utils';
 import { CreateProjectDto, ProjectApiDto, ProjectStatisticApiDto } from './dto';
 import { ProjectEntity } from './entities/project.entity';
 
@@ -22,6 +22,7 @@ export class ProjectService {
   constructor(
     @InjectRepository(ProjectEntity)
     private projectRepository: Repository<ProjectEntity>,
+    private readonly utilsService: UtilsService,
   ) {}
 
   /**
@@ -141,7 +142,7 @@ export class ProjectService {
       await this.fetchProjectTasksCommentsAttachmentsPaths(projectId);
 
     await this.projectRepository.delete({ id: projectId });
-    await removeFilesFromStorage([
+    await this.utilsService.removeFilesFromStorage([
       ...projectTasksAttachmentsPaths,
       ...projectTasksCommentsAttachmentsPaths,
     ]);

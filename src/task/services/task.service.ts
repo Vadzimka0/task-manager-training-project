@@ -10,13 +10,13 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, SelectQueryBuilder } from 'typeorm';
 
 import { CommentMessageEnum, MessageEnum } from '../../common/enums/messages.enum';
+import { UtilsService } from '../../common/services/utils.service';
 import { ProjectEntity } from '../../project/entities/project.entity';
 import { ProjectService } from '../../project/project.service';
 import { UserEntity } from '../../user/entities/user.entity';
 import { UserAvatarService } from '../../user/services';
 import { UserService } from '../../user/services/user.service';
 import { UserApiType } from '../../user/types';
-import { haveSameItems, removeFilesFromStorage } from '../../utils';
 import { CreateTaskDto } from '../dto';
 import { TaskApiDto } from '../dto/api-dto/task-api.dto';
 import { TaskAttachmentApiDto } from '../dto/api-dto/task-attachment-api.dto';
@@ -39,6 +39,7 @@ export class TaskService {
     private readonly userAvatarService: UserAvatarService,
     @Inject(forwardRef(() => TaskAttachmentService))
     private readonly taskAttachmentService: TaskAttachmentService,
+    private readonly utilsService: UtilsService,
   ) {}
 
   /**
@@ -95,7 +96,7 @@ export class TaskService {
 
     const currentMembersIds = currentTask.members?.map((member) => member.id);
 
-    if (!haveSameItems(members, currentMembersIds)) {
+    if (!this.utilsService.haveSameItems(members, currentMembersIds)) {
       const updatedMembers = await this.getMembersById(members);
       currentTask.members = updatedMembers;
     }
@@ -115,7 +116,10 @@ export class TaskService {
     const tasksCommentsAttachmentsPaths = await this.fetchTaskCommentsAttachmentsPaths(taskId);
 
     await this.taskRepository.delete({ id: taskId });
-    await removeFilesFromStorage([...taskAttachmentsPaths, ...tasksCommentsAttachmentsPaths]);
+    await this.utilsService.removeFilesFromStorage([
+      ...taskAttachmentsPaths,
+      ...tasksCommentsAttachmentsPaths,
+    ]);
 
     return { id: taskId };
   }

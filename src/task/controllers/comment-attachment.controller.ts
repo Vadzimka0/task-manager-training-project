@@ -34,7 +34,8 @@ import { JwtAuthGuard } from '../../auth/guards';
 import { Data } from '../../common/classes/response-data';
 import { ApiOkObjectResponse } from '../../common/decorators';
 import { AttachmentMessageEnum, MessageEnum } from '../../common/enums/messages.enum';
-import { getApiParam, isExists } from '../../utils';
+import { UtilsService } from '../../common/services/utils.service';
+import { getApiParam } from '../../utils';
 import { commentAttachmentOptions } from '../../utils/multer/comment-attachment-options';
 import { AddCommentAttachmentDto } from '../dto';
 import { CommentFileUploadDto } from '../dto/add-comment-attachment.dto';
@@ -42,12 +43,14 @@ import { CommentAttachmentApiDto } from '../dto/api-dto/comment-attachment-api.d
 import { CommentAttachmentService } from '../services';
 
 import type { Response } from 'express';
-
 @ApiTags('Comments Attachments:')
 @Controller('comments-attachments')
 @UseGuards(JwtAuthGuard)
 export class CommentAttachmentController {
-  constructor(private readonly commentAttachmentService: CommentAttachmentService) {}
+  constructor(
+    private readonly commentAttachmentService: CommentAttachmentService,
+    private readonly utilsService: UtilsService,
+  ) {}
 
   @Post()
   @HttpCode(200)
@@ -90,7 +93,7 @@ export class CommentAttachmentController {
     @Res({ passthrough: true }) res: Response,
   ): Promise<StreamableFile> {
     const file = await this.commentAttachmentService.fetchFileById(id);
-    const isFileExists = await isExists(file.path);
+    const isFileExists = await this.utilsService.isExists(file.path);
 
     if (!isFileExists) {
       throw new NotFoundException(AttachmentMessageEnum.FILE_NOT_FOUND);

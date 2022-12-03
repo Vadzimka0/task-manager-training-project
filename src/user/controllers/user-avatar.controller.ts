@@ -37,7 +37,8 @@ import {
   AvatarMessageEnum,
   MessageEnum,
 } from '../../common/enums/messages.enum';
-import { getApiParam, isExists } from '../../utils';
+import { UtilsService } from '../../common/services/utils.service';
+import { getApiParam } from '../../utils';
 import { avatarOptions } from '../../utils/multer/avatar-options';
 import { AddAvatarDto, AvatarUploadDto } from '../dto/add-avatar.dto';
 import { UserApiDto } from '../dto/user-api.dto';
@@ -46,7 +47,6 @@ import { UserAvatarService, UserService } from '../services';
 import { UserApiType } from '../types';
 
 import type { Response } from 'express';
-
 @ApiTags('Users Avatars:')
 @Controller('users-avatar')
 @UseGuards(JwtAuthGuard)
@@ -54,6 +54,7 @@ export class UserAvatarController {
   constructor(
     private readonly userAvatarService: UserAvatarService,
     private readonly userService: UserService,
+    private readonly utilsService: UtilsService,
   ) {}
 
   @Post()
@@ -89,7 +90,7 @@ export class UserAvatarController {
     @Res({ passthrough: true }) res: Response,
   ): Promise<StreamableFile> {
     const user = await this.userService.fetchUserById(id);
-    const isFileExists = await isExists(user.path);
+    const isFileExists = await this.utilsService.isExists(user.path);
 
     if (!isFileExists) {
       throw new NotFoundException(AttachmentMessageEnum.FILE_NOT_FOUND);
