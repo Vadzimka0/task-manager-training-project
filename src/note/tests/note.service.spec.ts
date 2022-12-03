@@ -4,7 +4,7 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
 import { mockedUser, mockedUserId } from '../../user/tests/user.test-data';
-import { MockType } from '../../utils/mocks/mock.type';
+import { MockType } from '../../shared/mocks/mock.type';
 import { NoteEntity } from '../entities/note.entity';
 import { NoteService } from '../note.service';
 import {

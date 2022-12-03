@@ -10,7 +10,7 @@ import { UserEntity } from '../../user/entities/user.entity';
 import { UserAvatarService } from '../../user/services/user-avatar.service';
 import { UserService } from '../../user/services/user.service';
 import { mockedUser, mockedUserId } from '../../user/tests/user.test-data';
-import { mockedConfigService, mockedJwtService, mockedUserService } from '../../utils/mocks';
+import { mockedConfigService, mockedJwtService, mockedUserService } from '../../shared/mocks';
 import { AuthService } from '../auth.service';
 
 describe('The AuthService', () => {

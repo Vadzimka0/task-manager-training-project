@@ -21,12 +21,12 @@ import {
 
 import { User } from '../auth/decorators/user.decorator';
 import { JwtAuthGuard } from '../auth/guards';
-import { EntityId } from '../common/classes';
-import { Data } from '../common/classes/response-data';
-import { ApiOkArrayResponse, ApiOkObjectResponse } from '../common/decorators';
-import { ChecklistMessageEnum, MessageEnum } from '../common/enums/messages.enum';
+import { EntityId } from '../shared/classes';
+import { Data } from '../shared/classes/response-data';
+import { ApiOkArrayResponse, ApiOkObjectResponse } from '../shared/decorators';
+import { ChecklistMessageEnum, MessageEnum } from '../shared/enums/messages.enum';
+import { getApiParam } from '../shared/swagger-utils/getApiParam';
 import { UserEntity } from '../user/entities/user.entity';
-import { getApiParam } from '../utils';
 import { ChecklistService } from './checklist.service';
 import { CreateChecklistDto, DeleteChecklistItemsDto, UpdateChecklistDto } from './dto';
 import { ChecklistApiDto } from './dto/api-dto/checklist-api.dto';

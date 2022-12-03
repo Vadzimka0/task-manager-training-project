@@ -11,10 +11,10 @@ import {
 
 import { User } from '../../auth/decorators/user.decorator';
 import { JwtAuthGuard } from '../../auth/guards';
-import { Data } from '../../common/classes/response-data';
-import { ApiOkArrayResponse, ApiOkObjectResponse } from '../../common/decorators';
-import { MessageEnum } from '../../common/enums/messages.enum';
-import { getApiParam } from '../../utils';
+import { Data } from '../../shared/classes/response-data';
+import { ApiOkArrayResponse, ApiOkObjectResponse } from '../../shared/decorators';
+import { MessageEnum } from '../../shared/enums/messages.enum';
+import { getApiParam } from '../../shared/swagger-utils/getApiParam';
 import { UserApiDto } from '../dto/user-api.dto';
 import { UserStatisticsApiDto } from '../dto/user-statistics-api.dto';
 import { UserEntity } from '../entities/user.entity';

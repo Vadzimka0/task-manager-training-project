@@ -2,7 +2,7 @@ import { ApiHideProperty, ApiProperty } from '@nestjs/swagger';
 import { Exclude } from 'class-transformer';
 import { BeforeInsert, Column, Entity, JoinTable, ManyToMany, ManyToOne, OneToMany } from 'typeorm';
 
-import { AbstractEntity } from '../../common/classes';
+import { AbstractEntity } from '../../shared/classes';
 import { ProjectEntity } from '../../project/entities/project.entity';
 import { UserApiDto } from '../../user/dto/user-api.dto';
 import { UserEntity } from '../../user/entities/user.entity';

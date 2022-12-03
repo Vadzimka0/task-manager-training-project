@@ -11,12 +11,12 @@ import {
 
 import { User } from '../../auth/decorators/user.decorator';
 import { JwtAuthGuard } from '../../auth/guards';
-import { EntityId } from '../../common/classes';
-import { Data } from '../../common/classes/response-data';
-import { ApiOkArrayResponse, ApiOkObjectResponse } from '../../common/decorators';
-import { CommentMessageEnum, MessageEnum } from '../../common/enums/messages.enum';
+import { EntityId } from '../../shared/classes';
+import { Data } from '../../shared/classes/response-data';
+import { ApiOkArrayResponse, ApiOkObjectResponse } from '../../shared/decorators';
+import { CommentMessageEnum, MessageEnum } from '../../shared/enums/messages.enum';
+import { getApiParam } from '../../shared/swagger-utils/getApiParam';
 import { UserEntity } from '../../user/entities/user.entity';
-import { getApiParam } from '../../utils';
 import { CreateCommentDto } from '../dto';
 import { CommentApiDto } from '../dto/api-dto/comment-api.dto';
 import { CommentService } from '../services';

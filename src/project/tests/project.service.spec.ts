@@ -4,7 +4,7 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { mockedUser } from '../../user/tests/user.test-data';
 
-import { MockType } from '../../utils/mocks/mock.type';
+import { MockType } from '../../shared/mocks/mock.type';
 import { ProjectEntity } from '../entities/project.entity';
 import { ProjectService } from '../project.service';
 import {
@@ -16,6 +16,7 @@ import {
   mockedUpdatedProject,
   updateProjectDto,
 } from './project.test-data';
+import { UtilsService } from '../../shared/services/utils.service';
 
 const repositoryMockFactory: () => MockType<Repository<any>> = jest.fn(() => ({
   findOneBy: jest.fn(),
@@ -41,6 +42,7 @@ describe('The ProjectService', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         ProjectService,
+        UtilsService,
         { provide: getRepositoryToken(ProjectEntity), useFactory: repositoryMockFactory },
       ],
     }).compile();

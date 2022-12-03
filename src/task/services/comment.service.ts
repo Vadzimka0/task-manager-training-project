@@ -8,8 +8,8 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
-import { MessageEnum } from '../../common/enums/messages.enum';
-import { UtilsService } from '../../common/services/utils.service';
+import { MessageEnum } from '../../shared/enums/messages.enum';
+import { UtilsService } from '../../shared/services/utils.service';
 import { UserEntity } from '../../user/entities/user.entity';
 import { UserAvatarService } from '../../user/services/user-avatar.service';
 import { UserApiType } from '../../user/types/user-api.type';

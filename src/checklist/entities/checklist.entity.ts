@@ -2,7 +2,7 @@ import { ApiHideProperty, ApiProperty } from '@nestjs/swagger';
 import { Exclude } from 'class-transformer';
 import { Column, Entity, ManyToOne, OneToMany } from 'typeorm';
 
-import { AbstractEntity } from '../../common/classes';
+import { AbstractEntity } from '../../shared/classes';
 import { UserEntity } from '../../user/entities/user.entity';
 import { ChecklistItemApiDto } from '../dto/api-dto/checklist-item-api.dto';
 import { ChecklistItemEntity } from './checklistItem.entity';

@@ -9,7 +9,7 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 
-import { AbstractEntity } from '../../common/classes';
+import { AbstractEntity } from '../../shared/classes';
 import { UserEntity } from '../../user/entities/user.entity';
 import { CommentAttachmentApiDto } from '../dto/api-dto/comment-attachment-api.dto';
 import { CommentAttachmentEntity } from './comment-attachment.entity';

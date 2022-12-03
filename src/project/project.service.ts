@@ -7,9 +7,9 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
-import { SPECIAL_ONE_PROJECT_NAME } from '../common/constants/default-constants';
-import { MessageEnum, ProjectMessageEnum } from '../common/enums/messages.enum';
-import { UtilsService } from '../common/services/utils.service';
+import { SPECIAL_ONE_PROJECT_NAME } from '../shared/constants/default-constants';
+import { MessageEnum, ProjectMessageEnum } from '../shared/enums/messages.enum';
+import { UtilsService } from '../shared/services/utils.service';
 import { UserEntity } from '../user/entities/user.entity';
 import { CreateProjectDto, ProjectApiDto, ProjectStatisticApiDto } from './dto';
 import { ProjectEntity } from './entities/project.entity';

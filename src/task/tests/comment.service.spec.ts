@@ -5,7 +5,7 @@ import { Repository } from 'typeorm';
 
 import { UserAvatarService } from '../../user/services';
 import { mockedUser } from '../../user/tests/user.test-data';
-import { mockedTaskService, MockType } from '../../utils/mocks';
+import { mockedTaskService, MockType } from '../../shared/mocks';
 import { CommentEntity } from '../entities/comment.entity';
 import { CommentAttachmentService, CommentService, TaskService } from '../services';
 import {
@@ -15,6 +15,7 @@ import {
   mockedComments,
 } from './comment.test-data';
 import { mockedTaskId } from './task.test-data';
+import { UtilsService } from '../../shared/services/utils.service';
 
 const repositoryMockFactory: () => MockType<Repository<any>> = jest.fn(() => ({
   findOneBy: jest.fn(),
@@ -38,6 +39,7 @@ describe('The CommentService', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         CommentService,
+        UtilsService,
         { provide: getRepositoryToken(CommentEntity), useFactory: repositoryMockFactory },
         { provide: TaskService, useValue: mockedTaskService },
         { provide: UserAvatarService, useValue: {} },

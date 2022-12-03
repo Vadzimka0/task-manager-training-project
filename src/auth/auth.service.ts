@@ -8,7 +8,7 @@ import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 
-import { MessageEnum } from '../common/enums/messages.enum';
+import { MessageEnum } from '../shared/enums/messages.enum';
 import PostgresErrorCode from '../database/postgresErrorCode.enum';
 import { UserEntity } from '../user/entities/user.entity';
 import { UserService } from '../user/services/user.service';

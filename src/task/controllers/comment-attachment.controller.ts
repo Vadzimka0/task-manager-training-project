@@ -31,18 +31,19 @@ import { join } from 'path';
 
 import { User } from '../../auth/decorators/user.decorator';
 import { JwtAuthGuard } from '../../auth/guards';
-import { Data } from '../../common/classes/response-data';
-import { ApiOkObjectResponse } from '../../common/decorators';
-import { AttachmentMessageEnum, MessageEnum } from '../../common/enums/messages.enum';
-import { UtilsService } from '../../common/services/utils.service';
-import { getApiParam } from '../../utils';
-import { commentAttachmentOptions } from '../../utils/multer/comment-attachment-options';
+import { Data } from '../../shared/classes/response-data';
+import { ApiOkObjectResponse } from '../../shared/decorators';
+import { AttachmentMessageEnum, MessageEnum } from '../../shared/enums/messages.enum';
+import { commentAttachmentOptions } from '../../shared/multer/comment-attachment-options';
+import { UtilsService } from '../../shared/services/utils.service';
+import { getApiParam } from '../../shared/swagger-utils/getApiParam';
 import { AddCommentAttachmentDto } from '../dto';
 import { CommentFileUploadDto } from '../dto/add-comment-attachment.dto';
 import { CommentAttachmentApiDto } from '../dto/api-dto/comment-attachment-api.dto';
 import { CommentAttachmentService } from '../services';
 
 import type { Response } from 'express';
+
 @ApiTags('Comments Attachments:')
 @Controller('comments-attachments')
 @UseGuards(JwtAuthGuard)

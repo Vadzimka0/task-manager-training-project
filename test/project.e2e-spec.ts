@@ -4,7 +4,7 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 import * as request from 'supertest';
 
 import { JwtAuthGuard } from '../src/auth/guards';
-import { ValidationPipe422 } from '../src/common/validation-pipe/validation-pipe422';
+import { ValidationPipe422 } from '../src/shared/validation-pipe/validation-pipe422';
 import { ProjectEntity } from '../src/project/entities/project.entity';
 import { ProjectModule } from '../src/project/project.module';
 import { ProjectService } from '../src/project/project.service';
@@ -16,7 +16,7 @@ import {
   updateProjectDto,
   updateProjectMissingFieldDto,
 } from '../src/project/tests/project.test-data';
-import { mockedProjectService } from '../src/utils/mocks';
+import { mockedProjectService } from '../src/shared/mocks';
 
 describe('ProjectController (e2e):', () => {
   let app: INestApplication;

@@ -20,11 +20,11 @@ import {
 
 import { User } from '../auth/decorators/user.decorator';
 import { JwtAuthGuard } from '../auth/guards';
-import { Data, EntityId } from '../common/classes';
-import { ApiOkArrayResponse, ApiOkObjectResponse } from '../common/decorators';
-import { MessageEnum, NoteMessageEnum } from '../common/enums/messages.enum';
+import { Data, EntityId } from '../shared/classes';
+import { ApiOkArrayResponse, ApiOkObjectResponse } from '../shared/decorators';
+import { MessageEnum, NoteMessageEnum } from '../shared/enums/messages.enum';
+import { getApiParam } from '../shared/swagger-utils/getApiParam';
 import { UserEntity } from '../user/entities/user.entity';
-import { getApiParam } from '../utils';
 import { CreateNoteDto, NoteApiDto, UpdateNoteDto } from './dto';
 import { NoteService } from './note.service';
 

@@ -4,7 +4,7 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 import * as request from 'supertest';
 
 import { JwtAuthGuard } from '../src/auth/guards';
-import { ValidationPipe422 } from '../src/common/validation-pipe/validation-pipe422';
+import { ValidationPipe422 } from '../src/shared/validation-pipe/validation-pipe422';
 import { NoteEntity } from '../src/note/entities/note.entity';
 import { NoteModule } from '../src/note/note.module';
 import { NoteService } from '../src/note/note.service';
@@ -16,7 +16,7 @@ import {
   updateNoteDto,
   updateNoteMissingFieldDto,
 } from '../src/note/tests/note.test-data';
-import { mockedNoteService } from '../src/utils/mocks/mock.note.service';
+import { mockedNoteService } from '../src/shared/mocks/mock.note.service';
 
 describe('NoteController (e2e):', () => {
   let app: INestApplication;

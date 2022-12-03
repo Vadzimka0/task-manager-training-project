@@ -3,7 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
-import { AvatarMessageEnum } from '../../common/enums/messages.enum';
+import { AvatarMessageEnum } from '../../shared/enums/messages.enum';
 import { AddAvatarDto } from '../dto/add-avatar.dto';
 import { UserEntity } from '../entities/user.entity';
 import { UserApiType } from '../types/user-api.type';

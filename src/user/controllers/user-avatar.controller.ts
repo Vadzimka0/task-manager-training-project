@@ -30,16 +30,16 @@ import { join } from 'path';
 
 import { User } from '../../auth/decorators/user.decorator';
 import { JwtAuthGuard } from '../../auth/guards';
-import { Data } from '../../common/classes/response-data';
-import { ApiOkObjectResponse } from '../../common/decorators';
+import { Data } from '../../shared/classes/response-data';
+import { ApiOkObjectResponse } from '../../shared/decorators';
 import {
   AttachmentMessageEnum,
   AvatarMessageEnum,
   MessageEnum,
-} from '../../common/enums/messages.enum';
-import { UtilsService } from '../../common/services/utils.service';
-import { getApiParam } from '../../utils';
-import { avatarOptions } from '../../utils/multer/avatar-options';
+} from '../../shared/enums/messages.enum';
+import { avatarOptions } from '../../shared/multer/avatar-options';
+import { UtilsService } from '../../shared/services/utils.service';
+import { getApiParam } from '../../shared/swagger-utils/getApiParam';
 import { AddAvatarDto, AvatarUploadDto } from '../dto/add-avatar.dto';
 import { UserApiDto } from '../dto/user-api.dto';
 import { UserEntity } from '../entities/user.entity';
@@ -47,6 +47,7 @@ import { UserAvatarService, UserService } from '../services';
 import { UserApiType } from '../types';
 
 import type { Response } from 'express';
+
 @ApiTags('Users Avatars:')
 @Controller('users-avatar')
 @UseGuards(JwtAuthGuard)

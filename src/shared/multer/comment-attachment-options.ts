@@ -5,8 +5,8 @@ import { existsSync, mkdirSync } from 'fs';
 import { diskStorage } from 'multer';
 import { v4 as uuidv4 } from 'uuid';
 
-import { SUPPORTED_IMAGES_FORMATS } from '../../common/constants/default-constants';
-import { AttachmentMessageEnum } from '../../common/enums/messages.enum';
+import { SUPPORTED_IMAGES_FORMATS } from '../../shared/constants/default-constants';
+import { AttachmentMessageEnum } from '../../shared/enums/messages.enum';
 
 export const commentAttachmentOptions: MulterOptions = {
   limits: {

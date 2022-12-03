@@ -5,7 +5,7 @@ import { existsSync, mkdirSync } from 'fs';
 import { diskStorage } from 'multer';
 
 import { ExpressRequestType } from '../../auth/types';
-import { AttachmentMessageEnum } from '../../common/enums/messages.enum';
+import { AttachmentMessageEnum } from '../../shared/enums/messages.enum';
 
 export const avatarOptions: MulterOptions = {
   fileFilter(

@@ -9,8 +9,8 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, SelectQueryBuilder } from 'typeorm';
 
-import { CommentMessageEnum, MessageEnum } from '../../common/enums/messages.enum';
-import { UtilsService } from '../../common/services/utils.service';
+import { CommentMessageEnum, MessageEnum } from '../../shared/enums/messages.enum';
+import { UtilsService } from '../../shared/services/utils.service';
 import { ProjectEntity } from '../../project/entities/project.entity';
 import { ProjectService } from '../../project/project.service';
 import { UserEntity } from '../../user/entities/user.entity';

@@ -7,9 +7,9 @@ import {
   ApiUnprocessableEntityResponse,
 } from '@nestjs/swagger';
 
-import { Data } from '../common/classes/response-data';
-import { ApiObjectResponse, ApiOkObjectResponse } from '../common/decorators';
-import { MessageEnum } from '../common/enums/messages.enum';
+import { Data } from '../shared/classes/response-data';
+import { ApiObjectResponse, ApiOkObjectResponse } from '../shared/decorators';
+import { MessageEnum } from '../shared/enums/messages.enum';
 import { UserEntity } from '../user/entities/user.entity';
 import { AuthService } from './auth.service';
 import { User } from './decorators/user.decorator';

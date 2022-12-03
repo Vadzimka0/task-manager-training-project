@@ -9,7 +9,7 @@ import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
-import { AttachmentMessageEnum } from '../../common/enums/messages.enum';
+import { AttachmentMessageEnum } from '../../shared/enums/messages.enum';
 import { AddCommentAttachmentDto } from '../dto';
 import { CommentAttachmentApiDto } from '../dto/api-dto/comment-attachment-api.dto';
 import { CommentAttachmentEntity } from '../entities/comment-attachment.entity';

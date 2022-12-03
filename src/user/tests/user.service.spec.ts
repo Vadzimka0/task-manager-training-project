@@ -8,7 +8,7 @@ import { ProjectService } from '../../project/project.service';
 import { TaskService } from '../../task/services/task.service';
 import { UserAvatarService } from '../../user/services';
 import { UserService } from '../../user/services/user.service';
-import { mockedProjectService, mockedUserAvatarService, MockType } from '../../utils/mocks';
+import { mockedProjectService, mockedUserAvatarService, MockType } from '../../shared/mocks';
 import { UserEntity } from '../entities/user.entity';
 import {
   mockedUser,

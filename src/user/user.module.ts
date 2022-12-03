@@ -2,7 +2,7 @@ import { forwardRef, Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
-import { UtilsService } from '../common/services/utils.service';
+import { UtilsService } from '../shared/services/utils.service';
 import { NoteModule } from '../note/note.module';
 import { ProjectModule } from '../project/project.module';
 import { TaskModule } from '../task/task.module';

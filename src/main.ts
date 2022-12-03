@@ -3,8 +3,8 @@ import { NestFactory, Reflector } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
 import { AppModule } from './app.module';
-import { HttpExceptionFilter } from './common/exception-filter/http-exception.filter';
-import { ValidationPipe422 } from './common/validation-pipe/validation-pipe422';
+import { HttpExceptionFilter } from './shared/exception-filter/http-exception.filter';
+import { ValidationPipe422 } from './shared/validation-pipe/validation-pipe422';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);

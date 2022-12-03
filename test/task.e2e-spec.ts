@@ -5,7 +5,7 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 import * as request from 'supertest';
 
 import { JwtAuthGuard } from '../src/auth/guards';
-import { ValidationPipe422 } from '../src/common/validation-pipe/validation-pipe422';
+import { ValidationPipe422 } from '../src/shared/validation-pipe/validation-pipe422';
 import { NoteEntity } from '../src/note/entities/note.entity';
 import { ProjectEntity } from '../src/project/entities/project.entity';
 import {
@@ -36,7 +36,7 @@ import {
 } from '../src/task/tests/task.test-data';
 import { UserEntity } from '../src/user/entities/user.entity';
 import { UserAvatarService, UserService } from '../src/user/services';
-import { mockedCommentService, mockedTaskService } from '../src/utils/mocks';
+import { mockedCommentService, mockedTaskService } from '../src/shared/mocks';
 
 let app: INestApplication;
 

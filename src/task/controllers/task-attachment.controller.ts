@@ -29,18 +29,19 @@ import { createReadStream } from 'fs';
 import { join } from 'path';
 
 import { JwtAuthGuard } from '../../auth/guards';
-import { Data } from '../../common/classes/response-data';
-import { ApiOkObjectResponse } from '../../common/decorators';
-import { AttachmentMessageEnum, MessageEnum } from '../../common/enums/messages.enum';
-import { UtilsService } from '../../common/services/utils.service';
-import { getApiParam } from '../../utils';
-import { taskAttachmentOptions } from '../../utils/multer/task-attachment-options';
+import { Data } from '../../shared/classes/response-data';
+import { ApiOkObjectResponse } from '../../shared/decorators';
+import { AttachmentMessageEnum, MessageEnum } from '../../shared/enums/messages.enum';
+import { taskAttachmentOptions } from '../../shared/multer/task-attachment-options';
+import { UtilsService } from '../../shared/services/utils.service';
+import { getApiParam } from '../../shared/swagger-utils/getApiParam';
 import { AddTaskAttachmentDto } from '../dto';
 import { FileUploadDto } from '../dto/add-task-attachment.dto';
 import { TaskAttachmentApiDto } from '../dto/api-dto/task-attachment-api.dto';
 import { TaskAttachmentService } from '../services';
 
 import type { Response } from 'express';
+
 @ApiTags('Tasks Attachments:')
 @Controller('tasks-attachments')
 @UseGuards(JwtAuthGuard)

@@ -6,7 +6,7 @@ import { Repository } from 'typeorm';
 import { ProjectService } from '../../project/project.service';
 import { UserAvatarService } from '../../user/services';
 import { UserService } from '../../user/services/user.service';
-import { mockedProjectService, mockedUserService, MockType } from '../../utils/mocks';
+import { mockedProjectService, mockedUserService, MockType } from '../../shared/mocks';
 import { TaskEntity } from '../entities/task.entity';
 import { TaskAttachmentService } from '../services/task-attachment.service';
 import { TaskService } from '../services/task.service';
@@ -20,6 +20,7 @@ import {
 } from './task.test-data';
 import { mockedProjectId } from '../../project/tests/project.test-data';
 import { mockedUser } from '../../user/tests/user.test-data';
+import { UtilsService } from '../../shared/services/utils.service';
 
 const repositoryMockFactory: () => MockType<Repository<any>> = jest.fn(() => ({
   findOne: jest.fn(),
@@ -45,6 +46,7 @@ describe('The TaskService', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         TaskService,
+        UtilsService,
         { provide: getRepositoryToken(TaskEntity), useFactory: repositoryMockFactory },
         { provide: ProjectService, useValue: mockedProjectService },
         { provide: UserService, useValue: mockedUserService },

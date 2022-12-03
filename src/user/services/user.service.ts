@@ -14,8 +14,8 @@ import { SignUpDto } from '../../auth/dto/sign-up.dto';
 import {
   SPECIAL_ONE_PROJECT_COLOR,
   SPECIAL_ONE_PROJECT_NAME,
-} from '../../common/constants/default-constants';
-import { MessageEnum } from '../../common/enums/messages.enum';
+} from '../../shared/constants/default-constants';
+import { MessageEnum } from '../../shared/enums/messages.enum';
 import { NoteService } from '../../note/note.service';
 import { ProjectService } from '../../project/project.service';
 import { TaskService } from '../../task/services';
